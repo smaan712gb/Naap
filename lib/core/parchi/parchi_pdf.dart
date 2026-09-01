@@ -13,6 +13,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../ease.dart';
+import '../fabric.dart';
 import '../models/measurements.dart';
 import '../models/profile.dart';
 
@@ -49,10 +50,12 @@ class ParchiPdf {
     required Naap naap,
     required GarmentType garment,
     required FitPreference fit,
+    FabricType? fabric,
   }) async {
     await _ensureFonts();
-    final lines = EaseEngine.buildParchi(naap, garment, fit);
+    final lines = EaseEngine.buildParchi(naap, garment, fit, fabric: fabric);
     final gdef = kGarments[garment]!;
+    final fdef = fabric != null ? kFabrics[fabric] : null;
     final isInches = profile.unit == PreferredUnit.inches;
     final unitLabel = isInches ? 'in' : 'cm';
     final unitUrdu = isInches ? 'انچ' : 'سینٹی میٹر';
@@ -126,7 +129,8 @@ class ParchiPdf {
                       style: en(13, bold: true)),
                   pw.SizedBox(height: 2),
                   pw.Text(
-                      '${gdef.english} · ${fit.name} fit · units: $unitLabel',
+                      '${gdef.english} · ${fit.name} fit'
+                      '${fdef != null ? ' · ${fdef.english}' : ''} · units: $unitLabel',
                       style: en(10).copyWith(color: PdfColors.grey700)),
                 ],
               ),
@@ -220,7 +224,8 @@ class ParchiPdf {
                 pw.Text('Notes for the tailor', style: en(10, bold: true)),
                 pw.SizedBox(height: 3),
                 pw.Text(
-                    '"Stitch" already includes ease (asan) for a ${fit.name} fit — cut to the Stitch column. '
+                    '"Stitch" already includes ease (asan) for a ${fit.name} fit'
+                    '${fdef != null ? ' in ${fdef.english}' : ''} — cut to the Stitch column. '
                     'Style numbers (ghera, paincha, kameez length) are the customer\'s preference and can be adjusted.',
                     style: en(9)),
                 pw.SizedBox(height: 5),

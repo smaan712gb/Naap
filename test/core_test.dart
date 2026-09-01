@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:naap/core/ease.dart';
+import 'package:naap/core/fabric.dart';
 import 'package:naap/core/measure/geometry.dart';
 import 'package:naap/core/models/measurements.dart';
 
@@ -88,6 +89,56 @@ void main() {
 
     test('chaak is a third of kameez length', () {
       expect(EaseEngine.chaakCm(99), closeTo(33, 0.001));
+    });
+
+    test('rigid raw silk adds extra ease to circumferences', () {
+      final base = EaseEngine.buildParchi(
+          sampleNaap(), GarmentType.shalwarKameez, FitPreference.regular);
+      final silk = EaseEngine.buildParchi(
+          sampleNaap(), GarmentType.shalwarKameez, FitPreference.regular,
+          fabric: FabricType.rawSilk);
+      final baseChest =
+          base.firstWhere((l) => l.def.key == MeasurementKey.chest);
+      final silkChest =
+          silk.firstWhere((l) => l.def.key == MeasurementKey.chest);
+      expect(silkChest.stitchCm - baseChest.stitchCm, closeTo(1.3, 0.001));
+    });
+
+    test('stretch knit reduces ease', () {
+      final base = EaseEngine.buildParchi(
+          sampleNaap(), GarmentType.shalwarKameez, FitPreference.regular);
+      final knit = EaseEngine.buildParchi(
+          sampleNaap(), GarmentType.shalwarKameez, FitPreference.regular,
+          fabric: FabricType.stretchKnit);
+      final baseChest =
+          base.firstWhere((l) => l.def.key == MeasurementKey.chest);
+      final knitChest =
+          knit.firstWhere((l) => l.def.key == MeasurementKey.chest);
+      expect(knitChest.stitchCm, lessThan(baseChest.stitchCm));
+    });
+
+    test('fabric never touches lengths or style numbers', () {
+      final base = EaseEngine.buildParchi(
+          sampleNaap(), GarmentType.shalwarKameez, FitPreference.regular);
+      final silk = EaseEngine.buildParchi(
+          sampleNaap(), GarmentType.shalwarKameez, FitPreference.regular,
+          fabric: FabricType.rawSilk);
+      final baseLen =
+          base.firstWhere((l) => l.def.key == MeasurementKey.kameezLength);
+      final silkLen =
+          silk.firstWhere((l) => l.def.key == MeasurementKey.kameezLength);
+      expect(silkLen.stitchCm, baseLen.stitchCm);
+    });
+
+    test('lawn baseline fabric changes nothing', () {
+      final base = EaseEngine.buildParchi(
+          sampleNaap(), GarmentType.shalwarKameez, FitPreference.regular);
+      final lawn = EaseEngine.buildParchi(
+          sampleNaap(), GarmentType.shalwarKameez, FitPreference.regular,
+          fabric: FabricType.lawn);
+      for (var i = 0; i < base.length; i++) {
+        expect(lawn[i].stitchCm, base[i].stitchCm);
+      }
     });
   });
 

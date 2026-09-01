@@ -6,6 +6,7 @@
 /// master tailor can review and tune them without touching engine code.
 library;
 
+import 'fabric.dart';
 import 'models/measurements.dart';
 
 enum GarmentType { shalwarKameez, kurtaPajama, suitTwoPiece, trousersShirt }
@@ -166,16 +167,28 @@ class ParchiLine {
 
 class EaseEngine {
   /// Builds the parchi lines for [garment] from body measurements [naap].
+  ///
+  /// [fabric] adjusts circumference ease for the cloth's rigidity/stretch
+  /// (see `fabric.dart`); null means the lawn/cotton baseline.
   static List<ParchiLine> buildParchi(
-      Naap naap, GarmentType garment, FitPreference fit) {
+      Naap naap, GarmentType garment, FitPreference fit,
+      {FabricType? fabric}) {
     final def = kGarments[garment]!;
     final ease = _regularEase[garment] ?? const {};
     final mult = _fitMultiplier[fit]!;
+    final fabricDef = fabric != null ? kFabrics[fabric] : null;
     final lines = <ParchiLine>[];
     for (final key in def.keys) {
       final v = naap[key];
       if (v == null) continue;
-      final e = (ease[key] ?? 0.0) * mult;
+      var e = (ease[key] ?? 0.0) * mult;
+      // Fabric delta applies only where the garment already gets ease —
+      // style numbers (paincha, ghera) are untouched by cloth choice.
+      if (fabricDef != null &&
+          (ease[key] ?? 0.0) > 0 &&
+          fabricDef.affectedKeys.contains(key)) {
+        e += fabricDef.easeDeltaCm;
+      }
       lines.add(ParchiLine(
         def: kMeasurementDefs[key]!,
         bodyCm: v.cm,

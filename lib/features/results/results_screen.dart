@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/app_state.dart';
 import '../../core/ease.dart';
+import '../../core/fabric.dart';
 import '../../core/models/measurements.dart';
 import '../../core/models/profile.dart';
 import '../../core/parchi/parchi_pdf.dart';
@@ -67,6 +68,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         naap: s.naap,
         garment: s.garment,
         fit: s.fit,
+        fabric: s.fabric,
       );
       final summary =
           'Naap parchi for ${s.profile.name} — ${kGarments[s.garment]!.english} '
@@ -92,7 +94,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
   @override
   Widget build(BuildContext context) {
     final s = context.watch<AppState>();
-    final lines = EaseEngine.buildParchi(s.naap, s.garment, s.fit);
+    final lines =
+        EaseEngine.buildParchi(s.naap, s.garment, s.fit, fabric: s.fabric);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Your Naap')),
@@ -110,6 +113,21 @@ class _ResultsScreenState extends State<ResultsScreen> {
                     value: g.type, child: Text('${g.english}  ${g.urdu}')),
             ],
             onChanged: (g) => g != null ? s.setGarment(g) : null,
+          ),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<FabricType?>(
+            initialValue: s.fabric,
+            decoration: const InputDecoration(
+                labelText: 'Fabric (adjusts ease for stretch)',
+                border: OutlineInputBorder()),
+            items: [
+              const DropdownMenuItem<FabricType?>(
+                  value: null, child: Text('Not sure / default')),
+              for (final f in kFabrics.values)
+                DropdownMenuItem<FabricType?>(
+                    value: f.type, child: Text('${f.english}  ${f.urdu}')),
+            ],
+            onChanged: (f) => s.setFabric(f),
           ),
           const SizedBox(height: 12),
           SegmentedButton<FitPreference>(

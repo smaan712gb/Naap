@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'ease.dart';
+import 'fabric.dart';
 import 'measure/engine.dart';
 import 'models/measurements.dart';
 import 'models/profile.dart';
@@ -11,6 +12,7 @@ class AppState extends ChangeNotifier {
   Naap naap = Naap.empty();
   GarmentType garment = GarmentType.shalwarKameez;
   FitPreference fit = FitPreference.regular;
+  FabricType? fabric;
   List<CaptureIssue> lastIssues = [];
   bool hydrated = false;
 
@@ -51,6 +53,11 @@ class AppState extends ChangeNotifier {
 
   void setFit(FitPreference f) {
     fit = f;
+    notifyListeners();
+  }
+
+  void setFabric(FabricType? f) {
+    fabric = f;
     notifyListeners();
   }
 }
