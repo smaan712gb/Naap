@@ -1,0 +1,70 @@
+# Builds the iOS app on a macOS runner (no local Mac needed).
+#
+# This produces an UNSIGNED .ipa artifact to prove the iOS build compiles.
+# For installing on real iPhones you need signing + TestFlight:
+#   1. Join the Apple Developer Program ($99/yr).
+#   2. Easiest path: connect this repo to Codemagic and use its automatic
+#      code-signing + TestFlight publishing for Flutter.
+#   3. Or extend this workflow with fastlane `match` and App Store Connect
+#      API keys (secrets: APP_STORE_CONNECT_KEY, CERTIFICATE, PROFILE).
+name: ios-build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - run: flutter test
+
+      - name: Build iOS (no codesign)
+        run: flutter build ios --release --no-codesign
+
+      - name: Package unsigned ipa
+        run: |
+          mkdir -p Payload
+          cp -r build/ios/iphoneos/Runner.app Payload/
+          zip -r naap-unsigned.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: naap-ios-unsigned
+          path: naap-unsigned.ipa
+
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - run: flutter test
+
+      - run: flutter build apk --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: naap-android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk

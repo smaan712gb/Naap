@@ -1,0 +1,37 @@
+# NAAP — Claude Code guide
+
+Flutter app (Android + iOS): privacy-first body measurement → bilingual EN/Urdu
+PDF parchi → WhatsApp to tailor. See README.md for architecture.
+
+## Build environment (Windows)
+
+Toolchain is NOT on PATH. Prefix every shell:
+
+```powershell
+$env:JAVA_HOME="$env:USERPROFILE\dev\jdk-17.0.20.1+1"
+$env:ANDROID_HOME="$env:USERPROFILE\dev\android-sdk"
+$env:Path="$env:USERPROFILE\dev\flutter\bin;$env:JAVA_HOME\bin;$env:ANDROID_HOME\platform-tools;$env:Path"
+```
+
+- `flutter test` — engine/ease unit tests (fast, Dart VM only).
+- `flutter analyze` — must stay at zero issues.
+- `flutter build apk --release` — Android artifact.
+- iOS builds only in CI (`.github/workflows/ios-build.yml`); this machine is Windows.
+
+## Product laws (do not violate)
+
+1. Capture photos are analyzed on-device and deleted (`shredCaptures`). Never
+   add code that uploads, persists, or logs user photos.
+2. The parchi contains numbers + generic sketch only — never user imagery.
+3. Every AI measurement stays user-editable; manual edits win (source=manual).
+
+## Conventions
+
+- Measurement values are stored in **cm** internally; convert at the UI/PDF edge.
+- Tailoring domain tables (ease/asan, garment definitions) live in
+  `lib/core/ease.dart` — keep them declarative so a master tailor can review.
+- Urdu strings live beside English in the measurement/garment defs; the PDF
+  uses NotoNaskhArabic with `pw.Directionality(rtl)`.
+- Engine tuning constants (row positions, shape factors) are at the top of
+  `lib/core/measure/engine.dart` — calibrate against tape measurements, don't
+  scatter magic numbers.
