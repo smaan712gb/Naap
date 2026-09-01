@@ -3,6 +3,7 @@ import 'package:naap/core/ease.dart';
 import 'package:naap/core/fabric.dart';
 import 'package:naap/core/measure/geometry.dart';
 import 'package:naap/core/models/measurements.dart';
+import 'package:naap/core/sizing.dart';
 
 void main() {
   group('geometry', () {
@@ -139,6 +140,40 @@ void main() {
       for (var i = 0; i < base.length; i++) {
         expect(lawn[i].stitchCm, base[i].stitchCm);
       }
+    });
+  });
+
+  group('su misura sizing', () {
+    Naap bodyNaap(double chest, double waist, double hip) {
+      final n = Naap.empty();
+      n.set(MeasurementKey.chest,
+          MeasurementValue(chest, source: MeasurementSource.silhouette));
+      n.set(MeasurementKey.waist,
+          MeasurementValue(waist, source: MeasurementSource.silhouette));
+      n.set(MeasurementKey.hip,
+          MeasurementValue(hip, source: MeasurementSource.silhouette));
+      return n;
+    }
+
+    test('regular 100cm chest maps to EU 50 drop 6', () {
+      final s = mapSuMisura(bodyNaap(100, 88, 102))!;
+      expect(s.euSize, 50);
+      expect(s.drop, 6);
+      expect(s.chestDeltaCm, 0.0);
+    });
+
+    test('athletic build gets a note', () {
+      final s = mapSuMisura(bodyNaap(104, 86, 100))!;
+      expect(s.drop, greaterThanOrEqualTo(8));
+      expect(s.notes, isNotEmpty);
+    });
+
+    test('missing measurements return null', () {
+      expect(mapSuMisura(Naap.empty()), isNull);
+    });
+
+    test('out-of-range chest returns null', () {
+      expect(mapSuMisura(bodyNaap(40, 40, 40)), isNull);
     });
   });
 

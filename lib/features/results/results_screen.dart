@@ -9,6 +9,7 @@ import '../../core/fabric.dart';
 import '../../core/models/measurements.dart';
 import '../../core/models/profile.dart';
 import '../../core/parchi/parchi_pdf.dart';
+import '../../core/sizing.dart';
 
 class ResultsScreen extends StatefulWidget {
   const ResultsScreen({super.key});
@@ -186,7 +187,35 @@ class _ResultsScreenState extends State<ResultsScreen> {
               label: const Text('Share PDF anywhere'),
             ),
           ],
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
+          if (mapSuMisura(s.naap) case final sm?)
+            Card(
+              color: const Color(0xFFF7F1E1),
+              elevation: 0,
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(children: [
+                      const Icon(Icons.public, color: Color(0xFFC9A227)),
+                      const SizedBox(width: 8),
+                      Text('European size: EU ${sm.euSize}, Drop ${sm.drop}',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w600, fontSize: 15)),
+                    ]),
+                    const SizedBox(height: 4),
+                    Text(
+                      'For off-the-rack suits and jackets. Computed on your '
+                      'phone — nothing was uploaded.'
+                      '${sm.notes.isNotEmpty ? '\n• ${sm.notes.join('\n• ')}' : ''}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          const SizedBox(height: 16),
           Text(
             'Estimates from on-device analysis. Values marked ~ are lower-confidence — '
             'verify with a tape for your first order, then Naap learns from your edits.',

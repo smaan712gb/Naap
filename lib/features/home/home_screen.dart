@@ -5,6 +5,7 @@ import '../../core/app_state.dart';
 import '../capture/capture_screen.dart';
 import '../profile/profile_screen.dart';
 import '../results/results_screen.dart';
+import '../shop/shop_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -82,6 +83,23 @@ class HomeScreen extends StatelessWidget {
             enabled: measured,
             onTap: () => Navigator.push(context,
                 MaterialPageRoute(builder: (_) => const ResultsScreen())),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            child: ListTile(
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              leading: const CircleAvatar(
+                  backgroundColor: Color(0xFFC9A227),
+                  child: Icon(Icons.storefront, color: Colors.white)),
+              title: const Text('Fabric Shop',
+                  style: TextStyle(fontWeight: FontWeight.w600)),
+              subtitle: const Text(
+                  'Beta — unstitched fabrics, stitched to your naap'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const ShopScreen())),
+            ),
           ),
         ],
       ),

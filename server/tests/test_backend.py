@@ -1,0 +1,158 @@
+"""Backend tests — everything that runs without API keys.
+
+Agent LLM calls are exercised only via their guardrails/fallbacks here;
+live-model integration is a separate (key-requiring) concern.
+"""
+
+import os
+import sys
+import tempfile
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import pytest
+from fastapi.testclient import TestClient
+
+from app import db
+from app.agents.darzi import fallback_note, numbers_intact
+from app.dxf_export import alteration_dxf
+from app.models import CheckoutMode, Fabric, ParchiLine
+from app.sizing import map_su_misura
+
+
+@pytest.fixture()
+def client(tmp_path, monkeypatch):
+    db.reset_for_tests(str(tmp_path / "test.db"))
+    monkeypatch.setenv("NAAP_ENV", "dev")
+    monkeypatch.delenv("NAAP_ADMIN_TOKEN", raising=False)
+    monkeypatch.delenv("STRIPE_SECRET_KEY", raising=False)
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+    from app.main import app
+    return TestClient(app)
+
+
+def sample_lines():
+    return [
+        ParchiLine(key="chest", english="Chest", urdu="چھاتی",
+                   tailor_term="Chaati", body_cm=96.0, stitch_cm=106.0),
+        ParchiLine(key="waist", english="Waist", urdu="کمر",
+                   tailor_term="Kamar", body_cm=84.0, stitch_cm=94.0),
+    ]
+
+
+# ------------------------------------------------------------- darzi guard
+
+def test_numbers_intact_accepts_verbatim():
+    note = fallback_note("Shalwar Kameez", "regular", "Lawn", sample_lines())
+    assert numbers_intact(note, sample_lines())
+
+
+def test_numbers_intact_rejects_altered_measurement():
+    note = fallback_note("Shalwar Kameez", "regular", "Lawn", sample_lines())
+    assert not numbers_intact(note.replace("106.0", "160.0"), sample_lines())
+
+
+def test_numbers_intact_rejects_missing_measurement():
+    note = fallback_note("Shalwar Kameez", "regular", "Lawn", sample_lines())
+    assert not numbers_intact(note.replace("94.0", ""), sample_lines())
+
+
+# ---------------------------------------------------------------- sizing
+
+def test_su_misura_maps_regular_body():
+    s = map_su_misura(chest_cm=100, waist_cm=88, hip_cm=102,
+                      shoulder_cm=41, sleeve_cm=61)
+    assert s.eu_size == 50
+    assert s.drop == 6
+    assert s.chest_delta_cm == 0.0
+
+
+def test_su_misura_athletic_drop_note():
+    s = map_su_misura(chest_cm=104, waist_cm=86, hip_cm=100,
+                      shoulder_cm=43, sleeve_cm=62)
+    assert s.drop >= 8
+    assert any("Athletic" in n for n in s.notes)
+
+
+def test_su_misura_rejects_out_of_range():
+    with pytest.raises(ValueError):
+        map_su_misura(30, 30, 30, 30, 30)
+
+
+def test_alteration_dxf_contains_deltas():
+    s = map_su_misura(101.3, 88.2, 103.0, 41.5, 60.8)
+    data = alteration_dxf(s, "abc123").decode("utf-8", "replace")
+    assert "EU 50" in data
+    assert "CHEST" in data
+
+
+# ----------------------------------------------------------------- API
+
+def _seed_fabric(client):
+    f = Fabric(id="lawn1", name="Premium Lawn 5m", composition="lawn",
+               price_usd=28.0, meters=5.0, verified=True)
+    r = client.post("/catalog", json=f.model_dump())
+    assert r.status_code == 200
+    return f
+
+
+def test_catalog_hides_unverified(client):
+    _seed_fabric(client)
+    unv = Fabric(id="x1", name="Mystery cloth", price_usd=5, meters=5,
+                 verified=False)
+    client.post("/catalog", json=unv.model_dump())
+    names = [f["name"] for f in client.get("/catalog").json()]
+    assert "Premium Lawn 5m" in names
+    assert "Mystery cloth" not in names
+
+
+def test_order_measurement_only_needs_no_fabric(client):
+    r = client.post("/orders", json={
+        "mode": "measurement_only",
+        "customer_name": "Test", "customer_email": "t@example.com",
+    })
+    assert r.status_code == 200
+    body = r.json()
+    assert body["order"]["total_usd"] == pytest.approx(1.99)
+    assert body["payment_url"] is None  # no stripe key in dev
+
+
+def test_order_stitch_and_ship_requires_parchi(client):
+    _seed_fabric(client)
+    r = client.post("/orders", json={
+        "mode": "stitch_and_ship", "fabric_id": "lawn1",
+        "customer_name": "Test", "customer_email": "t@example.com",
+    })
+    assert r.status_code == 422
+
+
+def test_order_stitch_and_ship_full_flow(client):
+    _seed_fabric(client)
+    r = client.post("/orders", json={
+        "mode": "stitch_and_ship", "fabric_id": "lawn1",
+        "garment": "Shalwar Kameez", "fit": "regular",
+        "customer_name": "Test", "customer_email": "t@example.com",
+        "ship_to": "London",
+        "parchi": [l.model_dump() for l in sample_lines()],
+    })
+    assert r.status_code == 200
+    body = r.json()
+    # fabric 28 + stitching 35 + shipping 25
+    assert body["order"]["total_usd"] == pytest.approx(88.0)
+    # no keys in test env -> deterministic fallback note, numbers verbatim
+    assert "106.0" in body["tailor_note"]
+
+    oid = body["order"]["id"]
+    ok = client.post(f"/orders/{oid}/advance", json={"to": "fabric_sourced"})
+    assert ok.status_code == 200
+    bad = client.post(f"/orders/{oid}/advance", json={"to": "delivered"})
+    assert bad.status_code == 409  # illegal jump refused
+
+
+def test_su_misura_endpoint(client):
+    r = client.post("/sizing/su-misura", json={
+        "chest_cm": 100, "waist_cm": 88, "hip_cm": 102,
+        "shoulder_cm": 41, "sleeve_cm": 61})
+    assert r.status_code == 200
+    assert r.json()["eu_size"] == 50
