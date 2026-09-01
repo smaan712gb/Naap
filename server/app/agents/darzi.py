@@ -67,7 +67,7 @@ def tailor_note(garment: str, fit: str, fabric: str,
               f"Parchi:\n{_fmt_lines(lines)}")
     try:
         note = customer_llm().invoke(
-            [("system", _SYSTEM), ("human", prompt)]).text()
+            [("system", _SYSTEM), ("human", prompt)]).text
     except Exception:
         return fallback_note(garment, fit, fabric, lines)
     if not numbers_intact(note, lines):
