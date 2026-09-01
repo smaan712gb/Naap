@@ -32,7 +32,12 @@ import urllib.request
 import boto3
 
 REGION = "us-west-2"
-PROJECT_NAME = "naap"
+# Same Device Farm project as Tern (per the user, 2026-09-01) — Naap runs
+# appear under it, named naap-smoke-*. One rented device per run.
+PROJECT_ARN = (
+    "arn:aws:devicefarm:us-west-2:334856751405:project:"
+    "c34a7911-ca52-4893-87dc-686ae905e508"
+)
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APP = os.path.join(REPO, "build", "app", "outputs", "flutter-apk",
                    "app-debug.apk")
@@ -53,27 +58,19 @@ SSL_CTX = ssl.create_default_context(
 SSL_CTX.verify_flags &= ~ssl.VERIFY_X509_STRICT
 
 
-def http(url, data=None, method="GET"):
+def http(url, data=None, method="GET", timeout=300):
     req = urllib.request.Request(url, data=data, method=method)
     if data is not None:
         req.add_header("Content-Type", "application/octet-stream")
-    return urllib.request.urlopen(req, context=SSL_CTX, timeout=300)
-
-
-def project_arn(df):
-    for p in df.list_projects()["projects"]:
-        if p["name"] == PROJECT_NAME:
-            return p["arn"]
-    arn = df.create_project(name=PROJECT_NAME)["project"]["arn"]
-    print(f"  created Device Farm project '{PROJECT_NAME}'")
-    return arn
+    return urllib.request.urlopen(req, context=SSL_CTX, timeout=timeout)
 
 
 def upload(df, proj, path, upload_type):
     name = os.path.basename(path)
     u = df.create_upload(projectArn=proj, name=name, type=upload_type)["upload"]
+    # Big APKs over a slow uplink need a generous write timeout.
     with open(path, "rb") as f:
-        http(u["url"], data=f.read(), method="PUT").read()
+        http(u["url"], data=f.read(), method="PUT", timeout=1800).read()
     for _ in range(60):
         got = df.get_upload(arn=u["arn"])["upload"]
         if got["status"] == "SUCCEEDED":
@@ -173,7 +170,7 @@ def main():
         return
 
     df = boto3.client("devicefarm", region_name=REGION)
-    proj = project_arn(df)
+    proj = PROJECT_ARN
     if args.poll_only:
         run_arn = args.poll_only
     else:
