@@ -5,6 +5,11 @@ tailor-ready measurement slip sent over WhatsApp. All computer vision runs
 **on-device** (Google ML Kit); photos are analyzed on the phone and deleted.
 Only numbers ever leave the device.
 
+This app is Phase 1 of a larger tailoring platform — see
+[docs/BLUEPRINT.md](docs/BLUEPRINT.md) for the business architecture, the
+agreed AI rules (on-device measurement, no LLM in the numeric path, agent
+layer split by data sensitivity), and the phased roadmap.
+
 ## How it works (v1 engine)
 
 1. **Guided capture** — front + side photo against a ghost-silhouette overlay
@@ -26,7 +31,7 @@ Only numbers ever leave the device.
 
 ## Project layout
 
-```
+```text
 lib/
   core/
     models/        measurement vocabulary (EN/UR/tailor terms), profile, storage
@@ -54,6 +59,23 @@ flutter test          # engine unit tests
 flutter build apk     # Android APK (sideload to any Android phone)
 flutter run           # with a phone connected over USB debugging
 ```
+
+### On-device smoke test (no local Android phone needed)
+
+`scripts/devicefarm_smoke.py` rents ONE physical Android phone on AWS Device
+Farm (~$0.17/device-minute ≈ $1/run, shared `tern` project), installs the
+debug APK, runs `LaunchTest`, and verifies `NAAPSMOKE_*` markers in the
+device log — proving install + Flutter engine + ML Kit native libs on real
+hardware. Build inputs first:
+
+```powershell
+flutter build apk --debug --target-platform android-arm64
+cd android; .\gradlew.bat app:assembleDebugAndroidTest; cd ..
+python scripts\devicefarm_smoke.py
+```
+
+A farm phone cannot photograph a real person — measurement-accuracy testing
+happens on family/tester phones via the release APK or TestFlight.
 
 ### iOS (no Mac needed locally)
 

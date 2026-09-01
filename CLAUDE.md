@@ -24,6 +24,22 @@ $env:Path="$env:USERPROFILE\dev\flutter\bin;$env:JAVA_HOME\bin;$env:ANDROID_HOME
    add code that uploads, persists, or logs user photos.
 2. The parchi contains numbers + generic sketch only — never user imagery.
 3. Every AI measurement stays user-editable; manual edits win (source=manual).
+4. **No cloud vision API ever receives user body photos** — measurement CV is
+   on-device only. Cheap LLM APIs (e.g. DeepSeek) are allowed ONLY for
+   public-data agents (fabric sourcing); customer PII/orders go to Claude
+   under a DPA. See docs/BLUEPRINT.md §AI architecture.
+5. **No LLM in the numeric path** — ease, stretch, and size math stays
+   deterministic, testable Dart (tables in `lib/core/ease.dart`).
+
+## Device testing (no local Android phone)
+
+- `python scripts\devicefarm_smoke.py` — one rented AWS Device Farm phone
+  (~$1/run, shared `tern` project, us-west-2). Needs
+  `flutter build apk --debug --target-platform android-arm64` and
+  `android\gradlew.bat app:assembleDebugAndroidTest` first.
+- Keep runs single-device unless the user approves the cost of more.
+- iOS: CI only (`.github/workflows/ios-build.yml`); TestFlight via Codemagic
+  is the tester-distribution plan.
 
 ## Conventions
 

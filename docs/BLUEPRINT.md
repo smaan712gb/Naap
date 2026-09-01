@@ -1,0 +1,85 @@
+# Naap — Business & Architecture Blueprint
+
+*Reconciled 2026-09-01. This supersedes chat-drafted versions; the privacy
+contradiction in earlier drafts (cloud vision + "photos never leave the
+device") is resolved in §AI Architecture below.*
+
+## Vision
+
+A two-phase geo-arbitrage tailoring platform: bridge overseas demand for
+perfectly fitting garments with Pakistan's textile and master-tailor
+infrastructure — measurement friction removed by privacy-first, on-device
+computer vision.
+
+## Phasing (agreed sequencing)
+
+| Phase | What | Status |
+| --- | --- | --- |
+| **1 — Measurement utility** | The trust wedge: scan → bilingual Digital Parchi → WhatsApp to your tailor. Free; later a small export micro-fee. | **Built (MVP)** — this repo |
+| **1.5 — Fabric marketplace** | Unstitched fabric e-commerce for the diaspora (US/UK/CA/UAE): branded (affiliate/partnership feeds preferred over scraping) + Faisalabad/Lahore wholesale. Tri-modal checkout: One-Click Stitch (vetted tailor network), DIY fabric export (fabric + parchi shipped), or measurement-only. | After scan trust is earned |
+| **2 — Luxury su misura** | EU size/drop translation (affiliate), MTM suiting stitched in Lahore/Karachi with pattern deltas → `.DXF` for CAD cutting, white-label iPad clienteling SaaS for luxury stores. | After Phase 1.5 network is battle-tested |
+
+Rationale for sequencing: the measurement utility earns the trust and the
+tape-verified accuracy data that everything downstream depends on. Marketplace
+before trust inverts the wedge.
+
+## AI architecture (agreed rules — do not violate)
+
+1. **Measurement is on-device, always.** No cloud vision API ever receives a
+   user's body photos. This is the product's differentiator and its legal
+   shield (biometric data: GDPR special-category, BIPA-style laws). VLMs also
+   cannot do ±2 cm metrology.
+2. **No model training now.** Accuracy roadmap:
+   - v1 (shipped): pretrained on-device models (pose landmarks + silhouette)
+     + deterministic geometry, height-calibrated.
+   - v1.5: per-measurement **calibration regressors** trained on
+     (estimate, tape-measured truth, user-edit) triples from early users.
+     Small, cheap, on-device. Highest-ROI ML work.
+   - v2: SMPL-X body-model fitting on-device via existing pretrained research
+     models converted to TFLite/Core ML. Unlocks the 3D avatar, EU size
+     translation, and pattern deltas. Never train a vision foundation model.
+3. **No LLM in the numeric path.** Ease, fabric-stretch adjustments, and size
+   translation are deterministic tables/code (see `lib/core/ease.dart`),
+   authored and reviewed with a master tailor. LLMs may *propose* table
+   entries and write Urdu instructions — the runtime math stays testable code.
+4. **Agent layer split by data sensitivity.**
+   - Bulk *public*-data work (fabric sourcing/scraping of wholesale listings,
+     fabric-photo classification): a cheap API is fine (e.g. DeepSeek V4
+     Flash) — no customer data may ever be sent to it.
+   - Anything touching customer PII, orders, or judgment (fit reasoning
+     explanations, QA, support): Claude (Haiku for volume, Opus for
+     reasoning), under a DPA.
+5. **Branded catalogs via partnership/affiliate feeds, not scraping.**
+   Scraping is reserved for genuinely unstructured wholesale sources.
+
+## Product laws (privacy contract)
+
+- Capture photos are analyzed on-device and deleted immediately
+  (`shredCaptures` in the engine). Never uploaded, persisted, or logged.
+- The parchi carries numbers + a generic sketch — never user imagery.
+- No account required for the measurement utility; data stays in local app
+  storage.
+- Every AI measurement is user-editable; manual edits win.
+
+## What is built today (Phase 1 MVP)
+
+Flutter app (Android + iOS): guided front/side capture with ghost overlay →
+ML Kit pose + segmentation engine (height-calibrated, elliptical
+circumference model) → Pakistani ease tables (asan/teera/chaak,
+fitted/regular/loose) → bilingual EN/Urdu PDF Digital Parchi → WhatsApp
+share. Unit-tested engine; CI builds both platforms; AWS Device Farm smoke
+gate on rented phones (`scripts/devicefarm_smoke.py`).
+
+## Near-term roadmap
+
+1. **Calibration sprint** — tape-measure validation on real bodies (family
+   phones via APK/TestFlight); tune engine constants; start collecting the
+   v1.5 regression dataset.
+2. **Capture UX** — front-camera self-scan mode, live pose validation, voice
+   guidance (EN/UR).
+3. **Fabric-aware ease** — stretch-coefficient table feeding the ease engine
+   (deterministic; blueprint's "fit & fabric reasoning" done right).
+4. **Distribution** — app icon/branding, Play Store internal track, Codemagic
+   → TestFlight for iOS testers.
+5. **Phase 1.5 groundwork** — supplier conversations (affiliate feeds),
+   tailor-network vetting criteria, diaspora payment rails (Stripe).
