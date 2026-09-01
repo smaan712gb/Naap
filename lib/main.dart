@@ -5,11 +5,16 @@ import 'core/app_state.dart';
 import 'features/home/home_screen.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
+  final binding = WidgetsFlutterBinding.ensureInitialized();
   final state = AppState()..hydrate();
   runApp(
     ChangeNotifierProvider.value(value: state, child: const NaapApp()),
   );
+  // On-device smoke gate (AWS Device Farm) greps the device log for this
+  // marker: it proves the Dart engine booted and the first frame rendered.
+  binding.addPostFrameCallback((_) {
+    debugPrint('NAAPSMOKE_BOOT_OK: first frame rendered');
+  });
 }
 
 const kNaapGreen = Color(0xFF1B4D3E);
