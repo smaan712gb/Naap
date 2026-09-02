@@ -218,8 +218,16 @@ class _CaptureScreenState extends State<CaptureScreen>
     }
     final isFront = _stage == _Stage.front;
     return Stack(fit: StackFit.expand, children: [
-      Center(child: CameraPreview(cam)),
-      CustomPaint(painter: PoseOverlayPainter(sideView: !isFront)),
+      // The ghost overlay is a CHILD of the preview so its canvas is the
+      // preview's own box — the outline then corresponds to the actual
+      // photo frame. Painted full-screen it floats over letterbox areas
+      // the camera never captures, guiding people into cropped photos.
+      Center(
+        child: CameraPreview(cam,
+            child: CustomPaint(
+                painter: PoseOverlayPainter(sideView: !isFront),
+                child: const SizedBox.expand())),
+      ),
       Positioned(
         top: 16,
         left: 16,
@@ -232,8 +240,11 @@ class _CaptureScreenState extends State<CaptureScreen>
           ),
           child: Text(
             isFront
-                ? 'Face the camera. Stand tall inside the outline, arms lifted slightly.'
-                : 'Turn 90° — your right side to the camera. Stand tall.',
+                ? 'Whole body between the two lines — head near the top line, '
+                    'feet on the bottom one. Face the camera, arms lifted '
+                    'slightly. Step back if you don\'t fit.'
+                : 'Turn 90° — right side to the camera. Whole body between '
+                    'the lines, look straight ahead.',
             textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.white, fontSize: 15),
           ),

@@ -71,11 +71,15 @@ class PoseOverlayPainter extends CustomPainter {
     }
     canvas.drawPath(path, paint);
 
-    // Feet line
-    final feetPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.35)
-      ..strokeWidth = 2;
-    canvas.drawLine(Offset(w * 0.15, bottom), Offset(w * 0.85, bottom), feetPaint);
+    // Head and feet bound lines — these are what the measurement engine
+    // actually needs in frame (face→heels calibrates height), so they read
+    // stronger than the silhouette, which is only a stance guide.
+    final boundPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.9)
+      ..strokeWidth = 3;
+    canvas.drawLine(Offset(w * 0.1, top), Offset(w * 0.9, top), boundPaint);
+    canvas.drawLine(
+        Offset(w * 0.1, bottom), Offset(w * 0.9, bottom), boundPaint);
   }
 
   @override

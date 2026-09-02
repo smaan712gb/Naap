@@ -325,7 +325,13 @@ class MeasurementEngine {
       return null;
     }
     final px = bottom.y - top.y;
-    if (px <= 0) return null;
+    if (px <= 0) {
+      issues.add(CaptureIssue(
+          'The $label photo does not show a standing person — set the phone '
+          'upright at waist height, 2–3 m away, and stand facing it.',
+          blocking: true));
+      return null;
+    }
     return (heightCm * (topRatio - bottomRatio)) / px;
   }
 
