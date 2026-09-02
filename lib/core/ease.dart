@@ -156,12 +156,14 @@ class ParchiLine {
   final double bodyCm;
   final double stitchCm;
   final MeasurementSource source;
+  final double confidence;
 
   const ParchiLine({
     required this.def,
     required this.bodyCm,
     required this.stitchCm,
     required this.source,
+    this.confidence = 1.0,
   });
 }
 
@@ -194,6 +196,7 @@ class EaseEngine {
         bodyCm: v.cm,
         stitchCm: v.cm + e,
         source: v.source,
+        confidence: v.confidence,
       ));
     }
     return lines;

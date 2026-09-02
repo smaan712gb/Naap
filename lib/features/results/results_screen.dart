@@ -169,7 +169,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                   ]),
                   subtitle: Text(
                       'Body ${_fmt(s, l.bodyCm)} → Stitch ${_fmt(s, l.stitchCm)}'),
-                  trailing: _sourceBadge(l.source),
+                  trailing: _sourceBadge(l.source, l.confidence),
                   onTap: () => _editValue(context, s, l.def, l.bodyCm),
                 ),
             ]),
@@ -233,8 +233,13 @@ class _ResultsScreenState extends State<ResultsScreen> {
     );
   }
 
-  Widget _sourceBadge(MeasurementSource src) {
+  Widget _sourceBadge(MeasurementSource src, double confidence) {
+    // A bounded/contaminated AI value drops to the "verify with tape" badge
+    // rather than presenting as a confident measurement.
     final (label, color) = switch (src) {
+      MeasurementSource.landmarks ||
+      MeasurementSource.silhouette when confidence < 0.5 =>
+        ('~', Colors.orange),
       MeasurementSource.landmarks => ('AI', const Color(0xFF1B4D3E)),
       MeasurementSource.silhouette => ('AI', const Color(0xFF1B4D3E)),
       MeasurementSource.regression => ('~', Colors.orange),

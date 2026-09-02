@@ -44,6 +44,19 @@ const double _kChestShape = 0.97;
 const double _kWaistShape = 0.99;
 const double _kSeatShape = 0.96;
 
+/// Anti-contamination bounds (first real session read chest AND waist at
+/// ~131 cm on a 40R body: hanging arms merge with the torso silhouette in
+/// both views). Shoulder landmarks are joints — arms cannot contaminate
+/// them — so torso width at a row is capped as a fraction of the shoulder
+/// landmark span, and depth as a fraction of that row's width. Generous
+/// caps: they only cut obvious arm merges, real bodies stay untouched.
+const double _kChestWidthOfShoulder = 0.85;
+const double _kWaistWidthOfShoulder = 0.90;
+const double _kSeatWidthOfShoulder = 0.95;
+const double _kChestDepthOfWidth = 0.85;
+const double _kWaistDepthOfWidth = 0.95;
+const double _kSeatDepthOfWidth = 0.95;
+
 class CaptureIssue {
   final String message;
   final bool blocking;
@@ -175,33 +188,39 @@ class MeasurementEngine {
         MeasurementValue(kameezCm, source: MeasurementSource.landmarks, confidence: 0.7));
 
     // ---- Circumferences (silhouette widths + depths, elliptical model) ----
-    // Hands hanging in front of the body merge with the torso in the SIDE
-    // silhouette and inflate its depth (first family test read a 132 cm
-    // waist). The chest row sits above where hands can reach, so its depth
-    // anchors a physical cap for the rows below; a capped row is flagged
-    // low-confidence and reported as a retake hint.
-    var depthCapped = false;
-    double? circumference(MeasurementKey key, double rowYF, double rowYS,
-        double shapeFactor, double conf, {double? maxDepthPx}) {
+    // Arms merged with the torso silhouette are the dominant real-world
+    // failure (see the _k*Of* constants above). Widths are capped against
+    // the shoulder-landmark span, depths against the row's width; a capped
+    // row is flagged low-confidence and reported as a retake hint.
+    final shoulderSpanCm = dist(lSh.x, lSh.y, rSh.x, rSh.y) * cmPerPxF;
+    var contaminated = false;
+    void circumference(MeasurementKey key, double rowYF, double rowYS,
+        double shapeFactor, double conf, double widthCapOfShoulder,
+        double depthCapOfWidth) {
       final wRun = runAtRow(front.mask, front.maskW, front.maskH,
           rowYF.round(), torsoMidX.round());
       final sMid = _sideTorsoMidX(side);
       final dRun = runAtRow(
           side.mask, side.maskW, side.maskH, rowYS.round(), sMid.round());
-      if (wRun == null || dRun == null) return null;
-      var depthPx = dRun.widthPx.toDouble();
+      if (wRun == null || dRun == null) return;
+      var widthCm = wRun.widthPx * cmPerPxF;
+      var depthCm = dRun.widthPx * cmPerPxS;
       var rowConf = conf;
-      if (maxDepthPx != null && depthPx > maxDepthPx) {
-        depthPx = maxDepthPx;
+      final widthCap = shoulderSpanCm * widthCapOfShoulder;
+      if (widthCm > widthCap) {
+        widthCm = widthCap;
         rowConf = 0.45;
-        depthCapped = true;
+        contaminated = true;
       }
-      final a = wRun.widthPx * cmPerPxF / 2; // semi-axis: half width
-      final b = depthPx * cmPerPxS / 2; // semi-axis: half depth
-      final c = ramanujan(a, b) * shapeFactor;
+      final depthCap = widthCm * depthCapOfWidth;
+      if (depthCm > depthCap) {
+        depthCm = depthCap;
+        rowConf = 0.45;
+        contaminated = true;
+      }
+      final c = ramanujan(widthCm / 2, depthCm / 2) * shapeFactor;
       naap.set(key,
           MeasurementValue(c, source: MeasurementSource.silhouette, confidence: rowConf));
-      return depthPx;
     }
 
     // Corresponding rows in the side view (its own landmark frame).
@@ -213,33 +232,36 @@ class MeasurementEngine {
         2;
     final sKneeY = side.lm(PoseLandmarkType.leftKnee).y;
 
-    final chestDepthPx = circumference(
+    circumference(
         MeasurementKey.chest,
         shoulderY + _kChestRowT * (hipY - shoulderY),
         sShY + _kChestRowT * (sHipY - sShY),
         _kChestShape,
-        0.7);
+        0.7,
+        _kChestWidthOfShoulder,
+        _kChestDepthOfWidth);
     circumference(
         MeasurementKey.waist,
         waistY,
         sShY + _kWaistRowT * (sHipY - sShY),
         _kWaistShape,
         0.7,
-        // Waist depth beyond ~1.15× chest depth is arms, not body.
-        maxDepthPx: chestDepthPx != null ? chestDepthPx * 1.15 : null);
+        _kWaistWidthOfShoulder,
+        _kWaistDepthOfWidth);
     circumference(
         MeasurementKey.hip,
         hipY + _kSeatRowT * (kneeY - hipY),
         sHipY + _kSeatRowT * (sKneeY - sHipY),
         _kSeatShape,
         0.65,
-        // The seat genuinely runs deeper than the chest; allow more room.
-        maxDepthPx: chestDepthPx != null ? chestDepthPx * 1.35 : null);
-    if (depthCapped) {
+        _kSeatWidthOfShoulder,
+        _kSeatDepthOfWidth);
+    if (contaminated) {
       issues.add(const CaptureIssue(
-          'Hands may have been in front of the body in the side photo — '
-          'waist/hip were adjusted down and marked for checking. For best '
-          'accuracy retake with hands relaxed at your sides.'));
+          'Arms may have blended into the body outline — the affected '
+          'girths were bounded and marked for checking. For best accuracy '
+          'retake with arms lifted ~30° in the front photo and hands at '
+          'your sides in the side photo.'));
     }
 
     // Thigh: front width at upper thigh × circular-ish model with side depth.
