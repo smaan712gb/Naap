@@ -5,6 +5,7 @@ import 'fabric.dart';
 import 'measure/engine.dart';
 import 'models/measurements.dart';
 import 'models/profile.dart';
+import 'styles.dart';
 
 /// Single source of truth for the app. Everything lives on-device.
 class AppState extends ChangeNotifier {
@@ -13,6 +14,7 @@ class AppState extends ChangeNotifier {
   GarmentType garment = GarmentType.shalwarKameez;
   FitPreference fit = FitPreference.regular;
   FabricType? fabric;
+  KameezStyle style = KameezStyle();
   List<CaptureIssue> lastIssues = [];
   bool hydrated = false;
 
@@ -21,6 +23,8 @@ class AppState extends ChangeNotifier {
     if (p != null) profile = p;
     final n = await LocalStore.loadNaap();
     if (n != null) naap = n;
+    final st = await LocalStore.loadStyle();
+    if (st != null) style = st;
     hydrated = true;
     notifyListeners();
   }
@@ -58,6 +62,12 @@ class AppState extends ChangeNotifier {
 
   void setFabric(FabricType? f) {
     fabric = f;
+    notifyListeners();
+  }
+
+  Future<void> setStyle(KameezStyle s) async {
+    style = s;
+    await LocalStore.saveStyle(s);
     notifyListeners();
   }
 }

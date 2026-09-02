@@ -72,12 +72,18 @@ const Map<GarmentType, GarmentDef> kGarments = {
     urdu: 'ٹو پیس سوٹ',
     keys: [
       MeasurementKey.chest,
+      MeasurementKey.frontChest,
+      MeasurementKey.backWidth,
       MeasurementKey.waist,
+      MeasurementKey.belly,
       MeasurementKey.hip,
       MeasurementKey.shoulder,
+      MeasurementKey.jacketLength,
       MeasurementKey.sleeveLength,
       MeasurementKey.neck,
       MeasurementKey.bicep,
+      MeasurementKey.armhole,
+      MeasurementKey.trouserWaist,
       MeasurementKey.shalwarLength,
       MeasurementKey.inseam,
       MeasurementKey.thigh,
@@ -93,6 +99,7 @@ const Map<GarmentType, GarmentDef> kGarments = {
       MeasurementKey.shoulder,
       MeasurementKey.chest,
       MeasurementKey.waist,
+      MeasurementKey.trouserWaist,
       MeasurementKey.hip,
       MeasurementKey.sleeveLength,
       MeasurementKey.wrist,
@@ -132,16 +139,22 @@ const Map<GarmentType, Map<MeasurementKey, double>> _regularEase = {
   GarmentType.suitTwoPiece: {
     MeasurementKey.chest: 8.5, // classic drafting ease for a canvassed jacket
     MeasurementKey.waist: 7.5,
+    MeasurementKey.belly: 7.5, // jacket must button over the widest point
     MeasurementKey.hip: 6.0,
     MeasurementKey.shoulder: 0.6,
     MeasurementKey.bicep: 7.0,
+    MeasurementKey.armhole: 1.5,
+    MeasurementKey.trouserWaist: 2.5,
     MeasurementKey.neck: 1.0,
     MeasurementKey.thigh: 7.0,
     MeasurementKey.ankleOpening: 0.0,
+    // jacketLength / frontChest / backWidth are drafting references —
+    // reported as-is, no wearing ease.
   },
   GarmentType.trousersShirt: {
     MeasurementKey.chest: 9.0,
     MeasurementKey.waist: 3.0,
+    MeasurementKey.trouserWaist: 2.5,
     MeasurementKey.hip: 5.0,
     MeasurementKey.shoulder: 1.0,
     MeasurementKey.neck: 1.2,

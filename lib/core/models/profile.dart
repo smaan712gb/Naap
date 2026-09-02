@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../styles.dart';
 import 'measurements.dart';
 
 enum BodyType { male, female }
@@ -78,5 +79,19 @@ class LocalStore {
   static Future<void> saveNaap(Naap n) async {
     final sp = await SharedPreferences.getInstance();
     await sp.setString(_kNaap, jsonEncode(n.toJson()));
+  }
+
+  static const _kStyle = 'naap.style';
+
+  static Future<KameezStyle?> loadStyle() async {
+    final sp = await SharedPreferences.getInstance();
+    final raw = sp.getString(_kStyle);
+    if (raw == null) return null;
+    return KameezStyle.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+  }
+
+  static Future<void> saveStyle(KameezStyle s) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setString(_kStyle, jsonEncode(s.toJson()));
   }
 }

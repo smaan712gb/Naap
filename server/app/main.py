@@ -204,13 +204,22 @@ class SuMisuraRequest(BaseModel):
     hip_cm: float
     shoulder_cm: float
     sleeve_cm: float
+    # Extended bespoke vocabulary — optional; None means "block default".
+    belly_cm: float | None = None
+    jacket_length_cm: float | None = None
+    front_chest_cm: float | None = None
+    back_width_cm: float | None = None
 
 
 @app.post("/sizing/su-misura")
 def su_misura(req: SuMisuraRequest) -> SuMisura:
     try:
         return map_su_misura(req.chest_cm, req.waist_cm, req.hip_cm,
-                             req.shoulder_cm, req.sleeve_cm)
+                             req.shoulder_cm, req.sleeve_cm,
+                             belly_cm=req.belly_cm,
+                             jacket_length_cm=req.jacket_length_cm,
+                             front_chest_cm=req.front_chest_cm,
+                             back_width_cm=req.back_width_cm)
     except ValueError as e:
         raise HTTPException(422, str(e)) from e
 

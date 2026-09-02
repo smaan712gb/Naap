@@ -27,6 +27,12 @@ class SuMisura(BaseModel):
     hip_delta_cm: float
     shoulder_delta_cm: float
     sleeve_delta_cm: float
+    # Extended bespoke deltas — present only when the corresponding
+    # measurement was supplied (None = block default, cutter decides).
+    belly_delta_cm: float | None = None
+    jacket_length_delta_cm: float | None = None
+    front_chest_delta_cm: float | None = None
+    back_width_delta_cm: float | None = None
     notes: list[str]
 
 
@@ -39,11 +45,20 @@ def _nominal(size: int) -> dict[str, float]:
         "hip": chest + 2.0,
         "shoulder": 39.0 + (size - 44) * 0.5,
         "sleeve": 59.0 + (size - 44) * 0.5,
+        # Extended bespoke references, classic drafting proportions.
+        "belly": chest - 8.0,       # block stomach for a drop-6 figure
+        "jacket_length": 72.0 + (size - 44) * 0.5,
+        "front_chest": chest * 0.36,
+        "back_width": chest * 0.43,
     }
 
 
 def map_su_misura(chest_cm: float, waist_cm: float, hip_cm: float,
-                  shoulder_cm: float, sleeve_cm: float) -> SuMisura:
+                  shoulder_cm: float, sleeve_cm: float,
+                  belly_cm: float | None = None,
+                  jacket_length_cm: float | None = None,
+                  front_chest_cm: float | None = None,
+                  back_width_cm: float | None = None) -> SuMisura:
     if not (60 <= chest_cm <= 160):
         raise ValueError(f"chest {chest_cm} cm outside supported range")
     size = min(EU_SIZES, key=lambda s: abs(s * 2.0 - chest_cm))
@@ -56,6 +71,10 @@ def map_su_misura(chest_cm: float, waist_cm: float, hip_cm: float,
         notes.append("Comfort drop — ease side seams, consider half-lining")
     if abs(chest_cm - nom["chest"]) > 4:
         notes.append("Between sizes — verify with a fitting garment")
+    if belly_cm is not None and belly_cm >= chest_cm:
+        # Corpulent figure: the jacket must button over the stomach, so the
+        # front balance changes, not just the side seams.
+        notes.append("Belly exceeds chest — cut a corpulent front balance")
     return SuMisura(
         eu_size=size,
         drop=drop,
@@ -64,5 +83,13 @@ def map_su_misura(chest_cm: float, waist_cm: float, hip_cm: float,
         hip_delta_cm=round(hip_cm - nom["hip"], 1),
         shoulder_delta_cm=round(shoulder_cm - nom["shoulder"], 1),
         sleeve_delta_cm=round(sleeve_cm - nom["sleeve"], 1),
+        belly_delta_cm=None if belly_cm is None
+        else round(belly_cm - nom["belly"], 1),
+        jacket_length_delta_cm=None if jacket_length_cm is None
+        else round(jacket_length_cm - nom["jacket_length"], 1),
+        front_chest_delta_cm=None if front_chest_cm is None
+        else round(front_chest_cm - nom["front_chest"], 1),
+        back_width_delta_cm=None if back_width_cm is None
+        else round(back_width_cm - nom["back_width"], 1),
         notes=notes,
     )

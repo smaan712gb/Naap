@@ -16,6 +16,7 @@ import '../ease.dart';
 import '../fabric.dart';
 import '../models/measurements.dart';
 import '../models/profile.dart';
+import '../styles.dart';
 
 /// Simple generic mannequin sketch (front view) — the privacy-preserving
 /// stand-in for the user's body on the parchi.
@@ -51,6 +52,7 @@ class ParchiPdf {
     required GarmentType garment,
     required FitPreference fit,
     FabricType? fabric,
+    KameezStyle? style,
   }) async {
     await _ensureFonts();
     final lines = EaseEngine.buildParchi(naap, garment, fit, fabric: fabric);
@@ -210,6 +212,49 @@ class ParchiPdf {
             ],
           ),
           pw.SizedBox(height: 10),
+
+          // ---- Style section (kameez cut choices — not measurements) ----
+          if (style != null &&
+              (garment == GarmentType.shalwarKameez ||
+                  garment == GarmentType.kurtaPajama)) ...[
+            pw.Container(
+              padding: const pw.EdgeInsets.all(10),
+              decoration: pw.BoxDecoration(
+                border: pw.Border.all(color: brandGreen, width: 0.8),
+                borderRadius: pw.BorderRadius.circular(6),
+              ),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        pw.Text('Style — کٹائی',
+                            style: en(10, bold: true)
+                                .copyWith(color: brandGreen)),
+                      ]),
+                  pw.SizedBox(height: 4),
+                  for (final (enLine, urLine) in style.parchiLines(
+                      isInches: profile.unit == PreferredUnit.inches))
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.only(bottom: 2),
+                      child: pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Expanded(child: pw.Text(enLine, style: en(9))),
+                          pw.Directionality(
+                            textDirection: pw.TextDirection.rtl,
+                            child: pw.Text(urLine, style: ur(9)),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            pw.SizedBox(height: 10),
+          ],
 
           // ---- Notes ----
           pw.Container(

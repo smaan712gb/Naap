@@ -35,6 +35,7 @@ const double _kAnkleHeightRatio = 0.039;
 /// Where key torso rows sit between the shoulder and hip landmark rows.
 const double _kChestRowT = 0.30; // shoulder→hip fraction for chest (nipple line)
 const double _kWaistRowT = 0.72; // natural waist
+const double _kBellyRowT = 0.92; // widest stomach, just above the navel
 const double _kSeatRowT = 0.22; // hip landmark → knee fraction for seat fullest point
 const double _kCrotchRowT = 0.16; // hip landmark → knee fraction for crotch
 
@@ -42,6 +43,7 @@ const double _kCrotchRowT = 0.16; // hip landmark → knee fraction for crotch
 /// ellipses. Tuned starting points; calibrate against tape measurements.
 const double _kChestShape = 0.97;
 const double _kWaistShape = 0.99;
+const double _kBellyShape = 0.99;
 const double _kSeatShape = 0.96;
 
 /// Anti-contamination bounds (first real session read chest AND waist at
@@ -52,9 +54,11 @@ const double _kSeatShape = 0.96;
 /// caps: they only cut obvious arm merges, real bodies stay untouched.
 const double _kChestWidthOfShoulder = 0.85;
 const double _kWaistWidthOfShoulder = 0.90;
+const double _kBellyWidthOfShoulder = 0.95;
 const double _kSeatWidthOfShoulder = 0.95;
 const double _kChestDepthOfWidth = 0.85;
 const double _kWaistDepthOfWidth = 0.95;
+const double _kBellyDepthOfWidth = 1.0; // bellies legitimately run deep
 const double _kSeatDepthOfWidth = 0.95;
 
 class CaptureIssue {
@@ -249,6 +253,14 @@ class MeasurementEngine {
         _kWaistWidthOfShoulder,
         _kWaistDepthOfWidth);
     circumference(
+        MeasurementKey.belly,
+        shoulderY + _kBellyRowT * (hipY - shoulderY),
+        sShY + _kBellyRowT * (sHipY - sShY),
+        _kBellyShape,
+        0.6,
+        _kBellyWidthOfShoulder,
+        _kBellyDepthOfWidth);
+    circumference(
         MeasurementKey.hip,
         hipY + _kSeatRowT * (kneeY - hipY),
         sHipY + _kSeatRowT * (sKneeY - sHipY),
@@ -308,6 +320,30 @@ class MeasurementEngine {
             (naap[MeasurementKey.chest]?.cm ?? h * 0.55) * 0.45,
             source: MeasurementSource.regression,
             confidence: 0.4));
+    // Trouser waistband sits at the high hip, between natural waist and seat.
+    final waistCm = naap[MeasurementKey.waist]?.cm;
+    final hipCm = naap[MeasurementKey.hip]?.cm;
+    if (waistCm != null && hipCm != null) {
+      naap.set(
+          MeasurementKey.trouserWaist,
+          MeasurementValue(waistCm + 0.4 * (hipCm - waistCm),
+              source: MeasurementSource.regression, confidence: 0.45));
+    }
+    // European drafting estimates — starting points a tailor refines.
+    // Jacket length: nape to thumb knuckle ≈ 0.44 of stature.
+    naap.set(
+        MeasurementKey.jacketLength,
+        MeasurementValue(h * 0.44,
+            source: MeasurementSource.regression, confidence: 0.4));
+    final chestCm = naap[MeasurementKey.chest]?.cm ?? h * 0.55;
+    naap.set(
+        MeasurementKey.frontChest,
+        MeasurementValue(chestCm * 0.36,
+            source: MeasurementSource.regression, confidence: 0.35));
+    naap.set(
+        MeasurementKey.backWidth,
+        MeasurementValue(chestCm * 0.43,
+            source: MeasurementSource.regression, confidence: 0.35));
     naap.set(
         MeasurementKey.ankleOpening,
         MeasurementValue(h * 0.16,

@@ -10,6 +10,7 @@ import '../../core/models/measurements.dart';
 import '../../core/models/profile.dart';
 import '../../core/parchi/parchi_pdf.dart';
 import '../../core/sizing.dart';
+import '../../core/styles.dart';
 
 class ResultsScreen extends StatefulWidget {
   const ResultsScreen({super.key});
@@ -76,6 +77,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         garment: s.garment,
         fit: s.fit,
         fabric: s.fabric,
+        style: s.style,
       );
       final summary =
           'Naap parchi for ${s.profile.name} — ${kGarments[s.garment]!.english} '
@@ -149,6 +151,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
             selected: {s.fit},
             onSelectionChanged: (sel) => s.setFit(sel.first),
           ),
+          const SizedBox(height: 12),
+          if (s.garment == GarmentType.shalwarKameez ||
+              s.garment == GarmentType.kurtaPajama)
+            _styleSection(context, s),
           const SizedBox(height: 16),
           Text('Tap any value to correct it — your edits are remembered.',
               style: Theme.of(context).textTheme.bodySmall),
@@ -227,6 +233,160 @@ class _ResultsScreenState extends State<ResultsScreen> {
             'Estimates from on-device analysis. Values marked ~ are lower-confidence — '
             'verify with a tape for your first order, then Naap learns from your edits.',
             style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _styleSection(BuildContext context, AppState s) {
+    final st = s.style;
+    final isInches = s.profile.unit == PreferredUnit.inches;
+    Future<void> editLength(String title, double? currentCm,
+        void Function(double?) apply) async {
+      final ctrl = TextEditingController(
+          text: currentCm == null
+              ? ''
+              : (isInches
+                  ? (currentCm / 2.54).toStringAsFixed(1)
+                  : currentCm.toStringAsFixed(1)));
+      final saved = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(title),
+          content: TextField(
+            controller: ctrl,
+            autofocus: true,
+            keyboardType:
+                const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+                suffixText: isInches ? 'inches' : 'cm',
+                helperText: 'Leave empty to let the tailor decide'),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancel')),
+            FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Save')),
+          ],
+        ),
+      );
+      if (saved == true) {
+        final d = double.tryParse(ctrl.text);
+        apply(d == null ? null : (isInches ? d * 2.54 : d));
+        await s.setStyle(st);
+      }
+    }
+
+    String lenLabel(double? cm) => cm == null
+        ? 'tailor decides'
+        : (isInches
+            ? '${(cm / 2.54).toStringAsFixed(1)}″'
+            : '${cm.toStringAsFixed(1)} cm');
+
+    return Card(
+      child: ExpansionTile(
+        leading: const Icon(Icons.design_services),
+        title: const Text('Style options (کٹائی)'),
+        subtitle: Text(
+            '${kNecklineLabels[st.neckline]!.english} · '
+            '${kSleeveLabels[st.sleeve]!.english} · '
+            '${kDamanLabels[st.daman]!.english}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis),
+        childrenPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        children: [
+          DropdownButtonFormField<NecklineStyle>(
+            initialValue: st.neckline,
+            decoration: const InputDecoration(
+                labelText: 'Neckline (گلا)', border: OutlineInputBorder()),
+            items: [
+              for (final e in kNecklineLabels.entries)
+                DropdownMenuItem(
+                    value: e.key,
+                    child: Text('${e.value.english}  ${e.value.urdu}')),
+            ],
+            onChanged: (v) async {
+              if (v != null) {
+                st.neckline = v;
+                await s.setStyle(st);
+              }
+            },
+          ),
+          const SizedBox(height: 10),
+          Row(children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => editLength('Front neck depth (گلے کی گہرائی)',
+                    st.neckDepthCm, (v) => st.neckDepthCm = v),
+                child: Text('Neck depth: ${lenLabel(st.neckDepthCm)}'),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => editLength('Neck width (گلے کی چوڑائی)',
+                    st.neckWidthCm, (v) => st.neckWidthCm = v),
+                child: Text('Neck width: ${lenLabel(st.neckWidthCm)}'),
+              ),
+            ),
+          ]),
+          const SizedBox(height: 10),
+          DropdownButtonFormField<SleeveStyle>(
+            initialValue: st.sleeve,
+            decoration: const InputDecoration(
+                labelText: 'Sleeve (آستین)', border: OutlineInputBorder()),
+            items: [
+              for (final e in kSleeveLabels.entries)
+                DropdownMenuItem(
+                    value: e.key,
+                    child: Text('${e.value.english}  ${e.value.urdu}')),
+            ],
+            onChanged: (v) async {
+              if (v != null) {
+                st.sleeve = v;
+                await s.setStyle(st);
+              }
+            },
+          ),
+          const SizedBox(height: 10),
+          DropdownButtonFormField<DamanStyle>(
+            initialValue: st.daman,
+            decoration: const InputDecoration(
+                labelText: 'Daman (دامن)', border: OutlineInputBorder()),
+            items: [
+              for (final e in kDamanLabels.entries)
+                DropdownMenuItem(
+                    value: e.key,
+                    child: Text('${e.value.english}  ${e.value.urdu}')),
+            ],
+            onChanged: (v) async {
+              if (v != null) {
+                st.daman = v;
+                await s.setStyle(st);
+              }
+            },
+          ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Side pockets (سائیڈ جیب)'),
+            value: st.sidePockets,
+            onChanged: (v) async {
+              st.sidePockets = v;
+              await s.setStyle(st);
+            },
+          ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Chest pocket (سینے کی جیب)'),
+            value: st.chestPocket,
+            onChanged: (v) async {
+              st.chestPocket = v;
+              await s.setStyle(st);
+            },
           ),
         ],
       ),

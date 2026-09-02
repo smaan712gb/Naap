@@ -37,6 +37,15 @@ def alteration_dxf(s: SuMisura, order_id: str) -> bytes:
         ("HIP", s.hip_delta_cm),
         ("SHOULDER", s.shoulder_delta_cm),
         ("SLEEVE", s.sleeve_delta_cm),
+        # Extended bespoke deltas appear only when supplied.
+        *([("BELLY", s.belly_delta_cm)]
+          if s.belly_delta_cm is not None else []),
+        *([("JACKET LEN", s.jacket_length_delta_cm)]
+          if s.jacket_length_delta_cm is not None else []),
+        *([("FRONT CHEST", s.front_chest_delta_cm)]
+          if s.front_chest_delta_cm is not None else []),
+        *([("BACK WIDTH", s.back_width_delta_cm)]
+          if s.back_width_delta_cm is not None else []),
     ]
     y = 74.0
     for name, cm in deltas:

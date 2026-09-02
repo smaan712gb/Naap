@@ -26,9 +26,10 @@ from pathlib import Path
 ENGINE = Path(__file__).resolve().parent.parent / "lib" / "core" / "measure" / "engine.dart"
 
 VALID = {
-    "neck", "shoulder", "chest", "waist", "hip", "sleeveLength", "bicep",
-    "armhole", "wrist", "kameezLength", "shalwarLength", "inseam", "thigh",
-    "ankleOpening", "hem",
+    "neck", "shoulder", "chest", "waist", "trouserWaist", "belly", "hip",
+    "sleeveLength", "bicep", "armhole", "wrist", "kameezLength",
+    "shalwarLength", "inseam", "thigh", "ankleOpening", "hem",
+    "jacketLength", "frontChest", "backWidth",
 }
 
 # measurement -> engine.dart shape-factor constant it calibrates

@@ -12,7 +12,9 @@ enum MeasurementKey {
   neck,
   shoulder, // Teera
   chest, // Chaati
-  waist, // Kamar
+  waist, // Kamar (natural waist — kameez fit)
+  trouserWaist, // Belt — where the trouser/pajama waistband sits
+  belly, // Pait — widest stomach, jacket buttoning
   hip, // Hip / Seat
   sleeveLength, // Baazu
   bicep,
@@ -24,6 +26,9 @@ enum MeasurementKey {
   thigh, // Raan
   ankleOpening, // Paincha
   hem, // Ghera (kameez bottom sweep)
+  jacketLength, // Coat Lambai — nape to hip, European jackets
+  frontChest, // front chest width, armpit to armpit (drafting)
+  backWidth, // back width across the blades (drafting)
 }
 
 class MeasurementDef {
@@ -94,6 +99,33 @@ const Map<MeasurementKey, MeasurementDef> kMeasurementDefs = {
       urdu: 'بغل',
       tailorTerm: 'Baghal',
       isCircumference: true),
+  MeasurementKey.trouserWaist: MeasurementDef(
+      key: MeasurementKey.trouserWaist,
+      english: 'Trouser waist',
+      urdu: 'پتلون کمر',
+      tailorTerm: 'Belt',
+      isCircumference: true),
+  MeasurementKey.belly: MeasurementDef(
+      key: MeasurementKey.belly,
+      english: 'Belly / Stomach',
+      urdu: 'پیٹ',
+      tailorTerm: 'Pait',
+      isCircumference: true),
+  MeasurementKey.jacketLength: MeasurementDef(
+      key: MeasurementKey.jacketLength,
+      english: 'Jacket length',
+      urdu: 'کوٹ لمبائی',
+      tailorTerm: 'Coat Lambai'),
+  MeasurementKey.frontChest: MeasurementDef(
+      key: MeasurementKey.frontChest,
+      english: 'Front chest width',
+      urdu: 'سامنے چھاتی',
+      tailorTerm: 'Front Chest'),
+  MeasurementKey.backWidth: MeasurementDef(
+      key: MeasurementKey.backWidth,
+      english: 'Back width',
+      urdu: 'پشت چوڑائی',
+      tailorTerm: 'Pusht'),
   MeasurementKey.wrist: MeasurementDef(
       key: MeasurementKey.wrist,
       english: 'Wrist / Cuff',

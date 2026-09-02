@@ -23,12 +23,14 @@ from app.sizing import map_su_misura
 @pytest.fixture()
 def client(tmp_path, monkeypatch):
     db.reset_for_tests(str(tmp_path / "test.db"))
+    # Import FIRST: app.main runs load_dotenv() at import time, which would
+    # re-inject a developer's server/.env secrets after any earlier scrub.
+    from app.main import app
     monkeypatch.setenv("NAAP_ENV", "dev")
     monkeypatch.delenv("NAAP_ADMIN_TOKEN", raising=False)
     monkeypatch.delenv("STRIPE_SECRET_KEY", raising=False)
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
-    from app.main import app
     return TestClient(app)
 
 
@@ -78,6 +80,31 @@ def test_su_misura_athletic_drop_note():
 def test_su_misura_rejects_out_of_range():
     with pytest.raises(ValueError):
         map_su_misura(30, 30, 30, 30, 30)
+
+
+def test_su_misura_extended_fields_default_to_none():
+    s = map_su_misura(chest_cm=100, waist_cm=88, hip_cm=102,
+                      shoulder_cm=41, sleeve_cm=61)
+    assert s.belly_delta_cm is None
+    assert s.jacket_length_delta_cm is None
+
+
+def test_su_misura_extended_bespoke_deltas():
+    s = map_su_misura(chest_cm=100, waist_cm=88, hip_cm=102,
+                      shoulder_cm=41, sleeve_cm=61,
+                      belly_cm=95, jacket_length_cm=76,
+                      front_chest_cm=38, back_width_cm=45)
+    # Nominals for EU 50: belly 92, jacket 75, front 36, back 43.
+    assert s.belly_delta_cm == 3.0
+    assert s.jacket_length_delta_cm == 1.0
+    assert s.front_chest_delta_cm == 2.0
+    assert s.back_width_delta_cm == 2.0
+
+
+def test_su_misura_corpulent_front_balance_note():
+    s = map_su_misura(chest_cm=100, waist_cm=98, hip_cm=104,
+                      shoulder_cm=41, sleeve_cm=61, belly_cm=104)
+    assert any("corpulent" in n for n in s.notes)
 
 
 def test_alteration_dxf_contains_deltas():
