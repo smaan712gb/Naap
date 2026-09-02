@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/shop_api.dart';
 import 'fabric_detail_screen.dart';
+import 'fabric_swatch.dart';
 
 /// Phase 1.5 storefront (beta): verified fabrics from the Naap backend.
 class ShopScreen extends StatefulWidget {
@@ -161,32 +162,112 @@ class _ShopScreenState extends State<ShopScreen> {
                       child: Text('No fabrics match these filters.'))),
             ]);
           }
-          return ListView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: fabrics.length + 1,
-            itemBuilder: (context, i) {
-              if (i == 0) return _filterBar();
-              final f = fabrics[i - 1];
-              return Card(
-                child: ListTile(
-                  leading: const CircleAvatar(
-                      backgroundColor: Color(0xFFE8F1EC),
-                      child: Icon(Icons.checkroom, color: Color(0xFF1B4D3E))),
-                  title: Text(f.name,
-                      style: const TextStyle(fontWeight: FontWeight.w600)),
-                  subtitle: Text(
-                      '${f.brand ?? 'Wholesale'} · ${f.composition} · ${f.meters} m'),
-                  trailing: Text('\$${f.priceUsd.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold)),
-                  onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => FabricDetailScreen(fabric: f))),
-                ),
-              );
-            },
-          );
+          return Column(children: [
+            _filterBar(),
+            const SizedBox(height: 4),
+            Expanded(
+              child: GridView.builder(
+                padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+                gridDelegate:
+                    const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: 0.68),
+                itemCount: fabrics.length,
+                itemBuilder: (context, i) {
+                  final f = fabrics[i];
+                  return Card(
+                    clipBehavior: Clip.antiAlias,
+                    elevation: 1.5,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                    child: InkWell(
+                      onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) =>
+                                  FabricDetailScreen(fabric: f))),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Stack(fit: StackFit.expand, children: [
+                              FabricSwatch(fabric: f, radius: 0),
+                              if (f.season != null)
+                                Positioned(
+                                  top: 8,
+                                  left: 8,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black
+                                          .withValues(alpha: 0.45),
+                                      borderRadius:
+                                          BorderRadius.circular(999),
+                                    ),
+                                    child: Text(f.season!,
+                                        style: const TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600)),
+                                  ),
+                                ),
+                            ]),
+                          ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.fromLTRB(10, 8, 10, 10),
+                            child: Column(
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.start,
+                              children: [
+                                Text(f.name,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13.5,
+                                        height: 1.25)),
+                                const SizedBox(height: 3),
+                                Text(
+                                    '${f.brand ?? 'Wholesale'} · '
+                                    '${f.fabricLabel ?? f.composition}',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        color: Colors.grey.shade600,
+                                        fontSize: 11.5)),
+                                const SizedBox(height: 6),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                        '\$${f.priceUsd.toStringAsFixed(0)}',
+                                        style: const TextStyle(
+                                            fontSize: 15.5,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF1B4D3E))),
+                                    Text('${f.meters} m',
+                                        style: TextStyle(
+                                            fontSize: 11,
+                                            color:
+                                                Colors.grey.shade600)),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ]);
         },
       ),
     );

@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/app_state.dart';
 import '../../core/ease.dart';
+import 'fabric_swatch.dart';
 import '../../core/shop_api.dart';
 
 /// Tri-modal checkout for one fabric: Stitch & Ship, DIY fabric, or
@@ -124,7 +125,12 @@ class _FabricDetailScreenState extends State<FabricDetailScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          Text('${f.brand ?? 'Wholesale'} · ${f.composition} · ${f.meters} m '
+          AspectRatio(
+              aspectRatio: 1.4,
+              child: FabricSwatch(fabric: f, radius: 16)),
+          const SizedBox(height: 16),
+          Text('${f.brand ?? 'Wholesale'} · '
+              '${f.fabricLabel ?? f.composition} · ${f.meters} m '
               'unstitched'),
           const SizedBox(height: 8),
           Text('\$${f.priceUsd.toStringAsFixed(2)}',

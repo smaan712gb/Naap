@@ -106,13 +106,41 @@ mentioned, seasonal themes, and notable garment types. Output 3-6 short
 bullet lines of plain text. Do not invent prices or products not present."""
 
 
-def _page_text(client: httpx.Client, url: str, cap: int = 6000) -> str:
+def _fetch_page(client: httpx.Client, url: str,
+                text_cap: int = 6000, max_images: int = 6) -> tuple[str, list[str]]:
+    """Returns (visible text for the LLM, product image URLs for the
+    report). Images are HOTLINKED in the private admin brief only — never
+    copied, never shown to customers (blueprint rule 5 + copyright)."""
     r = client.get(url)
+    html = r.text
+
+    # Product-looking images: og:image first, then <img> sources that look
+    # like catalog media (skip logos/sprites/icons).
+    imgs: list[str] = []
+    og = re.search(r'property=["\']og:image["\']\s+content=["\']([^"\']+)',
+                   html, re.I)
+    if og:
+        imgs.append(og.group(1))
+    for m in re.finditer(r'<img[^>]+src=["\']([^"\']+)["\']', html, re.I):
+        src = m.group(1)
+        if re.search(r"logo|icon|sprite|placeholder|\.svg|\.gif", src, re.I):
+            continue
+        if not re.search(r"\.(jpe?g|png|webp)", src, re.I):
+            continue
+        if src.startswith("//"):
+            src = "https:" + src
+        elif src.startswith("/"):
+            src = str(httpx.URL(url).join(src))
+        if src.startswith("http") and src not in imgs:
+            imgs.append(src)
+        if len(imgs) >= max_images:
+            break
+
     text = re.sub(r"<script.*?</script>|<style.*?</style>", " ",
-                  r.text, flags=re.S | re.I)
+                  html, flags=re.S | re.I)
     text = re.sub(r"<[^>]+>", " ", text)
     text = re.sub(r"\s+", " ", text)
-    return text[:cap]
+    return text[:text_cap], imgs
 
 
 def trend_scan(max_brands: int = 3, offset: int = 0) -> dict:
@@ -125,13 +153,13 @@ def trend_scan(max_brands: int = 3, offset: int = 0) -> dict:
                       headers=_UA) as client:
         for b in picks:
             try:
-                text = _page_text(client, b["url"])
+                text, images = _fetch_page(client, b["url"])
                 note = llm.invoke(
                     [("system", _TREND_PROMPT),
                      ("human", f"Brand: {b['name']}\nPage text:\n{text}")]
                 ).text
                 findings.append({"brand": b["name"], "url": b["url"],
-                                 "notes": note})
+                                 "notes": note, "images": images})
             except Exception as e:  # noqa: BLE001
                 findings.append({"brand": b["name"], "url": b["url"],
                                  "error": type(e).__name__})

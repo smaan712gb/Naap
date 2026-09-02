@@ -20,6 +20,10 @@ class ShopFabric {
   final String description;
   final double priceUsd;
   final double meters;
+  final String? imageUrl;
+  final String? fabricLabel;
+  final String? season;
+  final List<String> occasions;
 
   const ShopFabric({
     required this.id,
@@ -29,6 +33,10 @@ class ShopFabric {
     required this.description,
     required this.priceUsd,
     required this.meters,
+    this.imageUrl,
+    this.fabricLabel,
+    this.season,
+    this.occasions = const [],
   });
 
   factory ShopFabric.fromJson(Map<String, dynamic> j) => ShopFabric(
@@ -39,6 +47,12 @@ class ShopFabric {
         description: j['description'] as String? ?? '',
         priceUsd: (j['price_usd'] as num).toDouble(),
         meters: (j['meters'] as num?)?.toDouble() ?? 5.0,
+        imageUrl: j['image_url'] as String?,
+        fabricLabel: j['fabric_label'] as String?,
+        season: j['season'] as String?,
+        occasions: [
+          for (final o in (j['occasions'] as List<dynamic>? ?? [])) '$o'
+        ],
       );
 }
 

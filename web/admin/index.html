@@ -103,18 +103,59 @@ async function runAgent(kind){
   if(r.ok) loadReports();
 }
 
+const esc = s => String(s ?? "").replace(/[<>&"]/g,
+  c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+
+function renderDoc(kind, doc){
+  if(kind === "seasonal"){
+    return `<p><strong>Now:</strong> ${esc(doc.current_season)}
+      (${doc.live_for_current?.length ?? 0} fabrics live) ·
+      <strong>Next:</strong> ${esc(doc.upcoming_season)}
+      (${doc.live_for_upcoming?.length ?? 0} ready)</p>
+      ${(doc.advice||[]).map(a => `<p style="color:#a15c00">⚠ ${esc(a)}</p>`).join("")}
+      <p class="meta">Ready for ${esc(doc.upcoming_season)}:
+      ${(doc.live_for_upcoming||[]).map(esc).join(" · ") || "—"}</p>`;
+  }
+  if(kind === "link-health"){
+    const dead = doc.dead || [];
+    return `<p>${esc(doc.summary)}</p>` + (dead.length
+      ? dead.map(d => `<p style="color:#b00020">✗ ${esc(d.brand)} —
+          ${esc(d.status ?? d.error)}</p>`).join("")
+      : `<p style="color:#2e7d32">All brand links healthy ✓</p>`);
+  }
+  if(kind === "trends"){
+    return (doc.findings||[]).map(f => `
+      <div style="border-top:1px solid #eef2f0;padding-top:10px;margin-top:10px">
+        <strong><a href="${esc(f.url)}" target="_blank">${esc(f.brand)}</a></strong>
+        ${f.error ? `<p style="color:#b00020">scan failed: ${esc(f.error)}</p>` : `
+        <div style="white-space:pre-wrap;font-size:.9rem;margin:6px 0">${esc(f.notes)}</div>
+        <div style="display:flex;gap:6px;overflow-x:auto">
+          ${(f.images||[]).map(u => `<a href="${esc(u)}" target="_blank">
+            <img src="${esc(u)}" loading="lazy" referrerpolicy="no-referrer"
+              style="height:110px;border-radius:8px;object-fit:cover"
+              onerror="this.parentNode.remove()"></a>`).join("")}
+        </div>
+        <p class="meta" style="margin-top:4px">Images hotlinked from the
+        brand's public page for internal review only.</p>`}
+      </div>`).join("");
+  }
+  return `<pre style="white-space:pre-wrap;font-size:.82rem;overflow-x:auto">${
+    esc(JSON.stringify(doc, null, 1))}</pre>`;
+}
+
 async function loadReports(){
   const r = await fetch(API + "/reports?limit=10", {headers: hdrs()});
   if(!r.ok){$('status').textContent = "Reports failed (" + r.status + ")"; return;}
   const reps = await r.json();
   $('reports').innerHTML = reps.length ? "" : "<div class='empty'>No reports yet.</div>";
+  const titles = {"seasonal":"🗓 Season planner","link-health":"🔗 Link auditor",
+                  "trends":"👗 Trend scout"};
   for(const rep of reps){
     const d = document.createElement('div');
     d.className = 'card';
-    d.innerHTML = `<h3>${rep.kind}</h3>
-      <div class="meta">${rep.created}</div>
-      <pre style="white-space:pre-wrap;font-size:.82rem;overflow-x:auto">${
-        JSON.stringify(rep.doc, null, 1)}</pre>`;
+    d.innerHTML = `<h3>${titles[rep.kind] || esc(rep.kind)}</h3>
+      <div class="meta">${esc(rep.created)}</div>` +
+      renderDoc(rep.kind, rep.doc);
     $('reports').appendChild(d);
   }
 }
