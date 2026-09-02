@@ -32,6 +32,18 @@ load_dotenv()
 log = logging.getLogger("naap")
 app = FastAPI(title="Naap API", version="0.2.0")
 
+# The landing page (different origin) posts waitlist signups from the
+# browser. Public endpoints only carry public data; admin endpoints are
+# token-gated regardless of origin.
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
+)
+
 
 @app.on_event("startup")
 def seed_if_empty() -> None:
@@ -81,6 +93,30 @@ def health() -> dict:
 def taxonomy() -> dict:
     """The full browse/filter tree (categories, occasions, brands, ...)."""
     return full_taxonomy()
+
+
+# ---------------------------------------------------------------- waitlist
+
+class WaitlistRequest(BaseModel):
+    email: str
+
+
+_EMAIL_RE = r"^[^@\s]{1,64}@[^@\s]{1,255}\.[A-Za-z]{2,}$"
+
+
+@app.post("/waitlist")
+def join_waitlist(req: WaitlistRequest) -> dict:
+    import re
+    email = req.email.strip().lower()
+    if not re.match(_EMAIL_RE, email):
+        raise HTTPException(422, "invalid email")
+    db.add_waitlist(email)
+    return {"ok": True}
+
+
+@app.get("/waitlist", dependencies=[Depends(admin_only)])
+def waitlist_export() -> list[dict]:
+    return db.list_waitlist()
 
 
 @app.get("/catalog")

@@ -101,6 +101,18 @@ def test_su_misura_extended_bespoke_deltas():
     assert s.back_width_delta_cm == 2.0
 
 
+def test_waitlist_signup_and_admin_export(client):
+    assert client.post("/waitlist",
+                       json={"email": "Tester@Example.com"}).status_code == 200
+    # Duplicate is idempotent, invalid rejected.
+    assert client.post("/waitlist",
+                       json={"email": "tester@example.com"}).status_code == 200
+    assert client.post("/waitlist",
+                       json={"email": "not-an-email"}).status_code == 422
+    rows = client.get("/waitlist").json()  # dev mode: no token required
+    assert [r["email"] for r in rows] == ["tester@example.com"]
+
+
 def test_taxonomy_serves_full_tree(client):
     t = client.get("/taxonomy").json()
     cat_ids = {c["id"] for c in t["categories"]}

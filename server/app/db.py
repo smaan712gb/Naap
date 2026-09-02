@@ -25,6 +25,9 @@ def _db() -> sqlite3.Connection:
             "CREATE TABLE IF NOT EXISTS fabrics (id TEXT PRIMARY KEY, doc TEXT)")
         _conn.execute(
             "CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, doc TEXT)")
+        _conn.execute(
+            "CREATE TABLE IF NOT EXISTS waitlist "
+            "(email TEXT PRIMARY KEY, created TEXT)")
         _conn.commit()
     return _conn
 
@@ -99,3 +102,20 @@ def list_orders() -> list[Order]:
     rows = _db().execute("SELECT doc FROM orders").fetchall()
     return sorted((Order.model_validate(json.loads(r[0])) for r in rows),
                   key=lambda o: o.created_at, reverse=True)
+
+
+# ---------------------------------------------------------------- waitlist
+
+def add_waitlist(email: str) -> None:
+    with _lock:
+        _db().execute(
+            "INSERT INTO waitlist (email, created) VALUES (?, ?) "
+            "ON CONFLICT(email) DO NOTHING",
+            (email, utcnow().isoformat()))
+        _db().commit()
+
+
+def list_waitlist() -> list[dict]:
+    rows = _db().execute(
+        "SELECT email, created FROM waitlist ORDER BY created").fetchall()
+    return [{"email": r[0], "created": r[1]} for r in rows]
