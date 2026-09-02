@@ -32,6 +32,24 @@ load_dotenv()
 log = logging.getLogger("naap")
 app = FastAPI(title="Naap API", version="0.2.0")
 
+
+@app.on_event("startup")
+def seed_if_empty() -> None:
+    """Self-healing catalog: the container's SQLite is ephemeral, so every
+    redeploy starts empty. If a bundled seed file exists and the catalog has
+    no rows, load it — demo inventory survives redeploys without manual
+    reseeding. Real durability (orders!) still needs external storage."""
+    import json
+    from pathlib import Path
+    seed = Path(__file__).resolve().parent.parent / "seed_fabrics.json"
+    if not seed.exists() or db.list_fabrics(verified_only=False):
+        return
+    n = 0
+    for row in json.loads(seed.read_text(encoding="utf-8")):
+        db.upsert_fabric(Fabric(**row))
+        n += 1
+    log.info("seeded %d fabrics from bundled seed file", n)
+
 STITCHING_FEE_USD = {  # margin-bearing service fees per checkout mode
     CheckoutMode.stitch_and_ship: 35.0,
     CheckoutMode.diy_fabric: 0.0,

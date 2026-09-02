@@ -3,6 +3,8 @@ WORKDIR /srv
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY app ./app
+# Bundled demo seed: loaded at startup when the (ephemeral) catalog is empty.
+COPY seed_fabrics.json ./seed_fabrics.json
 ENV NAAP_ENV=prod NAAP_DB_PATH=/data/naap.db
 VOLUME /data
 EXPOSE 8000

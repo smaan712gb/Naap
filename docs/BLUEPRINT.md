@@ -78,12 +78,15 @@ gate on rented phones (`scripts/devicefarm_smoke.py`).
 1. **Calibration sprint** — tape-measure validation on real bodies (family
    phones via APK/TestFlight); tune engine constants; start collecting the
    v1.5 regression dataset.
-2. **Capture UX (v1.5 spec, agreed 2026-09-02 after first family tests)** —
-   intelligent auto-capture: run the pose detector on the live camera
-   stream (ML Kit = MediaPipe), show live coaching ("step back", "good —
-   hold still"), and fire the shutter automatically when the whole body is
-   framed and still. No timer, no post-capture retake dialogs. On-device
-   TTS voice coaching EN/UR on top. SOTA review notes: 360° video +
+2. **Capture UX — BUILT 2026-09-02 (device validation pending)** —
+   intelligent auto-capture: `live_coach.dart` runs the pose detector on
+   the live camera stream (base model, throttled), judges framing
+   deterministically (head/feet in frame, body span 45–94%, side-view
+   hands-in-front check — prevention for the waist-inflation failure),
+   requires 1.2 s of stillness, then fires the shutter itself. Live
+   bilingual banner + on-device TTS voice coaching (Urdu voice when the
+   device has one, English otherwise), speaks on status change only.
+   Auto mode is default; the 7-second timer remains as fallback. SOTA review notes: 360° video +
    SMPL-X/WHAM under-cloth reconstruction stays v2 (must run on-device per
    privacy law — server-class today, and budget Android can't); ARCore
    ground-plane scale rejected for v1 (patchy on Pakistan's budget
