@@ -282,8 +282,11 @@ class MeasurementEngine {
     final weight = profile.weightKg;
     if (naap[MeasurementKey.neck] == null) {
       // Neck circumference scales with stature and BMI; simple linear model.
+      // Coefficients raised 2026-09-02 from the first calibration data
+      // point: a 16-17 collar tester (body neck ~39-41 cm) read 36.6 cm at
+      // the old 0.20 male coefficient.
       final bmi = weight != null ? weight / ((h / 100) * (h / 100)) : 23.0;
-      final neck = (profile.bodyType == BodyType.male ? 0.20 : 0.185) * h +
+      final neck = (profile.bodyType == BodyType.male ? 0.225 : 0.205) * h +
           (bmi - 23.0) * 0.45;
       naap.set(MeasurementKey.neck,
           MeasurementValue(neck, source: MeasurementSource.regression, confidence: 0.4));
