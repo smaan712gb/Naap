@@ -106,6 +106,25 @@ class _ResultsScreenState extends State<ResultsScreen> {
     final s = context.watch<AppState>();
     final lines =
         EaseEngine.buildParchi(s.naap, s.garment, s.fit, fabric: s.fabric);
+    // All three fits side by side, so the fitted/regular/loose variation is
+    // visible at a glance instead of only changing one number in place.
+    final byFit = {
+      for (final f in FitPreference.values)
+        f: EaseEngine.buildParchi(s.naap, s.garment, f, fabric: s.fabric)
+    };
+    String stitchRow(int i) {
+      final fitted = byFit[FitPreference.fitted]![i].stitchCm;
+      final regular = byFit[FitPreference.regular]![i].stitchCm;
+      final loose = byFit[FitPreference.loose]![i].stitchCm;
+      if (fitted == regular && regular == loose) {
+        return 'Stitch ${_fmt(s, regular)} (all fits)';
+      }
+      String mark(FitPreference f, String label, double cm) =>
+          s.fit == f ? '▶$label ${_fmt(s, cm)}' : '$label ${_fmt(s, cm)}';
+      return '${mark(FitPreference.fitted, 'F', fitted)} · '
+          '${mark(FitPreference.regular, 'R', regular)} · '
+          '${mark(FitPreference.loose, 'L', loose)}';
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Your Naap')),
@@ -163,7 +182,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           // Measurement rows
           Card(
             child: Column(children: [
-              for (final l in lines)
+              for (final (i, l) in lines.indexed)
                 ListTile(
                   dense: true,
                   title: Row(children: [
@@ -174,7 +193,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                             fontSize: 15, color: Color(0xFF1B4D3E))),
                   ]),
                   subtitle: Text(
-                      'Body ${_fmt(s, l.bodyCm)} → Stitch ${_fmt(s, l.stitchCm)}'),
+                      'Body ${_fmt(s, l.bodyCm)} → ${stitchRow(i)}'),
                   trailing: _sourceBadge(l.source, l.confidence),
                   onTap: () => _editValue(context, s, l.def, l.bodyCm),
                 ),
