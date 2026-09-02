@@ -31,6 +31,9 @@ def _db() -> sqlite3.Connection:
         _conn.execute(
             "CREATE TABLE IF NOT EXISTS reports "
             "(id TEXT PRIMARY KEY, kind TEXT, created TEXT, doc TEXT)")
+        _conn.execute(
+            "CREATE TABLE IF NOT EXISTS fit_reports "
+            "(id TEXT PRIMARY KEY, created TEXT, doc TEXT)")
         _conn.commit()
     return _conn
 
@@ -134,6 +137,23 @@ def add_report(kind: str, doc: dict) -> str:
             (rid, kind, utcnow().isoformat(), json.dumps(doc)))
         _db().commit()
     return rid
+
+
+def add_fit_report(doc: dict) -> str:
+    rid = uuid.uuid4().hex[:12]
+    with _lock:
+        _db().execute(
+            "INSERT INTO fit_reports (id, created, doc) VALUES (?,?,?)",
+            (rid, utcnow().isoformat(), json.dumps(doc)))
+        _db().commit()
+    return rid
+
+
+def list_fit_reports(limit: int = 500) -> list[dict]:
+    rows = _db().execute(
+        "SELECT id, created, doc FROM fit_reports "
+        "ORDER BY created DESC LIMIT ?", (limit,)).fetchall()
+    return [{"id": r[0], "created": r[1], **json.loads(r[2])} for r in rows]
 
 
 def list_reports(limit: int = 20) -> list[dict]:

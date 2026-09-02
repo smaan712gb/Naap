@@ -25,6 +25,10 @@ before trust inverts the wedge.
 
 ### Phase 2 design notes (2026-09-02 — NOT built; demo primitives ≠ product)
 
+**Full strategy, scaling gates, unit economics and the atelier decision:
+[PHASE2-PLAN.md](PHASE2-PLAN.md).** The fit-library data flywheel
+(fit_library.py + /fit-reports) collects from day one.
+
 The current EU size/drop mapping + drafting deltas + DXF export are
 generic-block placeholders. Real luxury size translation requires a
 **per-brand, per-line fit library**, because every house cuts its own

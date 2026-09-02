@@ -101,6 +101,27 @@ def test_su_misura_extended_bespoke_deltas():
     assert s.back_width_delta_cm == 2.0
 
 
+def test_fit_report_flywheel(client):
+    r = client.post("/fit-reports", json={
+        "brand": "ZEGNA", "garment": "jacket", "size_label": "EU 50",
+        "fit_verdict": "true-to-size", "body_chest_cm": 102.0})
+    assert r.status_code == 200
+    rows = client.get("/fit-reports").json()
+    assert rows[0]["brand"] == "ZEGNA"
+    # No identity fields exist on the model at all.
+    assert "email" not in rows[0] and "name" not in rows[0]
+    # Garbage body numbers rejected.
+    assert client.post("/fit-reports", json={
+        "brand": "X", "size_label": "M",
+        "body_chest_cm": 999}).status_code == 422
+
+
+def test_fit_library_seed_entries(client):
+    rows = client.get("/fit-library").json()
+    assert any(e["brand"] == "BOSS" and e["size_label"] == "40R"
+               for e in rows)
+
+
 def test_seasonal_agent_is_deterministic(client):
     import datetime
     from app.agents.monitor import season_for_month, seasonal_focus

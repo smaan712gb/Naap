@@ -25,6 +25,7 @@ from .agents.sourcing import extract_fabrics, to_catalog_entries
 from .models import (CheckoutMode, Fabric, Order, OrderCreate, OrderStatus,
                      ORDER_TRANSITIONS, utcnow)
 from .dxf_export import alteration_dxf
+from .fit_library import FitReport as FitReportModel
 from .taxonomy import full_taxonomy
 from .sizing import SuMisura, map_su_misura
 
@@ -141,6 +142,27 @@ def join_waitlist(req: WaitlistRequest) -> dict:
 @app.get("/waitlist", dependencies=[Depends(admin_only)])
 def waitlist_export() -> list[dict]:
     return db.list_waitlist()
+
+
+# ------------------------------------------------------------ fit library
+
+@app.get("/fit-library", dependencies=[Depends(admin_only)])
+def fit_library() -> list[dict]:
+    """Measured-garment entries (Phase 2 data moat; see PHASE2-PLAN.md)."""
+    from .fit_library import SEED_ENTRIES
+    return [e.model_dump() for e in SEED_ENTRIES]
+
+
+@app.post("/fit-reports")
+def submit_fit_report(report: "FitReportModel") -> dict:
+    """Anonymous brand-size self-report — numbers only, no identity."""
+    db.add_fit_report(report.model_dump())
+    return {"ok": True}
+
+
+@app.get("/fit-reports", dependencies=[Depends(admin_only)])
+def fit_reports_export() -> list[dict]:
+    return db.list_fit_reports()
 
 
 # ------------------------------------------------------------- agent team
