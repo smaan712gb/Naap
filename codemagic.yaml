@@ -85,3 +85,9 @@ workflows:
         script: flutter build apk --release
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
+    publishing:
+      # Android testers get the APK download link by email on every push —
+      # add family addresses here as they join.
+      email:
+        recipients:
+          - smaan2011@gmail.com
