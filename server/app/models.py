@@ -16,14 +16,32 @@ from pydantic import BaseModel, Field
 # ---------------------------------------------------------------- fabrics
 
 class FabricComposition(str, Enum):
+    # Summer
     lawn = "lawn"
+    embroidered_lawn = "embroidered_lawn"
     cotton = "cotton"
+    chiffon = "chiffon"
+    # Transitional
+    viscose = "viscose"
+    wash_and_wear = "wash_and_wear"
+    # Winter
     khaddar = "khaddar"
     linen = "linen"
-    wash_and_wear = "wash_and_wear"
+    marina = "marina"
+    dhanak = "dhanak"
+    pashmina = "pashmina"
+    wool_suiting = "wool_suiting"
+    velvet = "velvet"
+    # Weddings / bridal
     raw_silk = "raw_silk"
     karandi = "karandi"
-    wool_suiting = "wool_suiting"
+    jamawar = "jamawar"
+    organza = "organza"
+    net_tissue = "net_tissue"
+    # Eid / festive
+    jacquard = "jacquard"
+    cotton_net = "cotton_net"
+    # Modern
     stretch_knit = "stretch_knit"
     other = "other"
 
