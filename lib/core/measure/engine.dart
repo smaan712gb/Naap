@@ -343,28 +343,41 @@ class MeasurementEngine {
 
   Future<_View?> _analyzeView(
       String path, List<CaptureIssue> issues, String label) async {
-    final input = InputImage.fromFilePath(path);
-    final poses = await _poseDetector.processImage(input);
-    if (poses.isEmpty) {
-      issues.add(CaptureIssue('No person detected in the $label photo.',
-          blocking: true));
-      return null;
-    }
-    final mask = await _segmenter.processImage(input);
-    if (mask == null) {
-      issues.add(CaptureIssue(
-          'Could not separate the body from the background in the $label photo.',
-          blocking: true));
-      return null;
-    }
-    // Decode only the header for pixel dimensions (cheap).
+    // iPhones store photos sideways with an EXIF rotation flag, so the
+    // landmark coordinates and the decoded pixel grid can disagree about
+    // which way is up — every real iOS capture then failed as "not a
+    // standing person". Bake the rotation into the pixels first so the
+    // detectors, the mask, and the dimensions all see the same upright
+    // image on every platform.
     final decoded = await img.decodeImageFile(path);
     if (decoded == null) {
       issues.add(CaptureIssue('Could not read the $label photo.', blocking: true));
       return null;
     }
-    return _View(poses.first, mask.confidences, mask.width, mask.height,
-        decoded.width, decoded.height);
+    final upright = img.bakeOrientation(decoded);
+    final normFile = File('$path.upright.jpg');
+    await normFile.writeAsBytes(img.encodeJpg(upright, quality: 92));
+    try {
+      final input = InputImage.fromFilePath(normFile.path);
+      final poses = await _poseDetector.processImage(input);
+      if (poses.isEmpty) {
+        issues.add(CaptureIssue('No person detected in the $label photo.',
+            blocking: true));
+        return null;
+      }
+      final mask = await _segmenter.processImage(input);
+      if (mask == null) {
+        issues.add(CaptureIssue(
+            'Could not separate the body from the background in the $label photo.',
+            blocking: true));
+        return null;
+      }
+      return _View(poses.first, mask.confidences, mask.width, mask.height,
+          upright.width, upright.height);
+    } finally {
+      // Privacy contract: the normalized copy is a capture photo too.
+      if (await normFile.exists()) await normFile.delete();
+    }
   }
 }
 
