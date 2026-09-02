@@ -26,6 +26,12 @@ import 'geometry.dart';
 /// Used to calibrate cm-per-pixel because ML Kit has no top-of-head landmark.
 const double _kEyeHeightRatio = 0.936;
 
+/// Fallback anchors when eyes/heels are occluded (turned head in the side
+/// view, hair, long shalwar over the heels): nose height and ankle-bone
+/// height as fractions of stature, same anthropometric tables.
+const double _kNoseHeightRatio = 0.925;
+const double _kAnkleHeightRatio = 0.039;
+
 /// Where key torso rows sit between the shoulder and hip landmark rows.
 const double _kChestRowT = 0.30; // shoulder→hip fraction for chest (nipple line)
 const double _kWaistRowT = 0.72; // natural waist
@@ -107,11 +113,17 @@ class MeasurementEngine {
         MeasurementValue(h, source: MeasurementSource.manual));
 
     // ---- Calibration: cm per mask-pixel in each view ----
-    final cmPerPxF = _cmPerPx(front, h);
-    final cmPerPxS = _cmPerPx(side, h);
+    final cmPerPxF = _cmPerPx(front, h, issues, 'front');
+    final cmPerPxS = _cmPerPx(side, h, issues, 'side');
     if (cmPerPxF == null || cmPerPxS == null) {
-      return EngineResult(Naap.empty(),
-          [...issues, const CaptureIssue('Feet or face not visible — the whole body, head to heels, must be in frame.', blocking: true)]);
+      // _cmPerPx already added a specific, actionable issue per view.
+      if (!issues.any((i) => i.blocking)) {
+        issues.add(const CaptureIssue(
+            'Could not calibrate height from the photos — retake with the '
+            'whole body in frame.',
+            blocking: true));
+      }
+      return EngineResult(Naap.empty(), issues);
     }
 
     // ---- Landmark anchors (front view, mask space) ----
@@ -253,21 +265,68 @@ class MeasurementEngine {
   }
 
   /// cm-per-pixel from eye row and heel row against known stature.
-  double? _cmPerPx(_View v, double heightCm) {
-    final lEye = v.lmLikelihood(PoseLandmarkType.leftEye) > 0.5
-        ? v.lm(PoseLandmarkType.leftEye)
-        : null;
-    final lHeel = v.lmLikelihood(PoseLandmarkType.leftHeel) > 0.3
-        ? v.lm(PoseLandmarkType.leftHeel)
-        : null;
-    final rHeel = v.lmLikelihood(PoseLandmarkType.rightHeel) > 0.3
-        ? v.lm(PoseLandmarkType.rightHeel)
-        : null;
-    if (lEye == null || (lHeel == null && rHeel == null)) return null;
-    final heelY = ((lHeel?.y ?? rHeel!.y) + (rHeel?.y ?? lHeel!.y)) / 2;
-    final px = heelY - lEye.y;
+  /// Height calibration. Top anchor: whichever eye ML Kit is most sure of,
+  /// falling back to the nose (in a side photo the far eye is hidden, which
+  /// used to hard-fail every capture). Bottom anchor: either heel, falling
+  /// back to either ankle. Adds a specific issue naming the view and the
+  /// missing end when it fails.
+  double? _cmPerPx(_View v, double heightCm, List<CaptureIssue> issues,
+      String label) {
+    ({double x, double y})? top;
+    var topRatio = _kEyeHeightRatio;
+    final eyeType = [PoseLandmarkType.leftEye, PoseLandmarkType.rightEye]
+        .where((t) => v.lmLikelihood(t) > 0.3)
+        .fold<PoseLandmarkType?>(null,
+            (best, t) => best == null || v.lmLikelihood(t) > v.lmLikelihood(best) ? t : best);
+    if (eyeType != null) {
+      top = v.lm(eyeType);
+    } else if (v.lmLikelihood(PoseLandmarkType.nose) > 0.3) {
+      top = v.lm(PoseLandmarkType.nose);
+      topRatio = _kNoseHeightRatio;
+    }
+
+    ({double x, double y})? bottom;
+    var bottomRatio = 0.0;
+    final heels = [PoseLandmarkType.leftHeel, PoseLandmarkType.rightHeel]
+        .where((t) => v.lmLikelihood(t) > 0.3)
+        .map(v.lm)
+        .toList();
+    if (heels.isNotEmpty) {
+      bottom = (
+        x: heels.map((p) => p.x).reduce((a, b) => a + b) / heels.length,
+        y: heels.map((p) => p.y).reduce((a, b) => a + b) / heels.length,
+      );
+    } else {
+      final ankles = [PoseLandmarkType.leftAnkle, PoseLandmarkType.rightAnkle]
+          .where((t) => v.lmLikelihood(t) > 0.3)
+          .map(v.lm)
+          .toList();
+      if (ankles.isNotEmpty) {
+        bottom = (
+          x: ankles.map((p) => p.x).reduce((a, b) => a + b) / ankles.length,
+          y: ankles.map((p) => p.y).reduce((a, b) => a + b) / ankles.length,
+        );
+        bottomRatio = _kAnkleHeightRatio;
+      }
+    }
+
+    if (top == null) {
+      issues.add(CaptureIssue(
+          'Could not see the face in the $label photo — face the camera '
+          '(front) or look straight ahead (side), hair away from the face.',
+          blocking: true));
+      return null;
+    }
+    if (bottom == null) {
+      issues.add(CaptureIssue(
+          'Could not see the feet in the $label photo — step back so the '
+          'whole body, head to bare heels, is inside the outline.',
+          blocking: true));
+      return null;
+    }
+    final px = bottom.y - top.y;
     if (px <= 0) return null;
-    return (heightCm * _kEyeHeightRatio) / px;
+    return (heightCm * (topRatio - bottomRatio)) / px;
   }
 
   double _sideTorsoMidX(_View v) {
