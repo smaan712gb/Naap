@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:naap/core/ease.dart';
 import 'package:naap/core/fabric.dart';
+import 'package:naap/core/learning.dart';
 import 'package:naap/core/measure/geometry.dart';
 import 'package:naap/core/models/measurements.dart';
 import 'package:naap/core/sizing.dart';
@@ -186,6 +187,51 @@ void main() {
       expect(back[MeasurementKey.chest]!.cm, 96.5);
       expect(back[MeasurementKey.chest]!.source, MeasurementSource.silhouette);
       expect(back[MeasurementKey.chest]!.confidence, 0.7);
+    });
+  });
+
+  group('per-user learning', () {
+    test('learns a correction and applies it to the next AI value', () {
+      final cal = PersonalCalibration();
+      cal.learn(MeasurementKey.chest, aiCm: 96.0, manualCm: 100.0);
+      final naap = Naap.empty()
+        ..set(
+            MeasurementKey.chest,
+            const MeasurementValue(95.0,
+                source: MeasurementSource.silhouette, confidence: 0.7));
+      cal.apply(naap);
+      expect(naap[MeasurementKey.chest]!.cm, closeTo(99.0, 0.001));
+      expect(naap[MeasurementKey.chest]!.confidence, closeTo(0.85, 0.001));
+    });
+
+    test('never touches manual values', () {
+      final cal = PersonalCalibration();
+      cal.learn(MeasurementKey.waist, aiCm: 90, manualCm: 86);
+      final naap = Naap.empty()
+        ..set(MeasurementKey.waist, const MeasurementValue(88.0));
+      cal.apply(naap);
+      expect(naap[MeasurementKey.waist]!.cm, 88.0);
+    });
+
+    test('a wild edit is clamped so it cannot poison future captures', () {
+      final cal = PersonalCalibration();
+      cal.learn(MeasurementKey.hip, aiCm: 100, manualCm: 160); // typo edit
+      expect(cal.deltas[MeasurementKey.hip], PersonalCalibration.maxDeltaCm);
+    });
+
+    test('repeated corrections converge as an EWMA', () {
+      final cal = PersonalCalibration();
+      cal.learn(MeasurementKey.neck, aiCm: 38, manualCm: 40); // +2
+      cal.learn(MeasurementKey.neck, aiCm: 38, manualCm: 42); // +4
+      expect(cal.deltas[MeasurementKey.neck], closeTo(3.0, 0.001));
+    });
+
+    test('roundtrips through json', () {
+      final cal = PersonalCalibration();
+      cal.learn(MeasurementKey.chest, aiCm: 96, manualCm: 99);
+      final back =
+          PersonalCalibration.fromJsonString(cal.toJsonString());
+      expect(back.deltas[MeasurementKey.chest], closeTo(3.0, 0.001));
     });
   });
 }

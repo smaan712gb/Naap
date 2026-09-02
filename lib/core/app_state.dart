@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'ease.dart';
 import 'fabric.dart';
+import 'learning.dart';
 import 'measure/engine.dart';
 import 'models/measurements.dart';
 import 'models/profile.dart';
@@ -15,6 +16,7 @@ class AppState extends ChangeNotifier {
   FitPreference fit = FitPreference.regular;
   FabricType? fabric;
   KameezStyle style = KameezStyle();
+  PersonalCalibration calibration = PersonalCalibration();
   List<CaptureIssue> lastIssues = [];
   bool hydrated = false;
 
@@ -25,6 +27,8 @@ class AppState extends ChangeNotifier {
     if (n != null) naap = n;
     final st = await LocalStore.loadStyle();
     if (st != null) style = st;
+    final cal = await LocalStore.loadCalibrationRaw();
+    if (cal != null) calibration = PersonalCalibration.fromJsonString(cal);
     hydrated = true;
     notifyListeners();
   }
@@ -39,12 +43,21 @@ class AppState extends ChangeNotifier {
 
   Future<void> setResult(EngineResult r) async {
     naap = r.naap;
+    // v1.5 per-user learning: apply remembered tape corrections to the
+    // fresh AI values (manual edits are never touched).
+    calibration.apply(naap);
     lastIssues = r.issues;
     await LocalStore.saveNaap(naap);
     notifyListeners();
   }
 
   Future<void> editMeasurement(MeasurementKey k, double cm) async {
+    // Learn from the correction when it replaces an AI value.
+    final prev = naap[k];
+    if (prev != null && prev.source != MeasurementSource.manual) {
+      calibration.learn(k, aiCm: prev.cm, manualCm: cm);
+      await LocalStore.saveCalibrationRaw(calibration.toJsonString());
+    }
     naap.set(k, MeasurementValue(cm, source: MeasurementSource.manual));
     await LocalStore.saveNaap(naap);
     notifyListeners();

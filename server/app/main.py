@@ -41,7 +41,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type"],
+    # Authorization: the admin review page sends the bearer token from the
+    # browser; the token check itself stays server-side.
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 

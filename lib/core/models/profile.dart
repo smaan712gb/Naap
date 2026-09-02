@@ -82,6 +82,17 @@ class LocalStore {
   }
 
   static const _kStyle = 'naap.style';
+  static const _kCalibration = 'naap.personalCalibration';
+
+  static Future<String?> loadCalibrationRaw() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getString(_kCalibration);
+  }
+
+  static Future<void> saveCalibrationRaw(String raw) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setString(_kCalibration, raw);
+  }
 
   static Future<KameezStyle?> loadStyle() async {
     final sp = await SharedPreferences.getInstance();

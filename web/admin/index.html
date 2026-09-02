@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Naap Admin — Fabric Review</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+  :root{--green:#1B4D3E;--soft:#E8F1EC;--bg:#FAF9F6;--muted:#5b6b64}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#17211d;padding:20px;max-width:760px;margin:0 auto}
+  h1{color:var(--green);font-size:1.3rem;margin-bottom:14px}
+  .row{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+  input{flex:1;min-width:220px;padding:11px;border:1.5px solid #cbd6d0;border-radius:8px;font-size:.95rem}
+  button{padding:11px 18px;border:none;border-radius:8px;background:var(--green);color:#fff;font-weight:600;cursor:pointer}
+  button.ok{background:#2e7d32}
+  .card{background:#fff;border:1px solid #e4e9e6;border-radius:12px;padding:16px;margin-bottom:12px}
+  .card h3{font-size:1.02rem;margin-bottom:4px}
+  .card .meta{color:var(--muted);font-size:.85rem;margin-bottom:10px}
+  .empty{color:var(--muted);padding:30px;text-align:center}
+  #status{margin:10px 0;color:var(--muted);font-size:.9rem}
+  section{margin-top:26px}
+  h2{color:var(--green);font-size:1.05rem;margin-bottom:10px}
+  textarea{width:100%;min-height:110px;padding:11px;border:1.5px solid #cbd6d0;border-radius:8px;font-size:.9rem;font-family:inherit}
+</style>
+</head>
+<body>
+<h1>Naap Admin — sourcing review</h1>
+<div class="row">
+  <input type="password" id="tok" placeholder="Admin token">
+  <button onclick="loadQueue()">Load review queue</button>
+</div>
+<div id="status"></div>
+<div id="queue"></div>
+
+<section>
+  <h2>Run sourcing agent on pasted supplier text</h2>
+  <p style="color:var(--muted);font-size:.85rem;margin-bottom:8px">
+    Paste a wholesale listing (Roman Urdu is fine). Extracted fabrics land
+    in the review queue above — nothing goes live until you verify it.</p>
+  <textarea id="src" placeholder="e.g. 'Lawn ka fresh stock... 5 meter suit 2400 rupay...'"></textarea>
+  <div class="row" style="margin-top:8px">
+    <button onclick="runSourcing()">Extract fabrics</button>
+  </div>
+</section>
+
+<script>
+const API = "https://naap-api.m9vte9fmk66k4.us-west-2.cs.amazonlightsail.com";
+const $ = id => document.getElementById(id);
+const hdrs = () => ({"Authorization": "Bearer " + $('tok').value.trim(),
+                     "Content-Type": "application/json"});
+
+async function loadQueue(){
+  $('status').textContent = "Loading…";
+  try{
+    const r = await fetch(API + "/catalog/review", {headers: hdrs()});
+    if(r.status === 401){$('status').textContent = "Wrong token."; return;}
+    const items = await r.json();
+    $('status').textContent = items.length + " fabric(s) awaiting review.";
+    $('queue').innerHTML = items.length ? "" : "<div class='empty'>Queue is empty — nothing awaiting verification.</div>";
+    for(const f of items){
+      const d = document.createElement('div');
+      d.className = 'card';
+      d.innerHTML = `<h3>${f.name}</h3>
+        <div class="meta">${f.composition} · $${f.price_usd} · ${f.meters} m
+        · source: ${f.source}${f.supplier_ref ? " · " + f.supplier_ref : ""}</div>
+        <div>${f.description || ""}</div>
+        <div class="row" style="margin-top:10px">
+          <button class="ok" onclick="verify('${f.id}', this)">Approve — goes live</button>
+        </div>`;
+      $('queue').appendChild(d);
+    }
+  }catch(e){$('status').textContent = "Error: " + e;}
+}
+
+async function verify(id, btn){
+  btn.disabled = true; btn.textContent = "Approving…";
+  const r = await fetch(API + "/catalog/" + id + "/verify",
+                        {method:"POST", headers: hdrs()});
+  btn.textContent = r.ok ? "Live ✓" : "Failed (" + r.status + ")";
+}
+
+async function runSourcing(){
+  $('status').textContent = "Extracting…";
+  const r = await fetch(API + "/agents/source", {method:"POST",
+    headers: hdrs(),
+    body: JSON.stringify({supplier: "admin-paste", raw_text: $('src').value})});
+  $('status').textContent = r.ok
+    ? "Extraction done — reload the queue." : "Failed (" + r.status + ")";
+  if(r.ok) loadQueue();
+}
+</script>
+</body>
+</html>
