@@ -175,19 +175,33 @@ class MeasurementEngine {
         MeasurementValue(kameezCm, source: MeasurementSource.landmarks, confidence: 0.7));
 
     // ---- Circumferences (silhouette widths + depths, elliptical model) ----
-    void circumference(MeasurementKey key, double rowYF, double rowYS,
-        double shapeFactor, double conf) {
+    // Hands hanging in front of the body merge with the torso in the SIDE
+    // silhouette and inflate its depth (first family test read a 132 cm
+    // waist). The chest row sits above where hands can reach, so its depth
+    // anchors a physical cap for the rows below; a capped row is flagged
+    // low-confidence and reported as a retake hint.
+    var depthCapped = false;
+    double? circumference(MeasurementKey key, double rowYF, double rowYS,
+        double shapeFactor, double conf, {double? maxDepthPx}) {
       final wRun = runAtRow(front.mask, front.maskW, front.maskH,
           rowYF.round(), torsoMidX.round());
       final sMid = _sideTorsoMidX(side);
       final dRun = runAtRow(
           side.mask, side.maskW, side.maskH, rowYS.round(), sMid.round());
-      if (wRun == null || dRun == null) return;
+      if (wRun == null || dRun == null) return null;
+      var depthPx = dRun.widthPx.toDouble();
+      var rowConf = conf;
+      if (maxDepthPx != null && depthPx > maxDepthPx) {
+        depthPx = maxDepthPx;
+        rowConf = 0.45;
+        depthCapped = true;
+      }
       final a = wRun.widthPx * cmPerPxF / 2; // semi-axis: half width
-      final b = dRun.widthPx * cmPerPxS / 2; // semi-axis: half depth
+      final b = depthPx * cmPerPxS / 2; // semi-axis: half depth
       final c = ramanujan(a, b) * shapeFactor;
       naap.set(key,
-          MeasurementValue(c, source: MeasurementSource.silhouette, confidence: conf));
+          MeasurementValue(c, source: MeasurementSource.silhouette, confidence: rowConf));
+      return depthPx;
     }
 
     // Corresponding rows in the side view (its own landmark frame).
@@ -199,7 +213,7 @@ class MeasurementEngine {
         2;
     final sKneeY = side.lm(PoseLandmarkType.leftKnee).y;
 
-    circumference(
+    final chestDepthPx = circumference(
         MeasurementKey.chest,
         shoulderY + _kChestRowT * (hipY - shoulderY),
         sShY + _kChestRowT * (sHipY - sShY),
@@ -210,13 +224,23 @@ class MeasurementEngine {
         waistY,
         sShY + _kWaistRowT * (sHipY - sShY),
         _kWaistShape,
-        0.7);
+        0.7,
+        // Waist depth beyond ~1.15× chest depth is arms, not body.
+        maxDepthPx: chestDepthPx != null ? chestDepthPx * 1.15 : null);
     circumference(
         MeasurementKey.hip,
         hipY + _kSeatRowT * (kneeY - hipY),
         sHipY + _kSeatRowT * (sKneeY - sHipY),
         _kSeatShape,
-        0.65);
+        0.65,
+        // The seat genuinely runs deeper than the chest; allow more room.
+        maxDepthPx: chestDepthPx != null ? chestDepthPx * 1.35 : null);
+    if (depthCapped) {
+      issues.add(const CaptureIssue(
+          'Hands may have been in front of the body in the side photo — '
+          'waist/hip were adjusted down and marked for checking. For best '
+          'accuracy retake with hands relaxed at your sides.'));
+    }
 
     // Thigh: front width at upper thigh × circular-ish model with side depth.
     final thighYF = hipY + 0.35 * (kneeY - hipY);

@@ -243,8 +243,9 @@ class _CaptureScreenState extends State<CaptureScreen>
                 ? 'Whole body between the two lines — head near the top line, '
                     'feet on the bottom one. Face the camera, arms lifted '
                     'slightly. Step back if you don\'t fit.'
-                : 'Turn 90° — right side to the camera. Whole body between '
-                    'the lines, look straight ahead.',
+                : 'Turn 90° — right side to the camera. Hands relaxed at '
+                    'your sides, NOT in front of your body. Look straight '
+                    'ahead.',
             textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.white, fontSize: 15),
           ),

@@ -62,6 +62,12 @@ class _ResultsScreenState extends State<ResultsScreen> {
   }
 
   Future<void> _shareParchi(AppState s, {bool direct = false}) async {
+    // iOS requires an anchor rect for the share sheet ("sharePositionOrigin"
+    // PlatformException without it); resolve it before any async gap.
+    final box = context.findRenderObject() as RenderBox?;
+    final shareOrigin = box != null
+        ? box.localToGlobal(Offset.zero) & box.size
+        : const Rect.fromLTWH(0, 0, 1, 1);
     setState(() => _sharing = true);
     try {
       final file = await ParchiPdf.build(
@@ -81,7 +87,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
         final uri = Uri.parse('https://wa.me/$num?text=${Uri.encodeComponent(summary)}');
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
-      await Share.shareXFiles([XFile(file.path)], text: summary);
+      await Share.shareXFiles([XFile(file.path)],
+          text: summary, sharePositionOrigin: shareOrigin);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
