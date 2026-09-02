@@ -34,6 +34,21 @@
 <div id="queue"></div>
 
 <section>
+  <h2>Agent team</h2>
+  <p style="color:var(--muted);font-size:.85rem;margin-bottom:8px">
+    Weekly automatic runs (Mon seasonal · Tue link audit · Wed trend scout).
+    Run any of them now; results appear below. Agents write reports only —
+    nothing goes live without your approval.</p>
+  <div class="row">
+    <button onclick="runAgent('seasonal')">Season planner</button>
+    <button onclick="runAgent('link-health')">Link auditor</button>
+    <button onclick="runAgent('trends')">Trend scout</button>
+    <button onclick="loadReports()" style="background:#5b6b64">Refresh reports</button>
+  </div>
+  <div id="reports"></div>
+</section>
+
+<section>
   <h2>Run sourcing agent on pasted supplier text</h2>
   <p style="color:var(--muted);font-size:.85rem;margin-bottom:8px">
     Paste a wholesale listing (Roman Urdu is fine). Extracted fabrics land
@@ -78,6 +93,30 @@ async function verify(id, btn){
   const r = await fetch(API + "/catalog/" + id + "/verify",
                         {method:"POST", headers: hdrs()});
   btn.textContent = r.ok ? "Live ✓" : "Failed (" + r.status + ")";
+}
+
+async function runAgent(kind){
+  $('status').textContent = "Running " + kind + "…";
+  const r = await fetch(API + "/agents/run/" + kind,
+                        {method:"POST", headers: hdrs()});
+  $('status').textContent = r.ok ? kind + " done." : kind + " failed (" + r.status + ")";
+  if(r.ok) loadReports();
+}
+
+async function loadReports(){
+  const r = await fetch(API + "/reports?limit=10", {headers: hdrs()});
+  if(!r.ok){$('status').textContent = "Reports failed (" + r.status + ")"; return;}
+  const reps = await r.json();
+  $('reports').innerHTML = reps.length ? "" : "<div class='empty'>No reports yet.</div>";
+  for(const rep of reps){
+    const d = document.createElement('div');
+    d.className = 'card';
+    d.innerHTML = `<h3>${rep.kind}</h3>
+      <div class="meta">${rep.created}</div>
+      <pre style="white-space:pre-wrap;font-size:.82rem;overflow-x:auto">${
+        JSON.stringify(rep.doc, null, 1)}</pre>`;
+    $('reports').appendChild(d);
+  }
 }
 
 async function runSourcing(){

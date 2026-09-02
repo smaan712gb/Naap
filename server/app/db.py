@@ -28,6 +28,9 @@ def _db() -> sqlite3.Connection:
         _conn.execute(
             "CREATE TABLE IF NOT EXISTS waitlist "
             "(email TEXT PRIMARY KEY, created TEXT)")
+        _conn.execute(
+            "CREATE TABLE IF NOT EXISTS reports "
+            "(id TEXT PRIMARY KEY, kind TEXT, created TEXT, doc TEXT)")
         _conn.commit()
     return _conn
 
@@ -119,3 +122,23 @@ def list_waitlist() -> list[dict]:
     rows = _db().execute(
         "SELECT email, created FROM waitlist ORDER BY created").fetchall()
     return [{"email": r[0], "created": r[1]} for r in rows]
+
+
+# ---------------------------------------------------------------- reports
+
+def add_report(kind: str, doc: dict) -> str:
+    rid = uuid.uuid4().hex[:12]
+    with _lock:
+        _db().execute(
+            "INSERT INTO reports (id, kind, created, doc) VALUES (?,?,?,?)",
+            (rid, kind, utcnow().isoformat(), json.dumps(doc)))
+        _db().commit()
+    return rid
+
+
+def list_reports(limit: int = 20) -> list[dict]:
+    rows = _db().execute(
+        "SELECT id, kind, created, doc FROM reports "
+        "ORDER BY created DESC LIMIT ?", (limit,)).fetchall()
+    return [{"id": r[0], "kind": r[1], "created": r[2],
+             "doc": json.loads(r[3])} for r in rows]

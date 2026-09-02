@@ -48,6 +48,28 @@ app.add_middleware(
 
 
 @app.on_event("startup")
+def start_agent_team() -> None:
+    """Scheduled agents (trend scout, link auditor, season planner) — see
+    agents/monitor.py. Opt-in via NAAP_AGENTS_ENABLED=1 so tests and dev
+    servers stay quiet; every output is a report, never a live change."""
+    if os.environ.get("NAAP_AGENTS_ENABLED") != "1":
+        return
+    from apscheduler.schedulers.background import BackgroundScheduler
+    from .agents.monitor import run_agent
+    sched = BackgroundScheduler(daemon=True)
+    # Staggered weekly cadence; trend scan rotates 3 brands per run to keep
+    # LLM spend at pennies.
+    sched.add_job(lambda: run_agent("seasonal"), "cron",
+                  day_of_week="mon", hour=6)
+    sched.add_job(lambda: run_agent("link-health"), "cron",
+                  day_of_week="tue", hour=6)
+    sched.add_job(lambda: run_agent("trends"), "cron",
+                  day_of_week="wed", hour=6)
+    sched.start()
+    log.info("agent team scheduled (seasonal/link-health/trends)")
+
+
+@app.on_event("startup")
 def seed_if_empty() -> None:
     """Self-healing catalog: the container's SQLite is ephemeral, so every
     redeploy starts empty. If a bundled seed file exists and the catalog has
@@ -119,6 +141,22 @@ def join_waitlist(req: WaitlistRequest) -> dict:
 @app.get("/waitlist", dependencies=[Depends(admin_only)])
 def waitlist_export() -> list[dict]:
     return db.list_waitlist()
+
+
+# ------------------------------------------------------------- agent team
+
+@app.get("/reports", dependencies=[Depends(admin_only)])
+def reports(limit: int = 20) -> list[dict]:
+    return db.list_reports(limit=limit)
+
+
+@app.post("/agents/run/{kind}", dependencies=[Depends(admin_only)])
+def run_agent_now(kind: str) -> dict:
+    from .agents.monitor import run_agent
+    try:
+        return run_agent(kind)
+    except ValueError as e:
+        raise HTTPException(404, str(e)) from e
 
 
 @app.get("/catalog")

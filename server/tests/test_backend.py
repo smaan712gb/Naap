@@ -101,6 +101,29 @@ def test_su_misura_extended_bespoke_deltas():
     assert s.back_width_delta_cm == 2.0
 
 
+def test_seasonal_agent_is_deterministic(client):
+    import datetime
+    from app.agents.monitor import season_for_month, seasonal_focus
+    assert season_for_month(12) == "winter"
+    assert season_for_month(6) == "summer"
+    assert season_for_month(3) == "mid-season"
+    _seed_fabric(client)  # a lawn (summer implied untagged -> all-season)
+    winter = Fabric(id="v1", name="Velvet Test", composition="velvet",
+                    price_usd=99, meters=5, verified=True, season="winter")
+    client.post("/catalog", json=winter.model_dump())
+    doc = seasonal_focus(datetime.date(2026, 12, 15))
+    assert doc["current_season"] == "winter"
+    assert "Velvet Test" in doc["live_for_current"]
+
+
+def test_agent_run_endpoint_writes_report(client):
+    r = client.post("/agents/run/seasonal")
+    assert r.status_code == 200
+    reps = client.get("/reports").json()
+    assert reps and reps[0]["kind"] == "seasonal"
+    assert client.post("/agents/run/nonsense").status_code == 404
+
+
 def test_waitlist_signup_and_admin_export(client):
     assert client.post("/waitlist",
                        json={"email": "Tester@Example.com"}).status_code == 200
