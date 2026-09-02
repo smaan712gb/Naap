@@ -75,8 +75,17 @@ gate on rented phones (`scripts/devicefarm_smoke.py`).
 1. **Calibration sprint** — tape-measure validation on real bodies (family
    phones via APK/TestFlight); tune engine constants; start collecting the
    v1.5 regression dataset.
-2. **Capture UX** — front-camera self-scan mode, live pose validation, voice
-   guidance (EN/UR).
+2. **Capture UX (v1.5 spec, agreed 2026-09-02 after first family tests)** —
+   intelligent auto-capture: run the pose detector on the live camera
+   stream (ML Kit = MediaPipe), show live coaching ("step back", "good —
+   hold still"), and fire the shutter automatically when the whole body is
+   framed and still. No timer, no post-capture retake dialogs. On-device
+   TTS voice coaching EN/UR on top. SOTA review notes: 360° video +
+   SMPL-X/WHAM under-cloth reconstruction stays v2 (must run on-device per
+   privacy law — server-class today, and budget Android can't); ARCore
+   ground-plane scale rejected for v1 (patchy on Pakistan's budget
+   Androids; height is a parchi measurement anyway). Mesh→measurement
+   extraction ref for v2: SMPL-Anthropometry.
 3. **Fabric-aware ease** — stretch-coefficient table feeding the ease engine
    (deterministic; blueprint's "fit & fabric reasoning" done right).
 4. **Distribution** — app icon/branding, Play Store internal track, Codemagic
