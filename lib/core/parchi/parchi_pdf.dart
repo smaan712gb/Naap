@@ -56,6 +56,13 @@ class ParchiPdf {
   }) async {
     await _ensureFonts();
     final lines = EaseEngine.buildParchi(naap, garment, fit, fabric: fabric);
+    // All three fits appear on the parchi; the selected one is highlighted
+    // as the cutting column, the others are reference for the tailor's
+    // "kaisi fitting?" conversation.
+    final byFit = {
+      for (final f in FitPreference.values)
+        f: EaseEngine.buildParchi(naap, garment, f, fabric: fabric)
+    };
     final gdef = kGarments[garment]!;
     final fdef = fabric != null ? kFabrics[fabric] : null;
     final isInches = profile.unit == PreferredUnit.inches;
@@ -153,39 +160,67 @@ class ParchiPdf {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Expanded(
-                flex: 3,
+                flex: 4,
                 child: pw.TableHelper.fromTextArray(
                   headerDecoration: const pw.BoxDecoration(color: softGreen),
-                  headerStyle: en(9.5, bold: true).copyWith(color: brandGreen),
-                  cellStyle: en(10),
+                  headerStyle: en(9, bold: true).copyWith(color: brandGreen),
+                  cellStyle: en(9.5),
                   cellAlignments: {
                     0: pw.Alignment.centerLeft,
                     1: pw.Alignment.centerRight,
                     2: pw.Alignment.center,
                     3: pw.Alignment.center,
+                    4: pw.Alignment.center,
+                    5: pw.Alignment.center,
                   },
                   columnWidths: {
                     0: const pw.FlexColumnWidth(2.6),
-                    1: const pw.FlexColumnWidth(1.8),
-                    2: const pw.FlexColumnWidth(1.2),
-                    3: const pw.FlexColumnWidth(1.4),
+                    1: const pw.FlexColumnWidth(1.5),
+                    2: const pw.FlexColumnWidth(1.0),
+                    3: const pw.FlexColumnWidth(1.1),
+                    4: const pw.FlexColumnWidth(1.1),
+                    5: const pw.FlexColumnWidth(1.1),
                   },
                   headers: [
-                    'Measurement',
+                    'Measurement ($unitLabel)',
                     'اردو',
                     'Body',
-                    'Stitch ($unitLabel)',
+                    fit == FitPreference.fitted ? '» Fitted «' : 'Fitted',
+                    fit == FitPreference.regular ? '» Regular «' : 'Regular',
+                    fit == FitPreference.loose ? '» Loose «' : 'Loose',
                   ],
                   data: [
-                    for (final l in lines)
+                    for (final (i, l) in lines.indexed)
                       [
                         '${l.def.english} (${l.def.tailorTerm})',
                         l.def.urdu,
                         fmt(l.bodyCm),
-                        fmt(l.stitchCm),
+                        fmt(byFit[FitPreference.fitted]![i].stitchCm),
+                        fmt(byFit[FitPreference.regular]![i].stitchCm),
+                        fmt(byFit[FitPreference.loose]![i].stitchCm),
                       ],
                   ],
+                  // Highlight the customer's chosen fit column — that is
+                  // the cutting column; the others are reference.
+                  cellDecoration: (int col, dynamic data, int rowNum) {
+                    final selCol = 3 + FitPreference.values.indexOf(fit);
+                    if (col == selCol) {
+                      return const pw.BoxDecoration(color: softGreen);
+                    }
+                    return const pw.BoxDecoration();
+                  },
                   cellBuilder: (int col, dynamic data, int rowNum) {
+                    final selCol = 3 + FitPreference.values.indexOf(fit);
+                    if (col == selCol) {
+                      return pw.Padding(
+                        padding: const pw.EdgeInsets.symmetric(
+                            vertical: 3, horizontal: 4),
+                        child: pw.Text('$data',
+                            style: en(9.5, bold: true)
+                                .copyWith(color: brandGreen),
+                            textAlign: pw.TextAlign.center),
+                      );
+                    }
                     if (col != 1) return null; // default rendering
                     return pw.Padding(
                       padding: const pw.EdgeInsets.symmetric(
@@ -198,11 +233,11 @@ class ParchiPdf {
                   },
                 ),
               ),
-              pw.SizedBox(width: 14),
+              pw.SizedBox(width: 12),
               pw.Expanded(
                 flex: 1,
                 child: pw.Column(children: [
-                  pw.SvgImage(svg: _mannequinSvg, height: 210),
+                  pw.SvgImage(svg: _mannequinSvg, height: 180),
                   pw.SizedBox(height: 6),
                   pw.Text('Generic avatar — not a photo',
                       style: en(7).copyWith(color: PdfColors.grey600),
@@ -269,15 +304,19 @@ class ParchiPdf {
                 pw.Text('Notes for the tailor', style: en(10, bold: true)),
                 pw.SizedBox(height: 3),
                 pw.Text(
-                    '"Stitch" already includes ease (asan) for a ${fit.name} fit'
-                    '${fdef != null ? ' in ${fdef.english}' : ''} — cut to the Stitch column. '
-                    'Style numbers (ghera, paincha, kameez length) are the customer\'s preference and can be adjusted.',
+                    'Customer selected the »${fit.name.toUpperCase()}« column '
+                    '(highlighted) — cut to it. All three columns already '
+                    'include ease (asan)'
+                    '${fdef != null ? ' for ${fdef.english}' : ''}; fitted/'
+                    'regular/loose are shown so you can advise. Style numbers '
+                    '(ghera, paincha, kameez length) are the customer\'s '
+                    'preference and can be adjusted.',
                     style: en(9)),
                 pw.SizedBox(height: 5),
                 pw.Directionality(
                   textDirection: pw.TextDirection.rtl,
                   child: pw.Text(
-                      'درزی کے لیے: "اسٹچ" والے خانے میں آسان شامل ہے، اسی کے مطابق کاٹیں۔ گھیرا، پائنچہ اور قمیض کی لمبائی گاہک کی پسند کے مطابق ہے۔',
+                      'درزی کے لیے: گاہک نے نمایاں (سبز) والا خانہ منتخب کیا ہے — اسی کے مطابق کاٹیں۔ تینوں خانوں میں آسان شامل ہے۔ گھیرا، پائنچہ اور قمیض کی لمبائی گاہک کی پسند کے مطابق ہے۔',
                       style: ur(10)),
                 ),
               ],
