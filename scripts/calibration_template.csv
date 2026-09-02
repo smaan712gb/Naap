@@ -1,0 +1,9 @@
+subject,date,measurement,app_cm,tape_cm,notes
+# Copy this file per session: calibration_<subject>_<date>.csv
+# measurement must be one of: neck shoulder chest waist hip sleeveLength
+#   bicep wrist kameezLength shalwarLength inseam thigh ankleOpening hem
+# app_cm  = the AI value shown on the results screen BEFORE any manual edit
+# tape_cm = tape measurement taken per docs/CALIBRATION.md
+# Example (delete these rows):
+# amma,2026-09-02,chest,96.4,99.0,fitted kurta over camisole
+# amma,2026-09-02,waist,88.1,86.5,

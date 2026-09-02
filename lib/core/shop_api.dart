@@ -53,8 +53,10 @@ class OrderResult {
 
 class ShopApi {
   static const _kBaseUrl = 'naap.backendUrl';
-  // Android emulator's alias for the dev machine; overridable in the shop UI.
-  static const defaultBaseUrl = 'http://10.0.2.2:8000';
+  // Production backend (AWS Lightsail, docs/DEPLOY.md); overridable in the
+  // shop UI — use http://10.0.2.2:8000 against a dev server on an emulator.
+  static const defaultBaseUrl =
+      'https://naap-api.m9vte9fmk66k4.us-west-2.cs.amazonlightsail.com';
 
   static Future<String> baseUrl() async {
     final sp = await SharedPreferences.getInstance();

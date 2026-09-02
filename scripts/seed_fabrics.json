@@ -1,0 +1,18 @@
+[
+  {"id": "lawn-classic-white", "name": "Classic White Lawn — 5m suit",
+   "composition": "lawn", "price_usd": 24.0, "meters": 5.0,
+   "description": "Airy summer lawn, unstitched. Ideal for everyday shalwar kameez.",
+   "source": "manual", "verified": true},
+  {"id": "khaddar-winter-brown", "name": "Winter Khaddar — Earthy Brown",
+   "composition": "khaddar", "price_usd": 32.0, "meters": 5.0,
+   "description": "Handloom-style khaddar with a warm hand feel.",
+   "source": "manual", "verified": true},
+  {"id": "washwear-slate", "name": "Wash & Wear — Slate Grey",
+   "composition": "wash_and_wear", "price_usd": 38.0, "meters": 5.0,
+   "description": "Crease-resistant blend, the daily-wear workhorse.",
+   "source": "manual", "verified": true},
+  {"id": "rawsilk-ivory", "name": "Raw Silk — Ivory (occasion)",
+   "composition": "raw_silk", "price_usd": 95.0, "meters": 5.0,
+   "description": "Structured raw silk for weddings and events. Rigid weave — Naap adds extra ease automatically.",
+   "source": "manual", "verified": true}
+]

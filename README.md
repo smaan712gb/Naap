@@ -80,13 +80,22 @@ happens on family/tester phones via the release APK or TestFlight.
 ### iOS (no Mac needed locally)
 
 iOS binaries must be compiled on macOS. The codebase is already
-dual-platform (`ios/` is committed); use CI to build for iPhone testing:
+dual-platform (`ios/` is committed); CI builds it two ways:
 
-- **Codemagic** (easiest for Flutter): connect the repo, add your Apple
-  Developer account, ship to TestFlight.
-- Or GitHub Actions with a `macos-latest` runner + fastlane.
+- **Codemagic → TestFlight** ([codemagic.yaml](codemagic.yaml)) — signed
+  builds pushed to household testers. One-time account setup steps are in
+  [docs/TESTFLIGHT.md](docs/TESTFLIGHT.md).
+- GitHub Actions ([.github/workflows/ios-build.yml](.github/workflows/ios-build.yml))
+  — unsigned ipa proving the build compiles.
 
 Camera/photo permission strings for iOS are set in `ios/Runner/Info.plist`.
+
+### Calibrating measurement accuracy
+
+Tape-vs-app comparison sessions on family phones tune the engine constants:
+protocol in [docs/CALIBRATION.md](docs/CALIBRATION.md), analysis via
+`python scripts\calibrate.py calibration_*.csv` (deterministic — suggests
+shape-factor updates once ≥3 samples per circumference exist).
 
 ## Accuracy roadmap
 
