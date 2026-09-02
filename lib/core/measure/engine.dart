@@ -301,6 +301,13 @@ class MeasurementEngine {
             (naap[MeasurementKey.chest]?.cm ?? h * 0.55) * 0.32,
             source: MeasurementSource.regression,
             confidence: 0.4));
+    // Armscye circumference tracks chest size closely (~0.45x).
+    naap.set(
+        MeasurementKey.armhole,
+        MeasurementValue(
+            (naap[MeasurementKey.chest]?.cm ?? h * 0.55) * 0.45,
+            source: MeasurementSource.regression,
+            confidence: 0.4));
     naap.set(
         MeasurementKey.ankleOpening,
         MeasurementValue(h * 0.16,

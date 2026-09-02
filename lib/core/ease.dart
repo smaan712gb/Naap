@@ -39,6 +39,8 @@ const Map<GarmentType, GarmentDef> kGarments = {
       MeasurementKey.waist,
       MeasurementKey.hip,
       MeasurementKey.sleeveLength,
+      MeasurementKey.bicep,
+      MeasurementKey.armhole,
       MeasurementKey.wrist,
       MeasurementKey.neck,
       MeasurementKey.hem,
@@ -57,6 +59,7 @@ const Map<GarmentType, GarmentDef> kGarments = {
       MeasurementKey.waist,
       MeasurementKey.hip,
       MeasurementKey.sleeveLength,
+      MeasurementKey.armhole,
       MeasurementKey.neck,
       MeasurementKey.shalwarLength,
       MeasurementKey.thigh,
@@ -111,6 +114,8 @@ const Map<GarmentType, Map<MeasurementKey, double>> _regularEase = {
     MeasurementKey.shoulder: 1.2,
     MeasurementKey.neck: 1.5,
     MeasurementKey.sleeveLength: 0.0,
+    MeasurementKey.bicep: 6.0, // loose kameez sleeve
+    MeasurementKey.armhole: 3.0, // baghal asan for arm mobility
     MeasurementKey.wrist: 6.0,
     MeasurementKey.hem: 0.0, // ghera reported as-is; style choice
     MeasurementKey.ankleOpening: 0.0, // paincha is a style number
@@ -121,6 +126,7 @@ const Map<GarmentType, Map<MeasurementKey, double>> _regularEase = {
     MeasurementKey.hip: 8.0,
     MeasurementKey.shoulder: 1.0,
     MeasurementKey.neck: 1.5,
+    MeasurementKey.armhole: 2.5,
     MeasurementKey.thigh: 8.0,
   },
   GarmentType.suitTwoPiece: {

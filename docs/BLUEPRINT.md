@@ -88,6 +88,12 @@ gate on rented phones (`scripts/devicefarm_smoke.py`).
    extraction ref for v2: SMPL-Anthropometry.
 3. **Fabric-aware ease** — stretch-coefficient table feeding the ease engine
    (deterministic; blueprint's "fit & fabric reasoning" done right).
+   Measurement-vocabulary backlog (from the designer-tailoring review,
+   2026-09-02): armhole/baghal + bicep on the kameez parchi are DONE;
+   deferred — trouser waist as a separate key (drawstring shalwar makes it
+   non-critical), neckline width/depth (style fields, tailor's decision),
+   and the European bespoke set for Phase 2 MTM (belly, jacket length,
+   front/back chest widths, thumb-knuckle sleeve).
 4. **Distribution** — app icon/branding, Play Store internal track, Codemagic
    → TestFlight for iOS testers.
 5. **Phase 1.5 groundwork** — supplier conversations (affiliate feeds),

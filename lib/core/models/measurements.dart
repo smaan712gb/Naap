@@ -16,6 +16,7 @@ enum MeasurementKey {
   hip, // Hip / Seat
   sleeveLength, // Baazu
   bicep,
+  armhole, // Baghal
   wrist, // Kalai
   kameezLength, // Qameez Lambai
   shalwarLength, // Shalwar Lambai
@@ -86,6 +87,12 @@ const Map<MeasurementKey, MeasurementDef> kMeasurementDefs = {
       english: 'Bicep',
       urdu: 'ڈولا',
       tailorTerm: 'Dola',
+      isCircumference: true),
+  MeasurementKey.armhole: MeasurementDef(
+      key: MeasurementKey.armhole,
+      english: 'Armhole',
+      urdu: 'بغل',
+      tailorTerm: 'Baghal',
       isCircumference: true),
   MeasurementKey.wrist: MeasurementDef(
       key: MeasurementKey.wrist,
