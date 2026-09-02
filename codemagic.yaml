@@ -35,6 +35,17 @@ workflows:
       branch_patterns:
         - pattern: main
       cancel_previous_builds: true
+    when:
+      changeset:
+        includes:
+          - 'lib/**'
+          - 'ios/**'
+          - 'android/**'
+          - 'assets/**'
+          - 'test/**'
+          - 'pubspec.yaml'
+          - 'pubspec.lock'
+          - 'codemagic.yaml'
     scripts:
       - name: Get packages
         script: flutter pub get
@@ -78,6 +89,16 @@ workflows:
       branch_patterns:
         - pattern: main
       cancel_previous_builds: true
+    when:
+      changeset:
+        includes:
+          - 'lib/**'
+          - 'android/**'
+          - 'assets/**'
+          - 'test/**'
+          - 'pubspec.yaml'
+          - 'pubspec.lock'
+          - 'codemagic.yaml'
     scripts:
       - name: Get packages
         script: flutter pub get
