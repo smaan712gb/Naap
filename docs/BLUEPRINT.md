@@ -104,3 +104,17 @@ gate on rented phones (`scripts/devicefarm_smoke.py`).
    → TestFlight for iOS testers.
 5. **Phase 1.5 groundwork** — supplier conversations (affiliate feeds),
    tailor-network vetting criteria, diaspora payment rails (Stripe).
+6. **Catalog IA (built 2026-09-02 from the official-catalog review)** —
+   `server/app/taxonomy.py` holds the bilingual browse tree: women/men
+   main+sub categories, 11 occasions (Eid→walima→bridal/groom), buying
+   options (unstitched/semi/ready/custom), seasons, design types,
+   availability incl. made-to-measure, fabric shopping groups, and the
+   30-brand retail directory (+ Ahmad Jamal in a separate SUPPLIERS list
+   pending retail verification). Key rules encoded: garment/fabric/season/
+   occasion/stitching are separate product axes; the shopping fabric LABEL
+   (Boski, Wash & Wear) is stored apart from disclosed composition — Boski
+   does not establish silk content; piece count must state explicit
+   contents (shirt+trouser vs shirt+dupatta). Served at GET /taxonomy;
+   /catalog takes filter params; app shop has audience/season/occasion
+   filters. Ops idea: monthly catalog review flagging changed categories
+   and dead brand links.

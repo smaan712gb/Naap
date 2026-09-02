@@ -25,6 +25,7 @@ from .agents.sourcing import extract_fabrics, to_catalog_entries
 from .models import (CheckoutMode, Fabric, Order, OrderCreate, OrderStatus,
                      ORDER_TRANSITIONS, utcnow)
 from .dxf_export import alteration_dxf
+from .taxonomy import full_taxonomy
 from .sizing import SuMisura, map_su_misura
 
 load_dotenv()
@@ -58,9 +59,34 @@ def health() -> dict:
 
 # ---------------------------------------------------------------- catalog
 
+@app.get("/taxonomy")
+def taxonomy() -> dict:
+    """The full browse/filter tree (categories, occasions, brands, ...)."""
+    return full_taxonomy()
+
+
 @app.get("/catalog")
-def catalog() -> list[Fabric]:
-    return db.list_fabrics(verified_only=True)
+def catalog(audience: Optional[str] = None,
+            category_id: Optional[str] = None,
+            season: Optional[str] = None,
+            occasion: Optional[str] = None,
+            buying_option: Optional[str] = None,
+            brand_id: Optional[str] = None) -> list[Fabric]:
+    items = db.list_fabrics(verified_only=True)
+    if audience:
+        items = [f for f in items if f.audience in (audience, None)]
+    if category_id:
+        items = [f for f in items if f.category_id == category_id]
+    if season:
+        items = [f for f in items if f.season in (season, "all-season", None)]
+    if occasion:
+        items = [f for f in items if not f.occasions or occasion in f.occasions]
+    if buying_option:
+        items = [f for f in items
+                 if not f.buying_options or buying_option in f.buying_options]
+    if brand_id:
+        items = [f for f in items if f.brand_id == brand_id]
+    return items
 
 
 @app.get("/catalog/review", dependencies=[Depends(admin_only)])

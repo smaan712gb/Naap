@@ -101,6 +101,33 @@ def test_su_misura_extended_bespoke_deltas():
     assert s.back_width_delta_cm == 2.0
 
 
+def test_taxonomy_serves_full_tree(client):
+    t = client.get("/taxonomy").json()
+    cat_ids = {c["id"] for c in t["categories"]}
+    assert "w-bridal" in cat_ids and "m-wedding" in cat_ids
+    assert len(t["brands"]) == 30
+    assert any(o["id"] == "walima" for o in t["occasions"])
+    # Bilingual: every category carries Urdu.
+    assert all(c["ur"] for c in t["categories"])
+
+
+def test_catalog_filters_by_taxonomy(client):
+    _seed_fabric(client)
+    winter = Fabric(id="kh1", name="Winter Khaddar", composition="khaddar",
+                    price_usd=30, meters=5, verified=True,
+                    audience="women", season="winter",
+                    occasions=["daily"], buying_options=["unstitched"])
+    client.post("/catalog", json=winter.model_dump())
+    names = [f["name"]
+             for f in client.get("/catalog?season=winter").json()]
+    assert "Winter Khaddar" in names
+    # The untagged seed fabric survives filters (untagged = shown).
+    assert "Premium Lawn 5m" in names
+    names = [f["name"]
+             for f in client.get("/catalog?occasion=bridal").json()]
+    assert "Winter Khaddar" not in names  # tagged daily-only
+
+
 def test_su_misura_corpulent_front_balance_note():
     s = map_su_misura(chest_cm=100, waist_cm=98, hip_cm=104,
                       shoulder_cm=41, sleeve_cm=61, belly_cm=104)

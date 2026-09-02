@@ -41,6 +41,18 @@ class FabricComposition(str, Enum):
     # Eid / festive
     jacquard = "jacquard"
     cotton_net = "cotton_net"
+    # Catalog-review additions (2026-09-02)
+    cambric = "cambric"
+    voile = "voile"
+    seersucker = "seersucker"
+    cotton_dobby = "cotton_dobby"
+    georgette = "georgette"
+    satin = "satin"
+    silk = "silk"
+    # Boski is a shopping LABEL, often blended — it does not establish
+    # silk content; record disclosed composition separately.
+    boski = "boski"
+    cotton_latha = "cotton_latha"
     # Modern
     stretch_knit = "stretch_knit"
     other = "other"
@@ -67,6 +79,22 @@ class Fabric(BaseModel):
         description="sourcing-agent extractions stay unverified until a "
                     "human reviews them; only verified fabrics are sold")
     supplier_ref: Optional[str] = None
+
+    # ---- Catalog taxonomy (see taxonomy.py) — all optional, separate
+    # axes so one product can surface under several browse paths. ----
+    audience: Optional[str] = None          # "women" | "men"
+    category_id: Optional[str] = None       # e.g. "w-unstitched"
+    subcategory_id: Optional[str] = None    # e.g. "three-piece"
+    buying_options: list[str] = Field(default_factory=list)
+    occasions: list[str] = Field(default_factory=list)
+    season: Optional[str] = None            # taxonomy season id
+    design: Optional[str] = None            # plain/printed/embroidered/...
+    pieces: Optional[int] = None
+    piece_contents: Optional[str] = None    # "shirt + trouser" vs "shirt + dupatta"
+    fabric_label: Optional[str] = None      # shopping label (e.g. "Boski")
+    composition_detail: Optional[str] = None  # disclosed fiber percentages
+    availability: Optional[str] = None      # taxonomy availability id
+    brand_id: Optional[str] = None          # taxonomy brand id
 
 
 # ---------------------------------------------------------------- orders

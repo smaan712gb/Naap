@@ -37,6 +37,15 @@ enum FabricType {
   // Eid / festive
   jacquard,
   cottonNet,
+  // Catalog-review additions (2026-09-02)
+  voile,
+  seersucker,
+  cottonDobby,
+  georgette,
+  satin,
+  silk,
+  boski,
+  cottonLatha,
   // Modern
   stretchKnit,
 }
@@ -234,6 +243,63 @@ const Map<FabricType, FabricDef> kFabrics = {
       easeDeltaCm: 0.6,
       season: FabricSeason.summer,
       occasion: FabricOccasion.festive),
+  // ---- Catalog-review additions ----
+  FabricType.voile: FabricDef(
+      type: FabricType.voile,
+      english: 'Voile',
+      urdu: 'وائل',
+      stretch: 0.12,
+      easeDeltaCm: 0.0,
+      season: FabricSeason.summer),
+  FabricType.seersucker: FabricDef(
+      type: FabricType.seersucker,
+      english: 'Seersucker',
+      urdu: 'سیرسکر',
+      stretch: 0.15, // puckered weave has a little mechanical give
+      easeDeltaCm: 0.2,
+      season: FabricSeason.summer),
+  FabricType.cottonDobby: FabricDef(
+      type: FabricType.cottonDobby,
+      english: 'Cotton Dobby',
+      urdu: 'کاٹن ڈوبی',
+      stretch: 0.12,
+      easeDeltaCm: 0.2,
+      season: FabricSeason.summer),
+  FabricType.georgette: FabricDef(
+      type: FabricType.georgette,
+      english: 'Georgette',
+      urdu: 'جارجٹ',
+      stretch: 0.15, // crinkled drape, usually lined
+      easeDeltaCm: 0.0,
+      occasion: FabricOccasion.formal),
+  FabricType.satin: FabricDef(
+      type: FabricType.satin,
+      english: 'Satin',
+      urdu: 'ساٹن',
+      stretch: 0.10,
+      easeDeltaCm: 0.2,
+      occasion: FabricOccasion.formal),
+  FabricType.silk: FabricDef(
+      type: FabricType.silk,
+      english: 'Silk',
+      urdu: 'ریشم',
+      stretch: 0.10,
+      easeDeltaCm: 0.3,
+      occasion: FabricOccasion.formal),
+  FabricType.boski: FabricDef(
+      type: FabricType.boski,
+      english: 'Boski', // shopping label — often blended, not pure silk
+      urdu: 'بوسکی',
+      stretch: 0.12,
+      easeDeltaCm: 0.3,
+      occasion: FabricOccasion.festive),
+  FabricType.cottonLatha: FabricDef(
+      type: FabricType.cottonLatha,
+      english: 'Cotton Latha',
+      urdu: 'لٹھا',
+      stretch: 0.12,
+      easeDeltaCm: 0.0,
+      season: FabricSeason.summer),
   // ---- Modern ----
   FabricType.stretchKnit: FabricDef(
       type: FabricType.stretchKnit,

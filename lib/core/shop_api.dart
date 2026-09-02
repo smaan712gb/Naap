@@ -68,11 +68,16 @@ class ShopApi {
     await sp.setString(_kBaseUrl, url.trim());
   }
 
-  static Future<List<ShopFabric>> fetchCatalog() async {
+  /// [filters] maps /catalog query params (audience, season, occasion,
+  /// buying_option, brand_id, category_id) to taxonomy ids.
+  static Future<List<ShopFabric>> fetchCatalog(
+      {Map<String, String>? filters}) async {
     final base = await baseUrl();
-    final resp = await http
-        .get(Uri.parse('$base/catalog'))
-        .timeout(const Duration(seconds: 12));
+    final uri = Uri.parse('$base/catalog').replace(
+        queryParameters:
+            (filters == null || filters.isEmpty) ? null : filters);
+    final resp =
+        await http.get(uri).timeout(const Duration(seconds: 12));
     if (resp.statusCode != 200) {
       throw Exception('Catalog unavailable (HTTP ${resp.statusCode})');
     }

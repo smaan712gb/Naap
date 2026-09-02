@@ -14,10 +14,80 @@ class ShopScreen extends StatefulWidget {
 class _ShopScreenState extends State<ShopScreen> {
   late Future<List<ShopFabric>> _catalog;
 
+  // Filter selections (taxonomy ids; null = all). Kept client-side in the
+  // same vocabulary the server's /taxonomy serves.
+  String? _audience;
+  String? _season;
+  String? _occasion;
+
+  static const _audiences = {'women': 'Women خواتین', 'men': 'Men حضرات'};
+  static const _seasons = {
+    'summer': 'Summer گرمی',
+    'winter': 'Winter سردی',
+    'mid-season': 'Mid-season',
+    'all-season': 'All-season',
+  };
+  static const _occasions = {
+    'daily': 'Daily روزمرہ',
+    'workwear': 'Workwear',
+    'eid': 'Eid عید',
+    'dinner-party': 'Dinner/party',
+    'mehndi-dholki': 'Mehndi مہندی',
+    'nikkah': 'Nikkah نکاح',
+    'barat': 'Barat بارات',
+    'walima': 'Walima ولیمہ',
+    'wedding-guest': 'Wedding guest',
+    'bridal': 'Bridal دلہن',
+    'groom': 'Groom دولہا',
+  };
+
   @override
   void initState() {
     super.initState();
     _catalog = ShopApi.fetchCatalog();
+  }
+
+  void _refetch() {
+    final f = <String, String>{
+      if (_audience != null) 'audience': _audience!,
+      if (_season != null) 'season': _season!,
+      if (_occasion != null) 'occasion': _occasion!,
+    };
+    setState(() => _catalog = ShopApi.fetchCatalog(filters: f));
+  }
+
+  Widget _filterBar() {
+    DropdownButton<String?> dd(String hint, Map<String, String> opts,
+        String? value, void Function(String?) onSel) {
+      return DropdownButton<String?>(
+        value: value,
+        hint: Text(hint),
+        underline: const SizedBox.shrink(),
+        items: [
+          DropdownMenuItem(value: null, child: Text('All $hint')),
+          for (final e in opts.entries)
+            DropdownMenuItem(value: e.key, child: Text(e.value)),
+        ],
+        onChanged: (v) {
+          onSel(v);
+          _refetch();
+        },
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(children: [
+          dd('audience', _audiences, _audience, (v) => _audience = v),
+          const SizedBox(width: 16),
+          dd('season', _seasons, _season, (v) => _season = v),
+          const SizedBox(width: 16),
+          dd('occasion', _occasions, _occasion, (v) => _occasion = v),
+        ]),
+      ),
+    );
   }
 
   Future<void> _editServer() async {
@@ -84,13 +154,19 @@ class _ShopScreenState extends State<ShopScreen> {
           }
           final fabrics = snap.data!;
           if (fabrics.isEmpty) {
-            return const Center(child: Text('No fabrics listed yet.'));
+            return Column(children: [
+              _filterBar(),
+              const Expanded(
+                  child: Center(
+                      child: Text('No fabrics match these filters.'))),
+            ]);
           }
           return ListView.builder(
             padding: const EdgeInsets.all(12),
-            itemCount: fabrics.length,
+            itemCount: fabrics.length + 1,
             itemBuilder: (context, i) {
-              final f = fabrics[i];
+              if (i == 0) return _filterBar();
+              final f = fabrics[i - 1];
               return Card(
                 child: ListTile(
                   leading: const CircleAvatar(
@@ -116,3 +192,4 @@ class _ShopScreenState extends State<ShopScreen> {
     );
   }
 }
+
