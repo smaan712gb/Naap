@@ -87,10 +87,13 @@ curl https://naap-api.m9vte9fmk66k4.us-west-2.cs.amazonlightsail.com/health
 $URL = "https://naap-api.m9vte9fmk66k4.us-west-2.cs.amazonlightsail.com"
 $tok = (Get-Content server\.env | Select-String "NAAP_ADMIN_TOKEN=").ToString().Split("=")[1]
 $fabrics = Get-Content scripts\seed_fabrics.json -Raw | ConvertFrom-Json
+# UTF-8 bytes, not a string: Windows PowerShell 5.1 encodes string bodies as
+# Latin-1, which mangles the em dashes in fabric names into invalid JSON.
 foreach ($f in $fabrics) {
+  $body = [System.Text.Encoding]::UTF8.GetBytes(($f | ConvertTo-Json))
   Invoke-RestMethod -Method Post -Uri "$URL/catalog" `
-    -Headers @{Authorization="Bearer $tok"} -ContentType "application/json" `
-    -Body ($f | ConvertTo-Json) | Out-Null }
+    -Headers @{Authorization="Bearer $tok"} `
+    -ContentType "application/json; charset=utf-8" -Body $body | Out-Null }
 (Invoke-RestMethod "$URL/catalog").Count   # → 4
 ```
 
