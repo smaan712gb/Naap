@@ -42,13 +42,16 @@ before trust inverts the wedge.
    translation are deterministic tables/code (see `lib/core/ease.dart`),
    authored and reviewed with a master tailor. LLMs may *propose* table
    entries and write Urdu instructions — the runtime math stays testable code.
-4. **Agent layer split by data sensitivity.**
-   - Bulk *public*-data work (fabric sourcing/scraping of wholesale listings,
-     fabric-photo classification): a cheap API is fine (e.g. DeepSeek V4
-     Flash) — no customer data may ever be sent to it.
-   - Anything touching customer PII, orders, or judgment (fit reasoning
-     explanations, QA, support): Claude (Haiku for volume, Opus for
-     reasoning), under a DPA.
+4. **Agent layer: no identity in prompts; DeepSeek for all prose.**
+   (Revised 2026-09-02, founder decision on cost.) All agent prose runs on
+   DeepSeek. The privacy line moved from provider choice to prompt
+   content: **no LLM prompt may ever contain customer identity** — names,
+   contacts, addresses stay out (the darzi agent receives garment, fit,
+   fabric, and measurement numbers only; sourcing sees public supplier
+   text). Claude remains a per-deployment opt-in for customer-adjacent
+   prose (`NAAP_PREFER_CLAUDE=1` + key) if the DPA posture is wanted
+   later — revisit before scale or any B2B/clienteling data enters the
+   system, where identity-adjacent context becomes unavoidable.
 5. **Branded catalogs via partnership/affiliate feeds, not scraping.**
    Scraping is reserved for genuinely unstructured wholesale sources.
 

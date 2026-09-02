@@ -1,3 +1,4 @@
+
 # NAAP — Claude Code guide
 
 Flutter app (Android + iOS): privacy-first body measurement → bilingual EN/Urdu
@@ -25,9 +26,11 @@ $env:Path="$env:USERPROFILE\dev\flutter\bin;$env:JAVA_HOME\bin;$env:ANDROID_HOME
 2. The parchi contains numbers + generic sketch only — never user imagery.
 3. Every AI measurement stays user-editable; manual edits win (source=manual).
 4. **No cloud vision API ever receives user body photos** — measurement CV is
-   on-device only. Cheap LLM APIs (e.g. DeepSeek) are allowed ONLY for
-   public-data agents (fabric sourcing); customer PII/orders go to Claude
-   under a DPA. See docs/BLUEPRINT.md §AI architecture.
+   on-device only. All agent prose runs on DeepSeek (founder cost decision
+   2026-09-02) with a hard rule: **no customer identity ever enters an LLM
+   prompt** — names/contacts/addresses stay out; measurements without
+   identity are OK. Claude is a per-deployment opt-in
+   (NAAP_PREFER_CLAUDE=1). See docs/BLUEPRINT.md §AI architecture.
 5. **No LLM in the numeric path** — ease, stretch, and size math stays
    deterministic, testable Dart (tables in `lib/core/ease.dart`).
 
