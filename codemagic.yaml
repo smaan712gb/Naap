@@ -19,9 +19,16 @@ workflows:
     environment:
       flutter: stable
       xcode: latest
+      # Manual signing: the cert + profile are created by
+      # scripts/make_ios_signing.py and uploaded once under
+      # Codemagic > Personal Account > Code signing identities with these
+      # exact reference names. (Codemagic's automatic signing failed to
+      # create them itself — "No matching profiles found", 2026-09-02.)
       ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.naap.naap
+        certificates:
+          - naap_dist_cert
+        provisioning_profiles:
+          - naap_appstore_profile
     triggering:
       events:
         - push
