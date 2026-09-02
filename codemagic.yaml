@@ -55,10 +55,13 @@ workflows:
     publishing:
       app_store_connect:
         auth: integration
-        submit_to_testflight: true
-        # Internal groups skip Apple's beta review — instant installs.
-        beta_groups:
-          - Family
+        # Upload only. The "Family" internal group has automatic
+        # distribution enabled in App Store Connect, so every processed
+        # build reaches the household with no beta review. Turn
+        # submit_to_testflight/beta_groups back on only for EXTERNAL
+        # groups — and fill in the TestFlight test-info page first
+        # (appstoreconnect.apple.com/apps/6807809674/testflight/test-info),
+        # or the review submission fails.
 
   android-apk:
     name: Android release APK
