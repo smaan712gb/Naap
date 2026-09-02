@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/shop_api.dart';
 import 'fabric_detail_screen.dart';
 import 'fabric_swatch.dart';
+import 'orders_screen.dart';
 
 /// Phase 1.5 storefront (beta): verified fabrics from the Naap backend.
 class ShopScreen extends StatefulWidget {
@@ -122,6 +123,11 @@ class _ShopScreenState extends State<ShopScreen> {
       appBar: AppBar(
         title: const Text('Fabric Shop (beta)'),
         actions: [
+          IconButton(
+              tooltip: 'My orders',
+              icon: const Icon(Icons.receipt_long),
+              onPressed: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const OrdersScreen()))),
           IconButton(icon: const Icon(Icons.dns_outlined), onPressed: _editServer),
         ],
       ),

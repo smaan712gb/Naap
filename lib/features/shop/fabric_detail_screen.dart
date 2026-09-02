@@ -71,14 +71,21 @@ class _FabricDetailScreenState extends State<FabricDetailScreen> {
         customerEmail: email,
         parchi: parchi,
       );
+      await ShopApi.rememberOrder(PlacedOrder(
+        id: result.orderId,
+        fabricName: widget.fabric.name,
+        mode: mode,
+        totalUsd: result.totalUsd,
+        createdAt: DateTime.now(),
+      ));
       if (!mounted) return;
       if (result.paymentUrl != null) {
         await launchUrl(Uri.parse(result.paymentUrl!),
             mode: LaunchMode.externalApplication);
       }
       _snack('Order ${result.orderId} placed — total '
-          '\$${result.totalUsd.toStringAsFixed(2)}'
-          '${result.paymentUrl == null ? ' (payment link pending)' : ''}');
+          '\$${result.totalUsd.toStringAsFixed(2)}. Track it under '
+          'My Orders.');
       if (mounted) Navigator.pop(context);
     } catch (e) {
       _snack('Order failed: $e');

@@ -65,8 +65,87 @@ class OrderResult {
       {required this.orderId, required this.totalUsd, this.paymentUrl});
 }
 
+/// A locally remembered order (ids only live on this phone).
+class PlacedOrder {
+  final String id;
+  final String fabricName;
+  final String mode;
+  final double totalUsd;
+  final DateTime createdAt;
+
+  const PlacedOrder({
+    required this.id,
+    required this.fabricName,
+    required this.mode,
+    required this.totalUsd,
+    required this.createdAt,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'fabricName': fabricName,
+        'mode': mode,
+        'totalUsd': totalUsd,
+        'createdAt': createdAt.toIso8601String(),
+      };
+
+  factory PlacedOrder.fromJson(Map<String, dynamic> j) => PlacedOrder(
+        id: j['id'] as String,
+        fabricName: j['fabricName'] as String? ?? '',
+        mode: j['mode'] as String? ?? '',
+        totalUsd: (j['totalUsd'] as num?)?.toDouble() ?? 0,
+        createdAt: DateTime.tryParse(j['createdAt'] as String? ?? '') ??
+            DateTime.now(),
+      );
+}
+
+/// Live order status from the backend.
+class OrderStatus {
+  final String status;
+  final List<String> history;
+  final double totalUsd;
+
+  const OrderStatus(
+      {required this.status, required this.history, required this.totalUsd});
+}
+
 class ShopApi {
   static const _kBaseUrl = 'naap.backendUrl';
+  static const _kOrders = 'naap.placedOrders';
+
+  static Future<List<PlacedOrder>> localOrders() async {
+    final sp = await SharedPreferences.getInstance();
+    final raw = sp.getString(_kOrders);
+    if (raw == null) return [];
+    final list = jsonDecode(raw) as List<dynamic>;
+    return [
+      for (final j in list) PlacedOrder.fromJson(j as Map<String, dynamic>)
+    ]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  }
+
+  static Future<void> rememberOrder(PlacedOrder o) async {
+    final sp = await SharedPreferences.getInstance();
+    final current = await localOrders();
+    current.insert(0, o);
+    await sp.setString(
+        _kOrders, jsonEncode([for (final x in current) x.toJson()]));
+  }
+
+  static Future<OrderStatus> fetchOrder(String orderId) async {
+    final base = await baseUrl();
+    final resp = await http
+        .get(Uri.parse('$base/orders/$orderId'))
+        .timeout(const Duration(seconds: 12));
+    if (resp.statusCode != 200) {
+      throw Exception('Order lookup failed (HTTP ${resp.statusCode})');
+    }
+    final j = jsonDecode(resp.body) as Map<String, dynamic>;
+    return OrderStatus(
+      status: j['status'] as String? ?? 'unknown',
+      history: [for (final h in (j['history'] as List<dynamic>? ?? [])) '$h'],
+      totalUsd: (j['total_usd'] as num?)?.toDouble() ?? 0,
+    );
+  }
   // Production backend (AWS Lightsail, docs/DEPLOY.md); overridable in the
   // shop UI — use http://10.0.2.2:8000 against a dev server on an emulator.
   static const defaultBaseUrl =

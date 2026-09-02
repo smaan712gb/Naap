@@ -49,6 +49,12 @@
 </section>
 
 <section>
+  <h2>Waitlist</h2>
+  <div class="row"><button onclick="loadWaitlist()">Show signups</button></div>
+  <div id="waitlist"></div>
+</section>
+
+<section>
   <h2>Run sourcing agent on pasted supplier text</h2>
   <p style="color:var(--muted);font-size:.85rem;margin-bottom:8px">
     Paste a wholesale listing (Roman Urdu is fine). Extracted fabrics land
@@ -158,6 +164,16 @@ async function loadReports(){
       renderDoc(rep.kind, rep.doc);
     $('reports').appendChild(d);
   }
+}
+
+async function loadWaitlist(){
+  const r = await fetch(API + "/waitlist", {headers: hdrs()});
+  if(!r.ok){$('status').textContent = "Waitlist failed (" + r.status + ")"; return;}
+  const rows = await r.json();
+  $('waitlist').innerHTML = `<div class="card"><h3>${rows.length} signup(s)</h3>` +
+    rows.map(w => `<p style="font-size:.9rem">${esc(w.email)}
+      <span class="meta">· ${esc(w.created?.substring(0,16))}</span></p>`).join("") +
+    `</div>`;
 }
 
 async function runSourcing(){

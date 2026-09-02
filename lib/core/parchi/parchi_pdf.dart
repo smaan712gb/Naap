@@ -324,7 +324,7 @@ class ParchiPdf {
           ),
           pw.SizedBox(height: 8),
           pw.Text(
-              'Generated on-device by Naap (ناپ). No photos were uploaded — measurements only.',
+              'Generated on-device by Naap (ناپ). No photos were uploaded — measurements only. getnaap.com',
               style: en(7.5).copyWith(color: PdfColors.grey600)),
         ],
       ),
