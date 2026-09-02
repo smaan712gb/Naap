@@ -23,6 +23,31 @@ Rationale for sequencing: the measurement utility earns the trust and the
 tape-verified accuracy data that everything downstream depends on. Marketplace
 before trust inverts the wedge.
 
+### Phase 2 design notes (2026-09-02 — NOT built; demo primitives ≠ product)
+
+The current EU size/drop mapping + drafting deltas + DXF export are
+generic-block placeholders. Real luxury size translation requires a
+**per-brand, per-line fit library**, because every house cuts its own
+block: an EU 50 ZEGNA (classic Italian shoulder) ≠ EU 50 Saint Laurent
+(slim French, high armhole) ≠ Brioni (Roman shoulder, generous drop), and
+within a house the lines differ again. The library is deterministic data
+(brand, line, garment, size → measured garment dimensions + ease
+philosophy), built like ease.dart — declarative and reviewable — and
+populated from evidence: published size charts, garments measured on a
+table (the BOSS 40R method), and partner data feeds. Accumulated garment
+by garment, it is the Phase 2 moat; it is acquisition work, not an
+algorithm. The clienteling SaaS carries the measured BODY into stores'
+own MTM programs — their blocks stay theirs.
+
+Target roster (founder's list):
+
+| Origin | Houses |
+| --- | --- |
+| France | Hermès, Chanel, Dior, Louis Vuitton, Saint Laurent, Schiaparelli |
+| Italy | Loro Piana, Brunello Cucinelli, Brioni, Kiton, ZEGNA, Giorgio Armani, Valentino, Prada, Gucci, Bottega Veneta |
+| UK | Burberry, Alexander McQueen |
+| Spain | Loewe |
+
 ## AI architecture (agreed rules — do not violate)
 
 1. **Measurement is on-device, always.** No cloud vision API ever receives a
