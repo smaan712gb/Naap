@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:naap/core/ease.dart';
 import 'package:naap/core/fabric.dart';
 import 'package:naap/core/learning.dart';
+import 'package:naap/core/brand_fits.dart';
+import 'package:naap/core/measure/posture.dart';
 import 'package:naap/core/silhouettes.dart';
 import 'package:naap/core/measure/geometry.dart';
 import 'package:naap/core/models/measurements.dart';
@@ -176,6 +178,69 @@ void main() {
 
     test('out-of-range chest returns null', () {
       expect(mapSuMisura(bodyNaap(40, 40, 40)), isNull);
+    });
+  });
+
+  group('posture profiling', () {
+    test('slope angle and classification bands', () {
+      // Neck at (100,50); shoulder 40px out, 10px down → ~14° = square.
+      final sq = shoulderSlopeDeg(
+          neckX: 100, neckY: 50, shoulderX: 140, shoulderY: 60);
+      expect(sq, closeTo(14.0, 0.5));
+      expect(classifySlope(sq), 'square');
+      // 40 out, 16 down → ~21.8° = regular; 40 out, 22 down → ~28.8° sloping.
+      expect(
+          classifySlope(shoulderSlopeDeg(
+              neckX: 100, neckY: 50, shoulderX: 140, shoulderY: 66)),
+          'regular');
+      expect(
+          classifySlope(shoulderSlopeDeg(
+              neckX: 100, neckY: 50, shoulderX: 60, shoulderY: 72)),
+          'sloping');
+    });
+
+    test('balance classification', () {
+      expect(classifyBalance(0), 'erect');
+      expect(classifyBalance(6.0), 'forward-leaning');
+      expect(classifyBalance(-5.0), 'reclined');
+    });
+
+    test('roundtrips through json with tailor summary', () {
+      const p = PostureProfile(
+          leftSlopeDeg: 24,
+          rightSlopeDeg: 18,
+          slopeClass: 'regular',
+          headForwardCm: 6.2,
+          balanceClass: 'erect');
+      final back = PostureProfile.fromJson(p.toJson());
+      expect(back.slopeClass, 'regular');
+      expect(back.tailorSummary, contains('uneven'));
+      expect(back.tailorSummary, contains('forward 6 cm'));
+    });
+  });
+
+  group('brand fits', () {
+    test('slim houses size up for men', () {
+      final naap = Naap.empty()
+        ..set(MeasurementKey.chest, const MeasurementValue(100))
+        ..set(MeasurementKey.waist, const MeasurementValue(88))
+        ..set(MeasurementKey.hip, const MeasurementValue(102));
+      final advice = brandAdvice(naap, female: false);
+      final zegna = advice.firstWhere((a) => a.brand == 'ZEGNA');
+      final slp = advice.firstWhere((a) => a.brand == 'Saint Laurent');
+      expect(zegna.size, contains('EU 50'));
+      expect(slp.size, contains('EU 52'));
+    });
+
+    test('women get tri-convention sizes per house', () {
+      final naap = Naap.empty()
+        ..set(MeasurementKey.chest, const MeasurementValue(84))
+        ..set(MeasurementKey.waist, const MeasurementValue(66))
+        ..set(MeasurementKey.hip, const MeasurementValue(92));
+      final advice = brandAdvice(naap, female: true);
+      final chanel = advice.firstWhere((a) => a.brand == 'Chanel');
+      expect(chanel.size, contains('EU 36'));
+      expect(chanel.size, contains('FR 38'));
     });
   });
 

@@ -395,6 +395,41 @@ def su_misura(req: SuMisuraRequest) -> SuMisura:
         raise HTTPException(422, str(e)) from e
 
 
+class SpecRequest(BaseModel):
+    """Dual-layer spec export — our side of the CAD-integration wire.
+    Layer A: biometric ground truth (raw cm). Layer B: the mapped garment
+    block. A tailoring house's CAD operator (or a future Gerber/Lectra
+    bridge built WITH a partner) consumes this payload."""
+    measurements_cm: dict[str, float]
+    chest_cm: float
+    waist_cm: float
+    hip_cm: float
+    shoulder_cm: float
+    sleeve_cm: float
+    belly_cm: float | None = None
+    jacket_length_cm: float | None = None
+    front_chest_cm: float | None = None
+    back_width_cm: float | None = None
+
+
+@app.post("/sizing/spec")
+def dual_layer_spec(req: SpecRequest) -> dict:
+    try:
+        block = map_su_misura(req.chest_cm, req.waist_cm, req.hip_cm,
+                              req.shoulder_cm, req.sleeve_cm,
+                              belly_cm=req.belly_cm,
+                              jacket_length_cm=req.jacket_length_cm,
+                              front_chest_cm=req.front_chest_cm,
+                              back_width_cm=req.back_width_cm)
+    except ValueError as e:
+        raise HTTPException(422, str(e)) from e
+    return {
+        "layer_a_biometric_truth_cm": req.measurements_cm,
+        "layer_b_garment_block": block.model_dump(),
+        "format": "naap-spec-v1",
+    }
+
+
 @app.post("/sizing/su-misura/alteration.dxf")
 def su_misura_dxf(req: SuMisuraRequest) -> Response:
     s = su_misura(req)

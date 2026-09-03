@@ -114,6 +114,18 @@ def test_order_quote_breakdown(client):
     assert q2["total_usd"] == 1.99
 
 
+def test_dual_layer_spec_export(client):
+    r = client.post("/sizing/spec", json={
+        "measurements_cm": {"chest": 100.0, "waist": 88.0, "neck": 40.0},
+        "chest_cm": 100, "waist_cm": 88, "hip_cm": 102,
+        "shoulder_cm": 41, "sleeve_cm": 61})
+    assert r.status_code == 200
+    j = r.json()
+    assert j["format"] == "naap-spec-v1"
+    assert j["layer_a_biometric_truth_cm"]["neck"] == 40.0
+    assert j["layer_b_garment_block"]["eu_size"] == 50
+
+
 def test_fit_report_flywheel(client):
     r = client.post("/fit-reports", json={
         "brand": "ZEGNA", "garment": "jacket", "size_label": "EU 50",

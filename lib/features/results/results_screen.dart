@@ -13,6 +13,7 @@ import '../../core/models/measurements.dart';
 import '../../core/models/profile.dart';
 import '../../core/parchi/parchi_pdf.dart';
 import '../../core/parchi/reports_pdf.dart';
+import '../../core/brand_fits.dart';
 import '../../core/shop_api.dart';
 import '../../core/silhouettes.dart';
 import '../../core/sizing.dart';
@@ -87,6 +88,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         silhouette: s.silhouette,
         measuredBy: s.shopName,
         bilingual: s.parchiBilingual,
+        posture: s.active.posture,
       );
       final summary =
           'Naap parchi for ${s.profile.name} — ${kGarments[s.garment]!.english} '
@@ -273,6 +275,24 @@ class _ResultsScreenState extends State<ResultsScreen> {
           const SizedBox(height: 16),
           _sizeCard(context, s),
           const SizedBox(height: 8),
+          _brandSizesCard(context, s),
+          const SizedBox(height: 8),
+          if (s.active.posture case final p?)
+            Card(
+              elevation: 0,
+              color: const Color(0xFFE8F1EC),
+              child: ListTile(
+                dense: true,
+                leading: const Icon(Icons.accessibility_new,
+                    color: Color(0xFF1B4D3E)),
+                title: const Text('Figuration (for your tailor)',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text(
+                    '${p.tailorSummary}\nAdvisory estimate — precise '
+                    'posture arrives with 3D capture.'),
+              ),
+            ),
+          const SizedBox(height: 8),
           OutlinedButton.icon(
             onPressed: () => _shareSizePassport(s),
             icon: const Icon(Icons.badge_outlined),
@@ -392,6 +412,37 @@ class _ResultsScreenState extends State<ResultsScreen> {
             'Drop ${sm.drop}',
         sm.notes,
         'For off-the-rack suits and jackets.');
+  }
+
+  /// Per-brand sizes — chart/reputation starting points, refined by the
+  /// fit library as reports arrive. Honest labeling built in.
+  Widget _brandSizesCard(BuildContext context, AppState s) {
+    final advice = brandAdvice(s.naap,
+        female: s.profile.bodyType == BodyType.female);
+    if (advice.isEmpty) return const SizedBox.shrink();
+    return Card(
+      child: ExpansionTile(
+        leading: const Icon(Icons.storefront),
+        title: const Text('Your size across brands (beta)'),
+        subtitle: const Text(
+            'From published charts & fit reputation — refined as real '
+            'fit reports come in'),
+        childrenPadding: const EdgeInsets.only(bottom: 8),
+        children: [
+          for (final a in advice)
+            ListTile(
+              dense: true,
+              title: Text(a.brand),
+              subtitle: Text(a.note,
+                  style: const TextStyle(fontSize: 11.5)),
+              trailing: Text(a.size,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1B4D3E))),
+            ),
+        ],
+      ),
+    );
   }
 
   /// The mainstream artifact: shareable one-page international size card.

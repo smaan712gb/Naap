@@ -15,6 +15,7 @@ import 'package:pdf/widgets.dart' as pw;
 import '../ease.dart';
 import '../fabric.dart';
 import '../models/measurements.dart';
+import '../measure/posture.dart';
 import '../models/profile.dart';
 import '../silhouettes.dart';
 import '../styles.dart';
@@ -56,6 +57,7 @@ class ParchiPdf {
     KameezStyle? style,
     SilhouetteProfile? silhouette,
     String? measuredBy, // tailor's shop name (device-level)
+    PostureProfile? posture, // figuration notes (suit-family garments)
     // Bilingual EN/UR is the default (Pakistan flow). English-only serves
     // Western/EU tailors — same numbers, no Urdu column or notes.
     bool bilingual = true,
@@ -331,6 +333,14 @@ class ParchiPdf {
               children: [
                 pw.Text('Notes for the tailor', style: en(10, bold: true)),
                 pw.SizedBox(height: 3),
+                if (posture != null &&
+                    (garment == GarmentType.suitTwoPiece ||
+                        garment == GarmentType.trousersShirt)) ...[
+                  pw.Text('Figuration: ${posture.tailorSummary} '
+                      '(advisory estimate)',
+                      style: en(9).copyWith(color: brandGreen)),
+                  pw.SizedBox(height: 3),
+                ],
                 pw.Text(
                     'Customer selected the »${fit.name.toUpperCase()}« column '
                     '(highlighted) — cut to it. All three columns already '

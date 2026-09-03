@@ -9,6 +9,7 @@ import 'ease.dart';
 import 'fabric.dart';
 import 'learning.dart';
 import 'measure/engine.dart';
+import 'measure/posture.dart';
 import 'models/measurements.dart';
 import 'models/profile.dart';
 import 'silhouettes.dart';
@@ -46,6 +47,9 @@ class ClientRecord {
   /// are deleted by product law; the parchi PDF itself stays numbers-only.
   final List<String> referencePaths;
 
+  /// Latest posture profile (v1 advisory) — figuration notes for tailors.
+  PostureProfile? posture;
+
   ClientRecord({
     required this.id,
     UserProfile? profile,
@@ -69,6 +73,7 @@ class ClientRecord {
         'calibration': calibration.toJsonString(),
         'history': [for (final h in history) h.toJson()],
         'referencePaths': referencePaths,
+        'posture': posture?.toJson(),
       };
 
   factory ClientRecord.fromJson(Map<String, dynamic> j) => ClientRecord(
@@ -94,7 +99,9 @@ class ClientRecord {
         referencePaths: j['referencePaths'] != null
             ? [for (final p in j['referencePaths'] as List<dynamic>) '$p']
             : null,
-      );
+      )..posture = j['posture'] != null
+          ? PostureProfile.fromJson(j['posture'] as Map<String, dynamic>)
+          : null;
 }
 
 /// Single source of truth for the app. Everything lives on-device.
@@ -239,6 +246,7 @@ class AppState extends ChangeNotifier {
 
   Future<void> setResult(EngineResult r) async {
     active.naap = r.naap;
+    if (r.posture != null) active.posture = r.posture;
     // v1.5 per-user learning: apply this client's remembered corrections.
     active.calibration.apply(active.naap);
     // Scan history: a deep copy per scan, newest first, capped.

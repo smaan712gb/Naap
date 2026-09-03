@@ -21,6 +21,7 @@ import 'package:image/image.dart' as img;
 import '../models/measurements.dart';
 import '../models/profile.dart';
 import 'geometry.dart';
+import 'posture.dart';
 
 /// Eye height as a fraction of stature (standard anthropometric tables).
 /// Used to calibrate cm-per-pixel because ML Kit has no top-of-head landmark.
@@ -77,7 +78,8 @@ class CaptureIssue {
 class EngineResult {
   final Naap naap;
   final List<CaptureIssue> issues;
-  const EngineResult(this.naap, this.issues);
+  final PostureProfile? posture;
+  const EngineResult(this.naap, this.issues, {this.posture});
 
   bool get hasBlockingIssues => issues.any((i) => i.blocking);
 }
@@ -388,7 +390,44 @@ class MeasurementEngine {
         MeasurementValue((naap[MeasurementKey.hip]?.cm ?? h * 0.6) + 10,
             source: MeasurementSource.regression, confidence: 0.4));
 
-    return EngineResult(naap, issues);
+    // ---- Posture profile (v1 advisory, from landmarks) ----
+    // Neck point proxy: between the ears' midpoint and the shoulder line.
+    PostureProfile? posture;
+    final lEarF = front.lm(PoseLandmarkType.leftEar);
+    final rEarF = front.lm(PoseLandmarkType.rightEar);
+    if (front.lmLikelihood(PoseLandmarkType.leftEar) > 0.3 ||
+        front.lmLikelihood(PoseLandmarkType.rightEar) > 0.3) {
+      final earMidY = (lEarF.y + rEarF.y) / 2;
+      final neckY = earMidY + 0.6 * (shoulderY - earMidY);
+      final neckX = (lSh.x + rSh.x) / 2;
+      final ls = shoulderSlopeDeg(
+          neckX: neckX, neckY: neckY, shoulderX: lSh.x, shoulderY: lSh.y);
+      final rs = shoulderSlopeDeg(
+          neckX: neckX, neckY: neckY, shoulderX: rSh.x, shoulderY: rSh.y);
+
+      // Side view: head-forward and shoulder-vs-hip balance in cm.
+      final sEar = side.lmLikelihood(PoseLandmarkType.leftEar) >
+              side.lmLikelihood(PoseLandmarkType.rightEar)
+          ? side.lm(PoseLandmarkType.leftEar)
+          : side.lm(PoseLandmarkType.rightEar);
+      final sSh = side.lm(PoseLandmarkType.leftShoulder);
+      final sHip = side.lm(PoseLandmarkType.leftHip);
+      // Facing direction from nose vs hip: measurements signed toward it.
+      final sNose = side.lm(PoseLandmarkType.nose);
+      final facing = (sNose.x - sHip.x).sign;
+      final headForward = (sEar.x - sSh.x) * facing * cmPerPxS;
+      final shoulderVsHip = (sSh.x - sHip.x) * facing * cmPerPxS;
+
+      posture = PostureProfile(
+        leftSlopeDeg: ls,
+        rightSlopeDeg: rs,
+        slopeClass: classifySlope((ls + rs) / 2),
+        headForwardCm: headForward,
+        balanceClass: classifyBalance(shoulderVsHip),
+      );
+    }
+
+    return EngineResult(naap, issues, posture: posture);
   }
 
   /// cm-per-pixel from eye row and heel row against known stature.
