@@ -37,6 +37,9 @@ const Map<GarmentType, GarmentDef> kGarments = {
       MeasurementKey.shoulder,
       MeasurementKey.chest,
       MeasurementKey.waist,
+      // Requested by the pilot tailor (Imran, 2026-09-03): his shalwar
+      // kameez parchi carries the trouser waist and thigh too.
+      MeasurementKey.trouserWaist,
       MeasurementKey.hip,
       MeasurementKey.sleeveLength,
       MeasurementKey.bicep,
@@ -45,6 +48,7 @@ const Map<GarmentType, GarmentDef> kGarments = {
       MeasurementKey.neck,
       MeasurementKey.hem,
       MeasurementKey.shalwarLength,
+      MeasurementKey.thigh,
       MeasurementKey.ankleOpening,
     ],
   ),
@@ -138,6 +142,8 @@ const Map<GarmentType, Map<MeasurementKey, double>> _regularEase = {
     MeasurementKey.bicep: 6.0, // loose kameez sleeve
     MeasurementKey.armhole: 3.0, // baghal asan for arm mobility
     MeasurementKey.wrist: 6.0,
+    MeasurementKey.trouserWaist: 2.0, // belt reference for the shalwar
+    MeasurementKey.thigh: 9.0, // shalwar cuts generous through the raan
     MeasurementKey.hem: 0.0, // ghera reported as-is; style choice
     MeasurementKey.ankleOpening: 0.0, // paincha is a style number
   },
