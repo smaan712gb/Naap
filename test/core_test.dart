@@ -229,7 +229,9 @@ void main() {
       final zegna = advice.firstWhere((a) => a.brand == 'ZEGNA');
       final slp = advice.firstWhere((a) => a.brand == 'Saint Laurent');
       expect(zegna.size, contains('EU 50'));
-      expect(slp.size, contains('EU 52'));
+      // Saint Laurent's published chart runs TWO sizes small (their 54
+      // fits the 100cm chest a standard EU 50 fits) — offset +4.
+      expect(slp.size, contains('EU 54'));
     });
 
     test('women get tri-convention sizes per house', () {

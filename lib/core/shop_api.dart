@@ -214,6 +214,34 @@ class ShopApi {
   static const defaultBaseUrl =
       'https://naap-api.m9vte9fmk66k4.us-west-2.cs.amazonlightsail.com';
 
+  /// Darzi verification mode: (engine estimate, tape truth) pairs — the
+  /// v1.5 calibration dataset. Numbers only, never identity.
+  static Future<void> submitCalibrationPairs({
+    required List<({String key, double estimateCm, double tapeCm})> pairs,
+    double? heightCm,
+    String? gender,
+    int? appBuild,
+  }) async {
+    final base = await baseUrl();
+    await http
+        .post(Uri.parse('$base/calibration-pairs'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'pairs': [
+                for (final p in pairs)
+                  {
+                    'key': p.key,
+                    'estimate_cm': p.estimateCm,
+                    'tape_cm': p.tapeCm,
+                  }
+              ],
+              if (heightCm != null) 'height_cm': heightCm,
+              if (gender != null) 'gender': gender,
+              if (appBuild != null) 'app_build': appBuild,
+            }))
+        .timeout(const Duration(seconds: 12));
+  }
+
   static Future<String> baseUrl() async {
     final sp = await SharedPreferences.getInstance();
     return sp.getString(_kBaseUrl) ?? defaultBaseUrl;

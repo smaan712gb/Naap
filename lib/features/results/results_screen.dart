@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/app_state.dart';
+import '../../core/app_version.dart';
 import '../../core/ease.dart';
 import '../../core/fabric.dart';
 import '../../core/models/measurements.dart';
@@ -153,6 +154,11 @@ class _ResultsScreenState extends State<ResultsScreen> {
             ? 'Your Naap'
             : '${s.profile.name} — Naap'),
         actions: [
+          IconButton(
+            tooltip: 'Tape check — darzi verification',
+            icon: const Icon(Icons.straighten),
+            onPressed: () => _showTapeCheck(context, s),
+          ),
           if (s.active.history.length > 1)
             IconButton(
               tooltip: 'Naap history',
@@ -311,6 +317,111 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
   /// Naap over time: girths per scan, newest first, with deltas — the
   /// "watch your body change" retention loop.
+  /// Darzi verification mode: enter tape-measured values next to the
+  /// engine's estimates. Filled fields become (estimate, tape) calibration
+  /// pairs — sent numbers-only to Naap — AND are applied as manual edits,
+  /// so the parchi is corrected and per-user learning kicks in.
+  Future<void> _showTapeCheck(BuildContext context, AppState s) async {
+    final isInches = s.profile.unit == PreferredUnit.inches;
+    final unit = isInches ? '″' : 'cm';
+    final keys = [
+      for (final k in kGarments[s.garment]!.keys)
+        if (s.naap[k] != null) k
+    ];
+    final ctrls = {for (final k in keys) k: TextEditingController()};
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+            bottom: MediaQuery.of(ctx).viewInsets.bottom,
+            left: 16, right: 16, top: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Tape check — darzi verification',
+                style: Theme.of(ctx).textTheme.titleMedium),
+            const SizedBox(height: 4),
+            Text(
+                'Enter the tape measurement next to any value. Filled rows '
+                'correct your naap and (numbers only, no name) help Naap '
+                'calibrate for everyone.',
+                style: Theme.of(ctx).textTheme.bodySmall),
+            const SizedBox(height: 10),
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  for (final k in keys)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: TextField(
+                        controller: ctrls[k],
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        decoration: InputDecoration(
+                          isDense: true,
+                          border: const OutlineInputBorder(),
+                          labelText:
+                              '${kMeasurementDefs[k]!.english} (${kMeasurementDefs[k]!.tailorTerm})',
+                          hintText:
+                              'app: ${_fmt(s, s.naap[k]!.cm)} — tape $unit',
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            SafeArea(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('Cancel')),
+                  FilledButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: const Text('Save tape values')),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (saved != true) return;
+
+    final pairs = <({String key, double estimateCm, double tapeCm})>[];
+    for (final k in keys) {
+      final raw = double.tryParse(ctrls[k]!.text.trim());
+      if (raw == null || raw <= 0) continue;
+      final tapeCm = isInches ? raw * 2.54 : raw;
+      pairs.add((key: k.name, estimateCm: s.naap[k]!.cm, tapeCm: tapeCm));
+    }
+    if (pairs.isEmpty) return;
+
+    // Tape wins locally: manual edits + per-user calibration learning.
+    for (final p in pairs) {
+      final key = keys.firstWhere((k) => k.name == p.key);
+      await s.editMeasurement(key, p.tapeCm);
+    }
+    // Best-effort upload of the anonymous pairs; offline is fine.
+    try {
+      await ShopApi.submitCalibrationPairs(
+        pairs: pairs,
+        heightCm: s.profile.heightCm,
+        gender: s.profile.bodyType.name,
+        appBuild: kNaapBuild,
+      );
+    } catch (_) {/* pairs still applied locally */}
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('${pairs.length} tape values saved — naap '
+              'updated, shukriya!')));
+    }
+  }
+
   void _showHistory(BuildContext context, AppState s) {
     final entries = s.active.history;
     const keys = [

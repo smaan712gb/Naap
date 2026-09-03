@@ -16,7 +16,7 @@ from typing import Optional
 import httpx
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException, Response
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from . import db
 from .agents.darzi import tailor_note
@@ -165,6 +165,34 @@ def submit_fit_report(report: "FitReportModel") -> dict:
 @app.get("/fit-reports", dependencies=[Depends(admin_only)])
 def fit_reports_export() -> list[dict]:
     return db.list_fit_reports()
+
+
+class CalibrationPair(BaseModel):
+    key: str = Field(min_length=1, max_length=30)   # MeasurementKey name
+    estimate_cm: float = Field(ge=1, le=300)        # what the engine said
+    tape_cm: float = Field(ge=1, le=300)            # what the tape said
+
+
+class CalibrationSubmission(BaseModel):
+    """Darzi verification mode: (engine estimate, tape truth) pairs.
+    Numbers only — no name, no contact, no photos (product law). This is
+    the v1.5 calibration-regressor dataset, one submission per body."""
+    pairs: list[CalibrationPair] = Field(min_length=1, max_length=40)
+    height_cm: float | None = Field(default=None, ge=90, le=230)
+    gender: str | None = Field(default=None, max_length=10)
+    app_build: int | None = None
+
+
+@app.post("/calibration-pairs")
+def submit_calibration(sub: CalibrationSubmission) -> dict:
+    rid = db.add_report("calibration", sub.model_dump())
+    return {"ok": True, "id": rid, "pairs": len(sub.pairs)}
+
+
+@app.get("/calibration-pairs", dependencies=[Depends(admin_only)])
+def calibration_export() -> list[dict]:
+    return [r for r in db.list_reports(limit=1000)
+            if r.get("kind") == "calibration"]
 
 
 # ------------------------------------------------------------- agent team

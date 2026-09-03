@@ -23,21 +23,32 @@ class BrandFit {
 }
 
 /// Men: offsets relative to the standard EU suit size (half chest).
+/// 2026-09-03: offsets reconciled against harvested published charts
+/// (server/app/fit_library.py). Chart law: IT size ≈ body chest ÷ 2 holds
+/// for Zegna/Prada/Gucci/Massimo Dutti; Saint Laurent's own chart runs
+/// TWO sizes small (their 54 fits the chest a standard 50 fits).
 const List<BrandFit> kBrandFitsMen = [
-  BrandFit('ZEGNA', BrandGender.men, 0, 'classic Italian — true to size'),
+  BrandFit('ZEGNA', BrandGender.men, 0,
+      'classic Italian — true to size (chart-verified)'),
   BrandFit('Brioni', BrandGender.men, 0, 'Roman shoulder, generous drop'),
-  BrandFit('Kiton', BrandGender.men, 0, 'Neapolitan soft — true to size'),
+  BrandFit('Kiton', BrandGender.men, 0,
+      'Neapolitan soft — true to size (chart-verified)'),
   BrandFit('Brunello Cucinelli', BrandGender.men, 0,
-      'relaxed luxury — true to size'),
+      'relaxed luxury — true to size (chart-verified)'),
   BrandFit('Loro Piana', BrandGender.men, 0, 'true to size'),
   BrandFit('Giorgio Armani', BrandGender.men, -2,
-      'soft, roomy cut — many size down'),
-  BrandFit('BOSS', BrandGender.men, 0, 'modern slim — true but trim'),
-  BrandFit('Saint Laurent', BrandGender.men, 2,
-      'very slim French cut — size up'),
+      'soft, roomy cut — many size down (chart-confirmed)'),
+  BrandFit('BOSS', BrandGender.men, 0,
+      'modern slim — true but trim (chart-verified)'),
+  BrandFit('Saint Laurent', BrandGender.men, 4,
+      'published chart runs two full sizes small — size up twice'),
   BrandFit('Dior Men', BrandGender.men, 2, 'slim — size up'),
-  BrandFit('Gucci', BrandGender.men, 2, 'slim Italian — size up'),
-  BrandFit('Prada', BrandGender.men, 2, 'slim — size up'),
+  BrandFit('Gucci', BrandGender.men, 0,
+      'per published chart: true to size, slightly roomy'),
+  BrandFit('Prada', BrandGender.men, 0,
+      'per published chart: true to size (IT = chest ÷ 2)'),
+  BrandFit('Massimo Dutti', BrandGender.men, 0,
+      'true to size, trim shoulders (chart-verified)'),
   BrandFit('Tom Ford', BrandGender.men, 0, 'structured — true to size'),
   BrandFit('Burberry', BrandGender.men, 0, 'British classic — true'),
   BrandFit('Louis Vuitton', BrandGender.men, 0, 'true to size'),
