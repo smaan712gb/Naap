@@ -115,6 +115,20 @@ Every touchpoint feeds the fit library:
 Next in code (needs app UI round): the optional brand-size question in
 checkout + post-scan prompt feeding /fit-reports.
 
+## Segment: EU/Western tailors with international clients (2026-09-03)
+
+MTM/bespoke tailors in Europe and diaspora tailors in the West solve an
+expensive problem with Naap as-built: remote clients self-scan at home
+and the parchi (with the EU suiting vocabulary — drop, over-arm, jacket
+length, cross widths, silhouettes) arrives without a flight or
+self-taping. Client book = trunk-show tool; the privacy stance sells
+well under GDPR sensibilities. They are the bridge segment to the
+clienteling SaaS (a one-person Milan MTM shop is the store associate at
+small scale) and the plausible FIRST PAYING tailor flavor when
+monetization opens — distinct economics from Pakistani tailors, who
+stay free forever. Banked wants: parchi language toggle (Urdu column is
+odd in Milan), richer tailor branding.
+
 ## European MTM spec review (2026-09-03) — silhouettes & associate mode
 
 Audit against the detailed EU/MTM requirements confirmed the
