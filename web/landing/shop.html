@@ -3,46 +3,68 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Naap Fabrics — unstitched cloth, stitched to your naap</title>
+<title>Naap Fabrics — cloth of Pakistan, stitched to your naap</title>
 <meta name="description" content="Pakistani fabrics for the diaspora — buy unstitched, or have it stitched to your exact measurements by a vetted master tailor.">
 <link rel="canonical" href="https://getnaap.com/shop.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--green:#1B4D3E;--soft:#E8F1EC;--gold:#C9A227;--bg:#FAF9F6;--muted:#5b6b64}
+  :root{
+    --green:#153B2F; --green-2:#1B4D3E; --soft:#EDF3EF; --gold:#C9A227;
+    --ink:#161D1A; --muted:#66736D; --bg:#F7F5F0; --card:#FFFFFF;
+    --serif:'Fraunces',Georgia,serif; --sans:'Inter','Segoe UI',system-ui,sans-serif;
+  }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#17211d}
-  header{background:var(--green);color:#fff;padding:14px 6vw;display:flex;justify-content:space-between;align-items:center}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);line-height:1.6}
+  header{background:var(--green);padding:18px 6vw;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
   header a{color:#fff;text-decoration:none}
-  header .brand{font-size:1.3rem;font-weight:700}
-  .hero{background:var(--green);color:#fff;text-align:center;padding:5vh 6vw 6vh}
-  .hero h1{font-size:clamp(1.5rem,3.5vw,2.3rem)}
-  .hero p{color:#cfe0d8;margin-top:10px;max-width:600px;margin-inline:auto}
-  main{max-width:1080px;margin:0 auto;padding:28px 4vw 60px}
-  .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}
-  select{padding:9px 12px;border:1.5px solid #cbd6d0;border-radius:9px;background:#fff;font-size:.92rem}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
-  .card{background:#fff;border:1px solid #e4e9e6;border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
-  .swatch{aspect-ratio:1;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.85);font-size:2.6rem;font-weight:700;position:relative}
-  .badge{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.45);color:#fff;font-size:.72rem;font-weight:600;padding:3px 9px;border-radius:999px}
-  .card .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:4px;flex:1}
-  .card h3{font-size:.98rem;line-height:1.3}
+  .brand{font-family:var(--serif);font-size:1.5rem;font-weight:700;letter-spacing:.3px}
+  .brand span{font-weight:400;opacity:.85}
+  header nav a{font-size:.9rem;opacity:.9;margin-left:22px}
+  header nav a:hover{opacity:1;text-decoration:underline;text-underline-offset:4px}
+  .hero{background:linear-gradient(170deg,var(--green) 55%,#0E2A21);color:#fff;text-align:center;padding:8vh 6vw 9vh}
+  .hero h1{font-family:var(--serif);font-weight:600;font-size:clamp(1.9rem,4vw,3rem);line-height:1.15}
+  .hero h1 em{font-style:italic;color:var(--gold)}
+  .hero p{color:#B9CDC3;margin:16px auto 0;max-width:560px;font-size:1.02rem}
+  main{max-width:1160px;margin:0 auto;padding:38px 4vw 80px}
+  .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:30px}
+  select{padding:10px 14px;border:1px solid #D7DDD9;border-radius:10px;background:#fff;font-size:.9rem;font-family:var(--sans);color:var(--ink)}
+  select:focus{outline:2px solid var(--green-2)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:26px}
+  .card{background:var(--card);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 1px 3px rgba(21,59,47,.08),0 8px 24px rgba(21,59,47,.06);transition:transform .25s,box-shadow .25s}
+  .card:hover{transform:translateY(-4px);box-shadow:0 4px 10px rgba(21,59,47,.1),0 18px 40px rgba(21,59,47,.12)}
+  .swatch{aspect-ratio:4/5;position:relative;overflow:hidden}
+  .swatch .label{position:absolute;top:12px;left:12px;background:rgba(14,32,25,.55);backdrop-filter:blur(4px);color:#fff;font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border-radius:999px}
+  .swatch .atelier{position:absolute;top:12px;right:12px;background:var(--gold);color:#241B02;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 11px;border-radius:999px}
+  .card .body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:5px;flex:1}
+  .card h3{font-family:var(--serif);font-weight:600;font-size:1.08rem;line-height:1.3}
   .card .meta{color:var(--muted);font-size:.8rem}
-  .card .price-row{margin-top:auto;display:flex;justify-content:space-between;align-items:baseline;padding-top:8px}
-  .card .price{font-weight:700;font-size:1.05rem;color:var(--green)}
-  .cta{background:var(--soft);border-radius:14px;padding:22px;margin-top:34px;text-align:center}
-  .cta .btn{display:inline-block;margin-top:12px;background:var(--gold);color:#1c1503;font-weight:600;padding:12px 24px;border-radius:10px;text-decoration:none}
-  .empty,.loading{color:var(--muted);text-align:center;padding:50px 0}
-  footer{background:var(--green);color:#cfe0d8;text-align:center;padding:22px;font-size:.85rem}
+  .card .desc{color:var(--muted);font-size:.84rem;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .price-row{margin-top:auto;display:flex;justify-content:space-between;align-items:baseline;padding-top:12px;border-top:1px solid #EEF1EF}
+  .price{font-family:var(--serif);font-weight:700;font-size:1.25rem;color:var(--green-2)}
+  .mode{color:var(--muted);font-size:.78rem}
+  .cta{background:var(--green);color:#fff;border-radius:20px;padding:40px;margin-top:52px;text-align:center}
+  .cta h2{font-family:var(--serif);font-weight:600;font-size:1.5rem}
+  .cta p{color:#B9CDC3;max-width:520px;margin:10px auto 0;font-size:.95rem}
+  .cta .btn{display:inline-block;margin-top:20px;background:var(--gold);color:#241B02;font-weight:600;padding:14px 30px;border-radius:12px;text-decoration:none}
+  .cta .btn:hover{filter:brightness(1.06)}
+  .empty,.loading{color:var(--muted);text-align:center;padding:60px 0}
+  footer{background:var(--green);color:#9DB6AB;text-align:center;padding:26px;font-size:.85rem;margin-top:0}
 </style>
 </head>
 <body>
 <header>
-  <a class="brand" href="/">Naap <span style="font-weight:400">ناپ</span></a>
-  <a href="/#get">Get the app</a>
+  <a class="brand" href="/">Naap <span>ناپ</span></a>
+  <nav>
+    <a href="/#get">Get the app</a>
+    <a href="/#tailors">For tailors</a>
+  </nav>
 </header>
 <div class="hero">
-  <h1>Fabrics of Pakistan, stitched to <em>your</em> naap</h1>
-  <p>Buy the cloth unstitched — or let a vetted master tailor stitch it to
-  the measurements your phone took. Fit risk: removed. کپڑا آپ کا، ناپ آپ کا۔</p>
+  <h1>The cloth of Pakistan,<br>stitched to <em>your</em> naap</h1>
+  <p>Buy it unstitched — or let a vetted master tailor cut it to the
+  measurements your phone took. Fit risk: removed. کپڑا آپ کا، ناپ آپ کا۔</p>
 </div>
 <main>
   <div class="filters">
@@ -63,12 +85,12 @@
       <option value="groom">Groom دولہا</option></select>
   </div>
   <div id="grid" class="grid"></div>
-  <div id="state" class="loading">Loading the catalog…</div>
+  <div id="state" class="loading">Loading the collection…</div>
   <div class="cta">
-    <strong>Ready to order?</strong><br>
-    Ordering lives in the Naap app — where your measurements are — so every
-    stitched order fits. Unstitched fabric ships worldwide either way.
-    <br><a class="btn" href="/#get">Get the Naap app</a>
+    <h2>Ready to order?</h2>
+    <p>Ordering lives in the Naap app — where your measurements are — so
+    every stitched piece fits. Unstitched fabric ships worldwide either way.</p>
+    <a class="btn" href="/#get">Get the Naap app</a>
   </div>
 </main>
 <footer>Naap (ناپ) · getnaap.com · Photos never leave your phone</footer>
@@ -78,57 +100,32 @@ const $ = id => document.getElementById(id);
 
 function hueFor(s){let h=0;for(const c of s)h+=c.charCodeAt(0);return (h*37)%360;}
 
-// Flat fashion illustrations (line-sheet style) — brand-safe, no models.
-// Chosen by product type; tinted per item.
-function artFor(f){
-  const hue = hueFor(f.composition || 'other');
-  const c1 = `hsl(${hue},38%,62%)`, c2 = `hsl(${hue},45%,38%)`,
-        c3 = `hsl(${hue},30%,80%)`;
-  const id = (f.id||'') + (f.category_id||'') + (f.fabric_label||'');
-  const svg = (body) => `<svg viewBox="0 0 200 200" style="width:100%;height:100%;display:block">
-    <defs><linearGradient id="g${hue}" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/>
-    </linearGradient></defs>
-    <rect width="200" height="200" fill="${c3}" opacity="0.35"/>${body}</svg>`;
-
-  if (/blazer|suit/i.test(id)) return svg(`
-    <path d="M60 52 L84 40 L100 58 L116 40 L140 52 L152 74 L138 170 L62 170 L48 74 Z"
-      fill="url(#g${hue})" stroke="${c2}" stroke-width="2"/>
-    <path d="M84 40 L100 58 L88 96 L72 60 Z" fill="${c3}" opacity="0.85"/>
-    <path d="M116 40 L100 58 L112 96 L128 60 Z" fill="${c3}" opacity="0.7"/>
-    <path d="M100 58 L96 168 M100 58 L104 168" stroke="${c2}" stroke-width="1.6" fill="none"/>
-    <circle cx="104" cy="112" r="2.6" fill="${c2}"/><circle cx="104" cy="130" r="2.6" fill="${c2}"/>`);
-
-  if (/kurta|kameez|sk\b|atelier-occasion/i.test(id)) return svg(`
-    <path d="M70 42 L88 34 Q100 44 112 34 L130 42 L150 68 L136 82 L128 70 L128 172 L72 172 L72 70 L64 82 L50 68 Z"
-      fill="url(#g${hue})" stroke="${c2}" stroke-width="2"/>
-    <path d="M88 34 Q100 44 112 34 L110 46 Q100 54 90 46 Z" fill="${c3}"/>
-    <path d="M100 50 L100 96" stroke="${c2}" stroke-width="1.6"/>
-    <circle cx="100" cy="60" r="2" fill="${c2}"/><circle cx="100" cy="72" r="2" fill="${c2}"/>
-    <circle cx="100" cy="84" r="2" fill="${c2}"/>
-    <path d="M72 150 L128 150" stroke="${c2}" stroke-width="1" opacity="0.5"/>`);
-
-  if (/organza|dupatta|shirt-only|velvet/i.test(id)) return svg(`
-    <path d="M30 140 Q60 40 100 90 Q140 150 170 60 L170 150 Q140 190 100 160 Q60 130 30 170 Z"
-      fill="url(#g${hue})" opacity="0.9"/>
-    <path d="M30 150 Q70 70 110 110 Q150 150 170 80" stroke="${c3}"
-      stroke-width="5" fill="none" opacity="0.8"/>
-    <path d="M34 160 Q75 90 112 122 Q148 156 168 96" stroke="${c2}"
-      stroke-width="2" fill="none" opacity="0.6"/>`);
-
-  // Default: a rolled fabric bolt with drape.
-  return svg(`
-    <rect x="36" y="40" width="128" height="26" rx="13" fill="${c2}"/>
-    <rect x="36" y="58" width="128" height="96" fill="url(#g${hue})"/>
-    <path d="M36 154 Q60 176 84 154 Q108 132 132 154 Q152 172 164 154 L164 154 L36 154 Z"
-      fill="${c2}" opacity="0.85"/>
-    <path d="M48 70 L48 148 M76 70 L76 148 M104 70 L104 148 M132 70 L132 148"
-      stroke="${c3}" stroke-width="2.5" opacity="0.5"/>
-    <circle cx="49" cy="53" r="7" fill="${c3}"/>`);
+// Draped-cloth swatch: layered gradients render hanging fabric with folds
+// and sheen, tuned per fabric family. Photography wins when image_url is
+// set (partner feeds / the image agent); this is the premium fallback.
+function clothCSS(f){
+  const comp = (f.composition||'other');
+  const h = hueFor(comp);
+  // Palette per family: rich but wearable tones.
+  const fam =
+    /velvet/.test(comp)   ? {s:52,l:30,sheen:.14,fold:.5,w:34} :
+    /silk|jamawar|boski|satin/.test(comp) ? {s:45,l:52,sheen:.5,fold:.3,w:26} :
+    /organza|net|chiffon|georgette|voile/.test(comp) ? {s:30,l:72,sheen:.4,fold:.18,w:44} :
+    /khaddar|wool|karandi|dhanak|marina/.test(comp) ? {s:26,l:46,sheen:.1,fold:.32,w:22} :
+    {s:34,l:58,sheen:.25,fold:.26,w:30}; // cottons/lawn
+  const base=`linear-gradient(160deg,hsl(${h},${fam.s}%,${fam.l+10}%),hsl(${h},${fam.s+8}%,${fam.l-14}%))`;
+  const folds=`repeating-linear-gradient(93deg,
+      hsla(${h},30%,10%,${fam.fold}) 0 2px,
+      transparent 6px ${fam.w*0.45}px,
+      hsla(0,0%,100%,${fam.fold*0.55}) ${fam.w*0.5}px ${fam.w*0.56}px,
+      transparent ${fam.w*0.62}px ${fam.w}px)`;
+  const sheen=`linear-gradient(115deg,transparent 32%,hsla(0,0%,100%,${fam.sheen}) 47%,transparent 62%)`;
+  const vign=`radial-gradient(120% 90% at 50% 8%,transparent 55%,hsla(${h},40%,8%,.28) 100%)`;
+  return `background:${vign},${sheen},${folds},${base};`;
 }
 
 async function load(){
-  $('state').textContent = "Loading the catalog…"; $('state').style.display='block';
+  $('state').textContent = "Loading the collection…"; $('state').style.display='block';
   const p = new URLSearchParams();
   if($('f-aud').value) p.set('audience', $('f-aud').value);
   if($('f-season').value) p.set('season', $('f-season').value);
@@ -136,29 +133,35 @@ async function load(){
   try{
     const r = await fetch(API + "/catalog?" + p);
     const items = await r.json();
+    // Atelier pieces lead the collection.
+    items.sort((a,b)=>(b.availability==='made-to-measure')-(a.availability==='made-to-measure'));
     $('grid').innerHTML = "";
     if(!items.length){$('state').textContent = "Nothing matches those filters yet."; return;}
     $('state').style.display = 'none';
     for(const f of items){
-      const hue = hueFor(f.composition || 'other');
       const card = document.createElement('div');
       card.className = 'card';
-      const img = f.image_url
-        ? `<div class="swatch" style="background:url('${f.image_url}') center/cover">`
-        : `<div class="swatch" style="font-size:0">${artFor(f)}`;
-      card.innerHTML = `${img}
-          ${f.season ? `<span class="badge">${f.season}</span>` : ""}</div>
+      const mtm = f.availability === 'made-to-measure';
+      const sw = f.image_url
+        ? `style="background:url('${f.image_url}') center/cover"`
+        : `style="${clothCSS(f)}"`;
+      card.innerHTML = `
+        <div class="swatch" ${sw}>
+          ${f.season ? `<span class="label">${f.season}</span>` : ""}
+          ${mtm ? `<span class="atelier">Atelier · MTM</span>` : ""}
+        </div>
         <div class="body">
           <h3>${f.name}</h3>
-          <div class="meta">${f.brand || 'Wholesale'} · ${f.fabric_label || f.composition}
-            · ${f.meters} m</div>
-          <div class="meta">${f.description || ""}</div>
-          <div class="price-row"><span class="price">$${Number(f.price_usd).toFixed(0)}</span>
-            <span class="meta">unstitched</span></div>
+          <div class="meta">${f.brand || 'Naap select'} · ${f.fabric_label || f.composition}${f.meters ? ` · ${f.meters} m` : ""}</div>
+          <div class="desc">${f.description || ""}</div>
+          <div class="price-row">
+            <span class="price">$${Number(f.price_usd).toFixed(0)}</span>
+            <span class="mode">${mtm ? 'made to your naap' : 'unstitched'}</span>
+          </div>
         </div>`;
       $('grid').appendChild(card);
     }
-  }catch(e){$('state').textContent = "Catalog unreachable right now — try again shortly.";}
+  }catch(e){$('state').textContent = "Collection unreachable right now — try again shortly.";}
 }
 for(const id of ['f-aud','f-season','f-occ']) $(id).onchange = load;
 load();
