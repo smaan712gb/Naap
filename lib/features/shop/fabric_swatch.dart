@@ -9,17 +9,32 @@ class FabricSwatch extends StatelessWidget {
   final ShopFabric fabric;
   final double? size;
   final double radius;
+
+  /// Optional override (fit-preview variants); falls back to the fabric's
+  /// own image, then the woven gradient, if it fails to load.
+  final String? imageUrlOverride;
+
   const FabricSwatch(
-      {super.key, required this.fabric, this.size, this.radius = 12});
+      {super.key,
+      required this.fabric,
+      this.size,
+      this.radius = 12,
+      this.imageUrlOverride});
 
   @override
   Widget build(BuildContext context) {
     final placeholder = _placeholder();
-    final url = fabric.imageUrl;
-    final child = url == null
+    final base = fabric.imageUrl;
+    final baseImage = base == null
         ? placeholder
-        : Image.network(url,
+        : Image.network(base,
             fit: BoxFit.cover, errorBuilder: (_, __, ___) => placeholder);
+    final child = imageUrlOverride == null
+        ? baseImage
+        : Image.network(imageUrlOverride!,
+            fit: BoxFit.cover,
+            gaplessPlayback: true,
+            errorBuilder: (_, __, ___) => baseImage);
     final clipped = ClipRRect(
         borderRadius: BorderRadius.circular(radius), child: child);
     return size == null

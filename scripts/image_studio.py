@@ -47,6 +47,19 @@ STYLE = ("Ultra-premium fashion e-commerce photography, soft diffused "
 PEOPLE = ("The person is a fully AI-synthesized fashion model who does not "
           "resemble any real individual or celebrity.")
 
+# Fit variants: same garment, same model, different cut — so customers SEE
+# what fitted vs regular vs loose means before ordering. The fit *numbers*
+# stay in the deterministic ease engine; these are illustrations.
+FITS = {
+    "fitted": "The garment is tailored CLOSE to the body: slim silhouette, "
+              "sharp shoulder line, tapered sleeves and trouser, visible "
+              "waist suppression.",
+    "regular": "The garment has a CLASSIC comfortable cut: follows the body "
+               "without clinging, easy shoulder, straight fall.",
+    "loose": "The garment is cut GENEROUSLY loose: relaxed drape, fuller "
+             "sleeves and body, airy traditional volume.",
+}
+
 
 def _key() -> str:
     k = os.environ.get("GEMINI_API_KEY")
@@ -65,6 +78,8 @@ def _key() -> str:
 
 def prompt_for(item: dict) -> str:
     """Art direction from the item's own metadata."""
+    if "_prompt" in item:  # pre-built prompt (fit variants)
+        return item["_prompt"]
     comp = item.get("composition", "")
     name = item["name"]
     design = item.get("design", "plain")
@@ -143,9 +158,29 @@ def generate(item: dict, key: str) -> bytes | None:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", help="comma-separated item ids")
+    ap.add_argument("--fits", help="comma-separated MTM item ids: generate "
+                    "fitted/regular/loose variants (<id>-<fit>.png)")
     ap.add_argument("--upload", action="store_true",
                     help="push approved previews to S3 + rewrite seeds")
     args = ap.parse_args()
+
+    if args.fits:
+        key = _key()
+        PREVIEW.mkdir(exist_ok=True)
+        items = {i["id"]: i for i in
+                 json.loads(SEEDS[0].read_text(encoding="utf-8"))}
+        for iid in args.fits.split(","):
+            base = prompt_for(items[iid])
+            for fit, delta in FITS.items():
+                print(f"  {iid}-{fit} …")
+                img = generate({"id": iid, "name": items[iid]["name"],
+                                "_prompt": f"{base} {delta}"}, key)
+                if img:
+                    (PREVIEW / f"{iid}-{fit}.png").write_bytes(img)
+                else:
+                    print("    FAILED")
+        print("\nfit variants in preview folder; convert+upload separately")
+        return 0
 
     items = json.loads(SEEDS[0].read_text(encoding="utf-8"))
     if args.only:

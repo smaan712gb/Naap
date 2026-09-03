@@ -22,7 +22,9 @@
   "pieces": 1,
   "piece_contents": "5m fabric cut",
   "availability": "ready-to-dispatch",
-  "image_url": "https://getnaap.com/img/lawn-classic-white.jpg"
+  "image_url": "https://getnaap.com/img/lawn-classic-white.jpg",
+  "color": "white",
+  "added_at": "2026-08-15"
  },
  {
   "id": "emblawn-festive-teal",
@@ -50,7 +52,9 @@
   "pieces": 3,
   "piece_contents": "shirt + trouser + silk dupatta",
   "availability": "ready-to-dispatch",
-  "image_url": "https://getnaap.com/img/emblawn-festive-teal.jpg"
+  "image_url": "https://getnaap.com/img/emblawn-festive-teal.jpg",
+  "color": "teal",
+  "added_at": "2026-08-15"
  },
  {
   "id": "khaddar-winter-brown",
@@ -74,7 +78,9 @@
   "pieces": 1,
   "piece_contents": "5m fabric cut",
   "availability": "ready-to-dispatch",
-  "image_url": "https://getnaap.com/img/khaddar-winter-brown.jpg"
+  "image_url": "https://getnaap.com/img/khaddar-winter-brown.jpg",
+  "color": "brown",
+  "added_at": "2026-08-15"
  },
  {
   "id": "dhanak-rose-2pc",
@@ -102,7 +108,9 @@
   "pieces": 2,
   "piece_contents": "shirt + trouser",
   "availability": "ready-to-dispatch",
-  "image_url": "https://getnaap.com/img/dhanak-rose-2pc.jpg"
+  "image_url": "https://getnaap.com/img/dhanak-rose-2pc.jpg",
+  "color": "pink",
+  "added_at": "2026-08-15"
  },
  {
   "id": "washwear-slate",
@@ -131,7 +139,9 @@
   "pieces": 1,
   "piece_contents": "5m fabric cut",
   "availability": "ready-to-dispatch",
-  "image_url": "https://getnaap.com/img/washwear-slate.jpg"
+  "image_url": "https://getnaap.com/img/washwear-slate.jpg",
+  "color": "grey",
+  "added_at": "2026-08-15"
  },
  {
   "id": "latha-white",
@@ -159,7 +169,9 @@
   "pieces": 1,
   "piece_contents": "5m fabric cut",
   "availability": "ready-to-dispatch",
-  "image_url": "https://getnaap.com/img/latha-white.jpg"
+  "image_url": "https://getnaap.com/img/latha-white.jpg",
+  "color": "white",
+  "added_at": "2026-08-15"
  },
  {
   "id": "boski-cream",
@@ -189,7 +201,9 @@
   "pieces": 1,
   "piece_contents": "5m fabric cut",
   "availability": "ready-to-dispatch",
-  "image_url": "https://getnaap.com/img/boski-cream.jpg"
+  "image_url": "https://getnaap.com/img/boski-cream.jpg",
+  "color": "cream",
+  "added_at": "2026-08-15"
  },
  {
   "id": "rawsilk-ivory",
@@ -217,7 +231,9 @@
   "piece_contents": "5m fabric cut",
   "availability": "made-to-order",
   "image_url": "https://getnaap.com/img/rawsilk-ivory.jpg",
-  "audience": "men"
+  "audience": "men",
+  "color": "ivory",
+  "added_at": "2026-08-15"
  },
  {
   "id": "velvet-emerald",
@@ -247,7 +263,9 @@
   "pieces": 1,
   "piece_contents": "shirt-length cut",
   "availability": "made-to-order",
-  "image_url": "https://getnaap.com/img/velvet-emerald.jpg"
+  "image_url": "https://getnaap.com/img/velvet-emerald.jpg",
+  "color": "green",
+  "added_at": "2026-08-15"
  },
  {
   "id": "organza-blush",
@@ -276,7 +294,9 @@
   "pieces": 1,
   "piece_contents": "shirt-length + dupatta cut",
   "availability": "made-to-order",
-  "image_url": "https://getnaap.com/img/organza-blush.jpg"
+  "image_url": "https://getnaap.com/img/organza-blush.jpg",
+  "color": "pink",
+  "added_at": "2026-08-15"
  },
  {
   "id": "atelier-kurta-boski",
@@ -301,7 +321,9 @@
   "fabric_label": "Atelier · Boski",
   "design": "plain",
   "availability": "made-to-measure",
-  "image_url": "https://getnaap.com/img/atelier-kurta-boski.jpg"
+  "image_url": "https://getnaap.com/img/atelier-kurta-boski.jpg",
+  "color": "cream",
+  "added_at": "2026-09-01"
  },
  {
   "id": "atelier-blazer-wool",
@@ -325,7 +347,9 @@
   "fabric_label": "Atelier · Wool",
   "design": "plain",
   "availability": "made-to-measure",
-  "image_url": "https://getnaap.com/img/atelier-blazer-wool.jpg"
+  "image_url": "https://getnaap.com/img/atelier-blazer-wool.jpg",
+  "color": "grey",
+  "added_at": "2026-09-01"
  },
  {
   "id": "atelier-occasion-sk",
@@ -350,7 +374,9 @@
   "design": "plain",
   "availability": "made-to-measure",
   "image_url": "https://getnaap.com/img/atelier-occasion-sk.jpg",
-  "audience": "men"
+  "audience": "men",
+  "color": "ivory",
+  "added_at": "2026-09-01"
  },
  {
   "id": "atelier-formal-ladies",
@@ -376,6 +402,8 @@
   "fabric_label": "Atelier · Raw Silk",
   "design": "embellished",
   "availability": "made-to-measure",
-  "image_url": "https://getnaap.com/img/atelier-formal-ladies.jpg"
+  "image_url": "https://getnaap.com/img/atelier-formal-ladies.jpg",
+  "color": "green",
+  "added_at": "2026-09-03"
  }
 ]

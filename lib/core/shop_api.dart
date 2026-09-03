@@ -24,6 +24,21 @@ class ShopFabric {
   final String? fabricLabel;
   final String? season;
   final List<String> occasions;
+  final String? availability;
+  final String? color;
+  final DateTime? addedAt;
+
+  bool get isMtm => availability == 'made-to-measure';
+  bool get isNew =>
+      addedAt != null && DateTime.now().difference(addedAt!).inDays < 14;
+
+  /// Fit-preview variant URL (fitted/regular/loose) for MTM garments;
+  /// callers must fall back to [imageUrl] if the variant 404s.
+  String? fitImageUrl(String fit) {
+    final base = imageUrl;
+    if (base == null || !base.endsWith('.jpg')) return null;
+    return base.replaceFirst(RegExp(r'\.jpg$'), '-$fit.jpg');
+  }
 
   const ShopFabric({
     required this.id,
@@ -37,6 +52,9 @@ class ShopFabric {
     this.fabricLabel,
     this.season,
     this.occasions = const [],
+    this.availability,
+    this.color,
+    this.addedAt,
   });
 
   factory ShopFabric.fromJson(Map<String, dynamic> j) => ShopFabric(
@@ -53,6 +71,11 @@ class ShopFabric {
         occasions: [
           for (final o in (j['occasions'] as List<dynamic>? ?? [])) '$o'
         ],
+        availability: j['availability'] as String?,
+        color: j['color'] as String?,
+        addedAt: j['added_at'] != null
+            ? DateTime.tryParse(j['added_at'] as String)
+            : null,
       );
 }
 

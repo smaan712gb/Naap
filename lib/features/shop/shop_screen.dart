@@ -20,6 +20,27 @@ class _ShopScreenState extends State<ShopScreen> {
   // same vocabulary the server's /taxonomy serves.
   String? _audience;
   String? _season;
+  String _sort = 'rec';
+
+  List<ShopFabric> _sorted(List<ShopFabric> items) {
+    final out = [...items];
+    int newer(ShopFabric a, ShopFabric b) => (b.addedAt ?? DateTime(2000))
+        .compareTo(a.addedAt ?? DateTime(2000));
+    switch (_sort) {
+      case 'new':
+        out.sort(newer);
+      case 'plo':
+        out.sort((a, b) => a.priceUsd.compareTo(b.priceUsd));
+      case 'phi':
+        out.sort((a, b) => b.priceUsd.compareTo(a.priceUsd));
+      default: // recommended: Atelier first, then newest
+        out.sort((a, b) {
+          final mtm = (b.isMtm ? 1 : 0) - (a.isMtm ? 1 : 0);
+          return mtm != 0 ? mtm : newer(a, b);
+        });
+    }
+    return out;
+  }
   String? _occasion;
 
   static const _audiences = {'women': 'Women خواتین', 'men': 'Men حضرات'};
@@ -87,6 +108,18 @@ class _ShopScreenState extends State<ShopScreen> {
           dd('season', _seasons, _season, (v) => _season = v),
           const SizedBox(width: 16),
           dd('occasion', _occasions, _occasion, (v) => _occasion = v),
+          const SizedBox(width: 16),
+          DropdownButton<String>(
+            value: _sort,
+            underline: const SizedBox.shrink(),
+            items: const [
+              DropdownMenuItem(value: 'rec', child: Text('Recommended')),
+              DropdownMenuItem(value: 'new', child: Text('New arrivals')),
+              DropdownMenuItem(value: 'plo', child: Text('Price ↑')),
+              DropdownMenuItem(value: 'phi', child: Text('Price ↓')),
+            ],
+            onChanged: (v) => setState(() => _sort = v ?? 'rec'),
+          ),
         ]),
       ),
     );
@@ -159,7 +192,7 @@ class _ShopScreenState extends State<ShopScreen> {
               ),
             );
           }
-          final fabrics = snap.data!;
+          final fabrics = _sorted(snap.data!);
           if (fabrics.isEmpty) {
             return Column(children: [
               _filterBar(),
@@ -218,6 +251,25 @@ class _ShopScreenState extends State<ShopScreen> {
                                             fontSize: 11,
                                             color: Colors.white,
                                             fontWeight: FontWeight.w600)),
+                                  ),
+                                ),
+                              if (f.isNew)
+                                Positioned(
+                                  bottom: 8,
+                                  left: 8,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius:
+                                          BorderRadius.circular(999),
+                                    ),
+                                    child: const Text('✦ New in',
+                                        style: TextStyle(
+                                            fontSize: 11,
+                                            color: Color(0xFF1B4D3E),
+                                            fontWeight: FontWeight.w700)),
                                   ),
                                 ),
                             ]),

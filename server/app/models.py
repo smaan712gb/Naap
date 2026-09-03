@@ -95,6 +95,11 @@ class Fabric(BaseModel):
     composition_detail: Optional[str] = None  # disclosed fiber percentages
     availability: Optional[str] = None      # taxonomy availability id
     brand_id: Optional[str] = None          # taxonomy brand id
+    color: Optional[str] = None             # canonical color slug (white,
+                                            # cream, ivory, beige, brown,
+                                            # grey, black, blue, teal, green,
+                                            # pink, red, gold, multi)
+    added_at: Optional[str] = None          # ISO date — drives "New in"
 
 
 # ---------------------------------------------------------------- orders

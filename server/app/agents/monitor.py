@@ -170,10 +170,16 @@ def trend_scan(max_brands: int = 3, offset: int = 0) -> dict:
 
 # ---------------------------------------------------------------- runner
 
+def _curator():
+    from .curator import draft_new_items
+    return draft_new_items()
+
+
 RUNNERS = {
     "seasonal": lambda: seasonal_focus(),
     "link-health": lambda: link_health(),
     "trends": lambda: trend_scan(),
+    "curator": _curator,
 }
 
 

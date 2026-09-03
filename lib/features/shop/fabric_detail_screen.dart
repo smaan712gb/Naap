@@ -20,6 +20,11 @@ class FabricDetailScreen extends StatefulWidget {
 class _FabricDetailScreenState extends State<FabricDetailScreen> {
   bool _busy = false;
 
+  /// Fit preview for made-to-measure garments: swapping fits swaps the
+  /// photo so the customer SEES the silhouette. The stitching numbers stay
+  /// in the deterministic ease engine.
+  String _fitPreview = 'regular';
+
   Future<void> _order(String mode) async {
     final s = context.read<AppState>();
     if (s.profile.name.isEmpty) {
@@ -221,8 +226,29 @@ class _FabricDetailScreenState extends State<FabricDetailScreen> {
         padding: const EdgeInsets.all(20),
         children: [
           AspectRatio(
-              aspectRatio: 1.4,
-              child: FabricSwatch(fabric: f, radius: 16)),
+              aspectRatio: f.isMtm ? 0.9 : 1.4,
+              child: FabricSwatch(
+                  fabric: f,
+                  radius: 16,
+                  imageUrlOverride:
+                      f.isMtm ? f.fitImageUrl(_fitPreview) : null)),
+          if (f.isMtm) ...[
+            const SizedBox(height: 10),
+            SegmentedButton<String>(
+              segments: const [
+                ButtonSegment(value: 'fitted', label: Text('Fitted')),
+                ButtonSegment(value: 'regular', label: Text('Regular')),
+                ButtonSegment(value: 'loose', label: Text('Loose')),
+              ],
+              selected: {_fitPreview},
+              onSelectionChanged: (s) =>
+                  setState(() => _fitPreview = s.first),
+            ),
+            const SizedBox(height: 4),
+            Text('See the cut change — your exact numbers come from your '
+                'own scan.',
+                style: Theme.of(context).textTheme.bodySmall),
+          ],
           const SizedBox(height: 16),
           Text('${f.brand ?? 'Wholesale'} · '
               '${f.fabricLabel ?? f.composition} · ${f.meters} m '

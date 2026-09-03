@@ -31,25 +31,38 @@
   .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:30px}
   select{padding:10px 14px;border:1px solid #D7DDD9;border-radius:10px;background:#fff;font-size:.9rem;font-family:var(--sans);color:var(--ink)}
   select:focus{outline:2px solid var(--green-2)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:26px}
-  .card{background:var(--card);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 1px 3px rgba(21,59,47,.08),0 8px 24px rgba(21,59,47,.06);transition:transform .25s,box-shadow .25s}
-  .card:hover{transform:translateY(-4px);box-shadow:0 4px 10px rgba(21,59,47,.1),0 18px 40px rgba(21,59,47,.12)}
-  .swatch{aspect-ratio:4/5;position:relative;overflow:hidden}
+  .tabs{display:flex;gap:26px;margin:6px 0 24px;border-bottom:1px solid #E3E7E4;flex-wrap:wrap}
+  .tabs button{border:none;background:none;font-family:var(--sans);font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:10px 2px;cursor:pointer;border-bottom:2px solid transparent}
+  .tabs button.on{color:var(--green);border-bottom-color:var(--gold);font-weight:600}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:34px 26px}
+  .card{background:none;display:flex;flex-direction:column;cursor:pointer}
+  .swatch{aspect-ratio:4/5;position:relative;overflow:hidden;background:#ECEAE4;transition:opacity .3s}
+  .card:hover .swatch{opacity:.96}
+  .card:hover h3{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
   .swatch .label{position:absolute;top:12px;left:12px;background:rgba(14,32,25,.55);backdrop-filter:blur(4px);color:#fff;font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border-radius:999px}
   .swatch .atelier{position:absolute;top:12px;right:12px;background:var(--gold);color:#241B02;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 11px;border-radius:999px}
-  .card .body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:5px;flex:1}
-  .card h3{font-family:var(--serif);font-weight:600;font-size:1.08rem;line-height:1.3}
-  .card .meta{color:var(--muted);font-size:.8rem}
-  .card .desc{color:var(--muted);font-size:.84rem;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .price-row{margin-top:auto;display:flex;justify-content:space-between;align-items:baseline;padding-top:12px;border-top:1px solid #EEF1EF}
-  .price{font-family:var(--serif);font-weight:700;font-size:1.25rem;color:var(--green-2)}
-  .mode{color:var(--muted);font-size:.78rem}
+  .card .body{padding:14px 2px 0;display:flex;flex-direction:column;gap:4px;flex:1}
+  .card h3{font-family:var(--serif);font-weight:500;font-size:1.02rem;line-height:1.35}
+  .card .meta{color:var(--muted);font-size:.72rem;letter-spacing:.09em;text-transform:uppercase}
+  .card .desc{display:none}
+  .price-row{display:flex;justify-content:space-between;align-items:baseline;padding-top:6px}
+  .price{font-family:var(--sans);font-weight:500;font-size:.95rem;color:var(--ink)}
+  .mode{color:var(--muted);font-size:.74rem;font-style:italic}
   .cta{background:var(--green);color:#fff;border-radius:20px;padding:40px;margin-top:52px;text-align:center}
   .cta h2{font-family:var(--serif);font-weight:600;font-size:1.5rem}
   .cta p{color:#B9CDC3;max-width:520px;margin:10px auto 0;font-size:.95rem}
   .cta .btn{display:inline-block;margin-top:20px;background:var(--gold);color:#241B02;font-weight:600;padding:14px 30px;border-radius:12px;text-decoration:none}
   .cta .btn:hover{filter:brightness(1.06)}
   .empty,.loading{color:var(--muted);text-align:center;padding:60px 0}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:26px}
+  .chips .lbl{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+  .chip{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #D7DDD9;cursor:pointer;transition:transform .15s}
+  .chip:hover{transform:scale(1.15)}
+  .chip.on{box-shadow:0 0 0 2px var(--gold)}
+  .newpill{position:absolute;bottom:12px;left:12px;background:#fff;color:var(--green);font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 11px;border-radius:999px}
+  .fitrow{position:absolute;bottom:12px;right:12px;display:flex;gap:4px}
+  .fitrow button{border:none;background:rgba(14,32,25,.55);backdrop-filter:blur(4px);color:#fff;font-size:.66rem;font-weight:600;padding:4px 9px;border-radius:999px;cursor:pointer}
+  .fitrow button.on{background:var(--gold);color:#241B02}
   footer{background:var(--green);color:#9DB6AB;text-align:center;padding:26px;font-size:.85rem;margin-top:0}
 </style>
 </head>
@@ -67,6 +80,13 @@
   measurements your phone took. Fit risk: removed. کپڑا آپ کا، ناپ آپ کا۔</p>
 </div>
 <main>
+  <div class="tabs" id="tabs">
+    <button class="on" data-t="all">All</button>
+    <button data-t="new">New In</button>
+    <button data-t="atelier">Atelier</button>
+    <button data-t="women">Women</button>
+    <button data-t="men">Men</button>
+  </div>
   <div class="filters">
     <select id="f-aud"><option value="">Everyone</option>
       <option value="women">Women خواتین</option>
@@ -83,7 +103,12 @@
       <option value="walima">Walima ولیمہ</option>
       <option value="bridal">Bridal دلہن</option>
       <option value="groom">Groom دولہا</option></select>
+    <select id="f-sort"><option value="rec">Recommended</option>
+      <option value="new">New arrivals</option>
+      <option value="plo">Price low to high</option>
+      <option value="phi">Price high to low</option></select>
   </div>
+  <div class="chips" id="chips"><span class="lbl">Colour</span></div>
   <div id="grid" class="grid"></div>
   <div id="state" class="loading">Loading the collection…</div>
   <div class="cta">
@@ -106,6 +131,77 @@ const IMG_IDS = ["lawn-classic-white","emblawn-festive-teal","khaddar-winter-bro
   "velvet-emerald","organza-blush","atelier-kurta-boski","atelier-blazer-wool",
   "atelier-occasion-sk","atelier-formal-ladies"];
 const IMG = Object.fromEntries(IMG_IDS.map(id => [id, `https://getnaap.com/img/${id}.jpg`]));
+
+const COLOR_HEX = {white:"#FAFAF7",cream:"#F1E7CF",ivory:"#F4EFE3",beige:"#D8C2A0",
+  brown:"#7A5C43",grey:"#8A9097",black:"#25272B",blue:"#2F4A7A",teal:"#2E7F7A",
+  green:"#1E5C43",pink:"#E7A6B4",red:"#A62639",gold:"#C9A227",multi:
+  "linear-gradient(135deg,#A62639 25%,#C9A227 25% 50%,#2E7F7A 50% 75%,#2F4A7A 75%)"};
+let selColor = "";
+const chipbar = $('chips');
+for(const [c,hex] of Object.entries(COLOR_HEX)){
+  const b = document.createElement('button');
+  b.className = 'chip'; b.title = c; b.dataset.c = c;
+  b.style.background = hex;
+  b.onclick = () => { selColor = (selColor===c ? "" : c);
+    chipbar.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x.dataset.c===selColor));
+    load(); };
+  chipbar.appendChild(b);
+}
+
+const DAY = 864e5;
+const isNew = f => f.added_at && (Date.now() - Date.parse(f.added_at)) < 14*DAY;
+
+let tab = "all";
+$('tabs').querySelectorAll('button').forEach(b => b.onclick = () => {
+  tab = b.dataset.t;
+  $('tabs').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+  if(tab==='women'||tab==='men') $('f-aud').value = tab; else $('f-aud').value = "";
+  load();
+});
+const tabFilter = items =>
+  tab==='new' ? items.filter(isNew) :
+  tab==='atelier' ? items.filter(f=>f.availability==='made-to-measure') : items;
+
+function sortItems(items){
+  const mode = $('f-sort').value;
+  const t = f => Date.parse(f.added_at||0)||0;
+  if(mode==='new') items.sort((a,b)=>t(b)-t(a));
+  else if(mode==='plo') items.sort((a,b)=>a.price_usd-b.price_usd);
+  else if(mode==='phi') items.sort((a,b)=>b.price_usd-a.price_usd);
+  else items.sort((a,b)=>((b.availability==='made-to-measure')-(a.availability==='made-to-measure'))||(t(b)-t(a)));
+  return items;
+}
+
+// Fit preview: swap the card photo between fitted / regular / loose cuts.
+// The numbers behind each fit stay in the deterministic ease engine — this
+// is the visual of what those numbers mean.
+// Hover preview: card image glides to the fitted cut (luxury-grid pattern),
+// unless the user has pinned a fit via the chips.
+window.hoverFit = function(sw, id, on){
+  if(sw.dataset.pinned) return;
+  const url = on ? `https://getnaap.com/img/${id}-fitted.jpg`
+                 : (sw.dataset.baseImg || "");
+  if(!sw.dataset.baseImg) sw.dataset.baseImg = sw.style.backgroundImage;
+  if(on){
+    const probe = new Image();
+    probe.onload = () => { if(!sw.dataset.pinned) sw.style.backgroundImage = `url('${url}')`; };
+    probe.src = url;
+  } else {
+    sw.style.backgroundImage = sw.dataset.baseImg;
+  }
+};
+
+window.swapFit = function(btn, id, fit){
+  const url = `https://getnaap.com/img/${id}-${fit}.jpg`;
+  const probe = new Image();
+  probe.onload = () => {
+    const sw = btn.closest('.swatch');
+    sw.dataset.pinned = "1";
+    sw.style.backgroundImage = `url('${url}')`;
+    btn.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===btn));
+  };
+  probe.src = url;
+};
 
 // Draped-cloth swatch: layered gradients render hanging fabric with folds
 // and sheen, tuned per fabric family. Photography wins when image_url is
@@ -137,11 +233,10 @@ async function load(){
   if($('f-aud').value) p.set('audience', $('f-aud').value);
   if($('f-season').value) p.set('season', $('f-season').value);
   if($('f-occ').value) p.set('occasion', $('f-occ').value);
+  if(selColor) p.set('color', selColor);
   try{
     const r = await fetch(API + "/catalog?" + p);
-    const items = await r.json();
-    // Atelier pieces lead the collection.
-    items.sort((a,b)=>(b.availability==='made-to-measure')-(a.availability==='made-to-measure'));
+    const items = sortItems(tabFilter(await r.json()));
     $('grid').innerHTML = "";
     if(!items.length){$('state').textContent = "Nothing matches those filters yet."; return;}
     $('state').style.display = 'none';
@@ -153,10 +248,20 @@ async function load(){
       const sw = img
         ? `style="${clothCSS(f)}background-image:url('${img}');background-size:cover;background-position:center"`
         : `style="${clothCSS(f)}"`;
+      // Luxury hover: Atelier cards glide to the fitted cut on mouse-over.
+      const hover = (mtm && img)
+        ? `onmouseenter="hoverFit(this,'${f.id}',1)" onmouseleave="hoverFit(this,'${f.id}',0)"`
+        : "";
       card.innerHTML = `
-        <div class="swatch" ${sw}>
+        <div class="swatch" ${sw} ${hover}>
           ${f.season ? `<span class="label">${f.season}</span>` : ""}
           ${mtm ? `<span class="atelier">Atelier · MTM</span>` : ""}
+          ${isNew(f) ? `<span class="newpill">✦ New in</span>` : ""}
+          ${mtm ? `<div class="fitrow">
+            <button onclick="swapFit(this,'${f.id}','fitted')">Fitted</button>
+            <button class="on" onclick="swapFit(this,'${f.id}','regular')">Regular</button>
+            <button onclick="swapFit(this,'${f.id}','loose')">Loose</button>
+          </div>` : ""}
         </div>
         <div class="body">
           <h3>${f.name}</h3>
@@ -171,7 +276,7 @@ async function load(){
     }
   }catch(e){$('state').textContent = "Collection unreachable right now — try again shortly.";}
 }
-for(const id of ['f-aud','f-season','f-occ']) $(id).onchange = load;
+for(const id of ['f-aud','f-season','f-occ','f-sort']) $(id).onchange = load;
 load();
 </script>
 </body>

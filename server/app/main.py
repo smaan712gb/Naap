@@ -66,8 +66,10 @@ def start_agent_team() -> None:
                   day_of_week="tue", hour=6)
     sched.add_job(lambda: run_agent("trends"), "cron",
                   day_of_week="wed", hour=6)
+    sched.add_job(lambda: run_agent("curator"), "cron",
+                  day_of_week="thu", hour=6)
     sched.start()
-    log.info("agent team scheduled (seasonal/link-health/trends)")
+    log.info("agent team scheduled (seasonal/link-health/trends/curator)")
 
 
 @app.on_event("startup")
@@ -187,10 +189,13 @@ def catalog(audience: Optional[str] = None,
             season: Optional[str] = None,
             occasion: Optional[str] = None,
             buying_option: Optional[str] = None,
-            brand_id: Optional[str] = None) -> list[Fabric]:
+            brand_id: Optional[str] = None,
+            color: Optional[str] = None) -> list[Fabric]:
     items = db.list_fabrics(verified_only=True)
     if audience:
         items = [f for f in items if f.audience in (audience, None)]
+    if color:
+        items = [f for f in items if f.color == color]
     if category_id:
         items = [f for f in items if f.category_id == category_id]
     if season:
