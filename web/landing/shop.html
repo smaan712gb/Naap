@@ -78,6 +78,55 @@ const $ = id => document.getElementById(id);
 
 function hueFor(s){let h=0;for(const c of s)h+=c.charCodeAt(0);return (h*37)%360;}
 
+// Flat fashion illustrations (line-sheet style) — brand-safe, no models.
+// Chosen by product type; tinted per item.
+function artFor(f){
+  const hue = hueFor(f.composition || 'other');
+  const c1 = `hsl(${hue},38%,62%)`, c2 = `hsl(${hue},45%,38%)`,
+        c3 = `hsl(${hue},30%,80%)`;
+  const id = (f.id||'') + (f.category_id||'') + (f.fabric_label||'');
+  const svg = (body) => `<svg viewBox="0 0 200 200" style="width:100%;height:100%;display:block">
+    <defs><linearGradient id="g${hue}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/>
+    </linearGradient></defs>
+    <rect width="200" height="200" fill="${c3}" opacity="0.35"/>${body}</svg>`;
+
+  if (/blazer|suit/i.test(id)) return svg(`
+    <path d="M60 52 L84 40 L100 58 L116 40 L140 52 L152 74 L138 170 L62 170 L48 74 Z"
+      fill="url(#g${hue})" stroke="${c2}" stroke-width="2"/>
+    <path d="M84 40 L100 58 L88 96 L72 60 Z" fill="${c3}" opacity="0.85"/>
+    <path d="M116 40 L100 58 L112 96 L128 60 Z" fill="${c3}" opacity="0.7"/>
+    <path d="M100 58 L96 168 M100 58 L104 168" stroke="${c2}" stroke-width="1.6" fill="none"/>
+    <circle cx="104" cy="112" r="2.6" fill="${c2}"/><circle cx="104" cy="130" r="2.6" fill="${c2}"/>`);
+
+  if (/kurta|kameez|sk\b|atelier-occasion/i.test(id)) return svg(`
+    <path d="M70 42 L88 34 Q100 44 112 34 L130 42 L150 68 L136 82 L128 70 L128 172 L72 172 L72 70 L64 82 L50 68 Z"
+      fill="url(#g${hue})" stroke="${c2}" stroke-width="2"/>
+    <path d="M88 34 Q100 44 112 34 L110 46 Q100 54 90 46 Z" fill="${c3}"/>
+    <path d="M100 50 L100 96" stroke="${c2}" stroke-width="1.6"/>
+    <circle cx="100" cy="60" r="2" fill="${c2}"/><circle cx="100" cy="72" r="2" fill="${c2}"/>
+    <circle cx="100" cy="84" r="2" fill="${c2}"/>
+    <path d="M72 150 L128 150" stroke="${c2}" stroke-width="1" opacity="0.5"/>`);
+
+  if (/organza|dupatta|shirt-only|velvet/i.test(id)) return svg(`
+    <path d="M30 140 Q60 40 100 90 Q140 150 170 60 L170 150 Q140 190 100 160 Q60 130 30 170 Z"
+      fill="url(#g${hue})" opacity="0.9"/>
+    <path d="M30 150 Q70 70 110 110 Q150 150 170 80" stroke="${c3}"
+      stroke-width="5" fill="none" opacity="0.8"/>
+    <path d="M34 160 Q75 90 112 122 Q148 156 168 96" stroke="${c2}"
+      stroke-width="2" fill="none" opacity="0.6"/>`);
+
+  // Default: a rolled fabric bolt with drape.
+  return svg(`
+    <rect x="36" y="40" width="128" height="26" rx="13" fill="${c2}"/>
+    <rect x="36" y="58" width="128" height="96" fill="url(#g${hue})"/>
+    <path d="M36 154 Q60 176 84 154 Q108 132 132 154 Q152 172 164 154 L164 154 L36 154 Z"
+      fill="${c2}" opacity="0.85"/>
+    <path d="M48 70 L48 148 M76 70 L76 148 M104 70 L104 148 M132 70 L132 148"
+      stroke="${c3}" stroke-width="2.5" opacity="0.5"/>
+    <circle cx="49" cy="53" r="7" fill="${c3}"/>`);
+}
+
 async function load(){
   $('state').textContent = "Loading the catalog…"; $('state').style.display='block';
   const p = new URLSearchParams();
@@ -96,8 +145,7 @@ async function load(){
       card.className = 'card';
       const img = f.image_url
         ? `<div class="swatch" style="background:url('${f.image_url}') center/cover">`
-        : `<div class="swatch" style="background:linear-gradient(135deg,
-             hsl(${hue},35%,66%),hsl(${hue},42%,40%))">${(f.name||'?')[0]}`;
+        : `<div class="swatch" style="font-size:0">${artFor(f)}`;
       card.innerHTML = `${img}
           ${f.season ? `<span class="badge">${f.season}</span>` : ""}</div>
         <div class="body">
