@@ -82,7 +82,9 @@ workflows:
     instance_type: mac_mini_m2
     environment:
       flutter: stable
-      java: 17
+      # No explicit java key: the Mac build image ships a compatible JDK,
+      # and the java selector was failing the workflow after the move from
+      # linux_x2 ("Something went wrong" emails with no step reached).
     triggering:
       events:
         - push
