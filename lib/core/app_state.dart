@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'ease.dart';
@@ -39,6 +41,11 @@ class ClientRecord {
   PersonalCalibration calibration;
   final List<ScanRecord> history;
 
+  /// Design/fabric reference photos the USER CHOSE from their gallery, to
+  /// send the tailor alongside the parchi. NEVER capture photos — those
+  /// are deleted by product law; the parchi PDF itself stays numbers-only.
+  final List<String> referencePaths;
+
   ClientRecord({
     required this.id,
     UserProfile? profile,
@@ -46,11 +53,13 @@ class ClientRecord {
     KameezStyle? style,
     PersonalCalibration? calibration,
     List<ScanRecord>? history,
+    List<String>? referencePaths,
   })  : profile = profile ?? UserProfile(),
         naap = naap ?? Naap.empty(),
         style = style ?? KameezStyle(),
         calibration = calibration ?? PersonalCalibration(),
-        history = history ?? [];
+        history = history ?? [],
+        referencePaths = referencePaths ?? [];
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -59,6 +68,7 @@ class ClientRecord {
         'style': style.toJson(),
         'calibration': calibration.toJsonString(),
         'history': [for (final h in history) h.toJson()],
+        'referencePaths': referencePaths,
       };
 
   factory ClientRecord.fromJson(Map<String, dynamic> j) => ClientRecord(
@@ -80,6 +90,9 @@ class ClientRecord {
                 for (final h in j['history'] as List<dynamic>)
                   ScanRecord.fromJson(h as Map<String, dynamic>)
               ]
+            : null,
+        referencePaths: j['referencePaths'] != null
+            ? [for (final p in j['referencePaths'] as List<dynamic>) '$p']
             : null,
       );
 }
@@ -260,6 +273,30 @@ class AppState extends ChangeNotifier {
 
   Future<void> setStyle(KameezStyle s) async {
     active.style = s;
+    await _persist();
+    notifyListeners();
+  }
+
+  /// Copy a user-picked gallery image into app storage as a design
+  /// reference for the active client (capped at 6).
+  Future<void> addReference(String pickedPath) async {
+    if (active.referencePaths.length >= 6) return;
+    final dir = await getApplicationDocumentsDirectory();
+    final ext = pickedPath.split('.').last.toLowerCase();
+    final dest = File(
+        '${dir.path}/ref_${active.id}_${DateTime.now().millisecondsSinceEpoch}.$ext');
+    await File(pickedPath).copy(dest.path);
+    active.referencePaths.add(dest.path);
+    await _persist();
+    notifyListeners();
+  }
+
+  Future<void> removeReference(String path) async {
+    active.referencePaths.remove(path);
+    try {
+      final f = File(path);
+      if (await f.exists()) await f.delete();
+    } catch (_) {}
     await _persist();
     notifyListeners();
   }

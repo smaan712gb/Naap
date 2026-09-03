@@ -32,6 +32,8 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Naap uses the camera to take your measurement photos. They are analyzed on this device and deleted — never uploaded.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Attach design or fabric reference photos you choose to send your tailor with the parchi. Measurement photos are never stored or attached.</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>https</string>

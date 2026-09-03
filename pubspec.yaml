@@ -18,6 +18,7 @@ dependencies:
   google_mlkit_pose_detection: ^0.14.0
   google_mlkit_selfie_segmentation: ^0.10.0
   flutter_tts: ^4.2.0
+  image_picker: ^1.1.2
 
   # Image decoding (to get pixel dimensions / mask math)
   image: ^4.2.0

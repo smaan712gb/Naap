@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -93,8 +96,15 @@ class _ResultsScreenState extends State<ResultsScreen> {
         final uri = Uri.parse('https://wa.me/$num?text=${Uri.encodeComponent(summary)}');
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
-      await Share.shareXFiles([XFile(file.path)],
-          text: summary, sharePositionOrigin: shareOrigin);
+      // Parchi PDF + any design references the user attached, one bundle.
+      await Share.shareXFiles(
+          [
+            XFile(file.path),
+            for (final p in s.active.referencePaths)
+              if (File(p).existsSync()) XFile(p),
+          ],
+          text: summary,
+          sharePositionOrigin: shareOrigin);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -255,6 +265,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
             ),
           ],
           const SizedBox(height: 16),
+          _referencesCard(context, s),
+          const SizedBox(height: 16),
           _fitReportCard(context, s),
           const SizedBox(height: 16),
           if (mapSuMisura(s.naap) case final sm?)
@@ -332,6 +344,85 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 ].join('  ·  ')),
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  /// Design/fabric reference photos (Imran's request: tailors often ask
+  /// for pictures). User-picked from the gallery only — capture photos
+  /// are deleted by law and can never appear here; the parchi PDF stays
+  /// numbers-only, references travel as separate files in the share.
+  Widget _referencesCard(BuildContext context, AppState s) {
+    final refs = s.active.referencePaths;
+    return Card(
+      child: ExpansionTile(
+        leading: const Icon(Icons.image_outlined),
+        title: const Text('Design references (تصویریں) for your tailor'),
+        subtitle: Text(refs.isEmpty
+            ? 'Attach photos of a design or fabric you like — sent with the parchi'
+            : '${refs.length} photo(s) will be sent with the parchi'),
+        childrenPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        children: [
+          SizedBox(
+            height: 92,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                for (final p in refs)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Stack(children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.file(File(p),
+                            width: 84, height: 84, fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const SizedBox(
+                                width: 84,
+                                height: 84,
+                                child: Icon(Icons.broken_image))),
+                      ),
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: () => s.removeReference(p),
+                          child: Container(
+                            decoration: const BoxDecoration(
+                                color: Colors.black54,
+                                shape: BoxShape.circle),
+                            child: const Icon(Icons.close,
+                                size: 18, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ]),
+                  ),
+                if (refs.length < 6)
+                  OutlinedButton(
+                    onPressed: () async {
+                      final picked = await ImagePicker().pickImage(
+                          source: ImageSource.gallery,
+                          maxWidth: 1600,
+                          imageQuality: 85);
+                      if (picked != null) await s.addReference(picked.path);
+                    },
+                    style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(84, 84)),
+                    child: const Icon(Icons.add_photo_alternate_outlined),
+                  ),
+              ],
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: Text(
+              'Only photos you choose here are shared. Your measurement '
+              'photos are always deleted and never attached.',
+              style: TextStyle(fontSize: 11.5, color: Colors.grey),
+            ),
+          ),
         ],
       ),
     );

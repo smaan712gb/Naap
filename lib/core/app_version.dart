@@ -4,7 +4,7 @@
 /// and shows an update card when the server is newer.
 library;
 
-const int kNaapBuild = 20260906;
+const int kNaapBuild = 20260907;
 
 const String kVersionUrl = 'https://getnaap.com/app/version.json';
 const String kDownloadUrl = 'https://getnaap.com/app/naap-latest.apk';
