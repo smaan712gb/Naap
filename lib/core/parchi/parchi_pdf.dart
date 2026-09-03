@@ -56,6 +56,9 @@ class ParchiPdf {
     KameezStyle? style,
     SilhouetteProfile? silhouette,
     String? measuredBy, // tailor's shop name (device-level)
+    // Bilingual EN/UR is the default (Pakistan flow). English-only serves
+    // Western/EU tailors — same numbers, no Urdu column or notes.
+    bool bilingual = true,
   }) async {
     await _ensureFonts();
     final lines = EaseEngine.buildParchi(naap, garment, fit,
@@ -122,11 +125,15 @@ class ParchiPdf {
                             en(10).copyWith(color: PdfColors.grey300)),
                   ],
                 ),
-                pw.Directionality(
-                  textDirection: pw.TextDirection.rtl,
-                  child: pw.Text('ڈیجیٹل ناپ پرچی',
-                      style: ur(16).copyWith(color: PdfColors.white)),
-                ),
+                if (bilingual)
+                  pw.Directionality(
+                    textDirection: pw.TextDirection.rtl,
+                    child: pw.Text('ڈیجیٹل ناپ پرچی',
+                        style: ur(16).copyWith(color: PdfColors.white)),
+                  )
+                else
+                  pw.Text('Measurement Specification',
+                      style: en(11).copyWith(color: PdfColors.grey300)),
               ],
             ),
           ),
@@ -148,14 +155,15 @@ class ParchiPdf {
                       style: en(10).copyWith(color: PdfColors.grey700)),
                 ],
               ),
-              pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.end,
-                children: [
-                  urduText(gdef.urdu, size: 13),
-                  pw.SizedBox(height: 2),
-                  urduText('پیمائش: $unitUrdu', size: 9),
-                ],
-              ),
+              if (bilingual)
+                pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.end,
+                  children: [
+                    urduText(gdef.urdu, size: 13),
+                    pw.SizedBox(height: 2),
+                    urduText('پیمائش: $unitUrdu', size: 9),
+                  ],
+                ),
             ],
           ),
           pw.SizedBox(height: 12),
@@ -172,23 +180,23 @@ class ParchiPdf {
                   cellStyle: en(9.5),
                   cellAlignments: {
                     0: pw.Alignment.centerLeft,
-                    1: pw.Alignment.centerRight,
-                    2: pw.Alignment.center,
-                    3: pw.Alignment.center,
-                    4: pw.Alignment.center,
-                    5: pw.Alignment.center,
+                    if (bilingual) 1: pw.Alignment.centerRight,
+                    (bilingual ? 2 : 1): pw.Alignment.center,
+                    (bilingual ? 3 : 2): pw.Alignment.center,
+                    (bilingual ? 4 : 3): pw.Alignment.center,
+                    (bilingual ? 5 : 4): pw.Alignment.center,
                   },
                   columnWidths: {
                     0: const pw.FlexColumnWidth(2.6),
-                    1: const pw.FlexColumnWidth(1.5),
-                    2: const pw.FlexColumnWidth(1.0),
-                    3: const pw.FlexColumnWidth(1.1),
-                    4: const pw.FlexColumnWidth(1.1),
-                    5: const pw.FlexColumnWidth(1.1),
+                    if (bilingual) 1: const pw.FlexColumnWidth(1.5),
+                    (bilingual ? 2 : 1): const pw.FlexColumnWidth(1.0),
+                    (bilingual ? 3 : 2): const pw.FlexColumnWidth(1.1),
+                    (bilingual ? 4 : 3): const pw.FlexColumnWidth(1.1),
+                    (bilingual ? 5 : 4): const pw.FlexColumnWidth(1.1),
                   },
                   headers: [
                     'Measurement ($unitLabel)',
-                    'اردو',
+                    if (bilingual) 'اردو',
                     'Body',
                     fit == FitPreference.fitted ? '» Fitted «' : 'Fitted',
                     fit == FitPreference.regular ? '» Regular «' : 'Regular',
@@ -198,7 +206,7 @@ class ParchiPdf {
                     for (final (i, l) in lines.indexed)
                       [
                         '${l.def.english} (${l.def.tailorTerm})',
-                        l.def.urdu,
+                        if (bilingual) l.def.urdu,
                         fmt(l.bodyCm),
                         fmt(byFit[FitPreference.fitted]![i].stitchCm),
                         fmt(byFit[FitPreference.regular]![i].stitchCm),
@@ -208,14 +216,16 @@ class ParchiPdf {
                   // Highlight the customer's chosen fit column — that is
                   // the cutting column; the others are reference.
                   cellDecoration: (int col, dynamic data, int rowNum) {
-                    final selCol = 3 + FitPreference.values.indexOf(fit);
+                    final selCol = (bilingual ? 3 : 2) +
+                        FitPreference.values.indexOf(fit);
                     if (col == selCol) {
                       return const pw.BoxDecoration(color: softGreen);
                     }
                     return const pw.BoxDecoration();
                   },
                   cellBuilder: (int col, dynamic data, int rowNum) {
-                    final selCol = 3 + FitPreference.values.indexOf(fit);
+                    final selCol = (bilingual ? 3 : 2) +
+                        FitPreference.values.indexOf(fit);
                     if (col == selCol) {
                       return pw.Padding(
                         padding: const pw.EdgeInsets.symmetric(
@@ -226,7 +236,7 @@ class ParchiPdf {
                             textAlign: pw.TextAlign.center),
                       );
                     }
-                    if (col != 1) return null; // default rendering
+                    if (!bilingual || col != 1) return null;
                     return pw.Padding(
                       padding: const pw.EdgeInsets.symmetric(
                           vertical: 3, horizontal: 4),
@@ -295,10 +305,11 @@ class ParchiPdf {
                         crossAxisAlignment: pw.CrossAxisAlignment.start,
                         children: [
                           pw.Expanded(child: pw.Text(enLine, style: en(9))),
-                          pw.Directionality(
-                            textDirection: pw.TextDirection.rtl,
-                            child: pw.Text(urLine, style: ur(9)),
-                          ),
+                          if (bilingual)
+                            pw.Directionality(
+                              textDirection: pw.TextDirection.rtl,
+                              child: pw.Text(urLine, style: ur(9)),
+                            ),
                         ],
                       ),
                     ),
@@ -329,13 +340,15 @@ class ParchiPdf {
                     '(ghera, paincha, kameez length) are the customer\'s '
                     'preference and can be adjusted.',
                     style: en(9)),
-                pw.SizedBox(height: 5),
-                pw.Directionality(
-                  textDirection: pw.TextDirection.rtl,
-                  child: pw.Text(
-                      'درزی کے لیے: گاہک نے نمایاں (سبز) والا خانہ منتخب کیا ہے — اسی کے مطابق کاٹیں۔ تینوں خانوں میں آسان شامل ہے۔ گھیرا، پائنچہ اور قمیض کی لمبائی گاہک کی پسند کے مطابق ہے۔',
-                      style: ur(10)),
-                ),
+                if (bilingual) ...[
+                  pw.SizedBox(height: 5),
+                  pw.Directionality(
+                    textDirection: pw.TextDirection.rtl,
+                    child: pw.Text(
+                        'درزی کے لیے: گاہک نے نمایاں (سبز) والا خانہ منتخب کیا ہے — اسی کے مطابق کاٹیں۔ تینوں خانوں میں آسان شامل ہے۔ گھیرا، پائنچہ اور قمیض کی لمبائی گاہک کی پسند کے مطابق ہے۔',
+                        style: ur(10)),
+                  ),
+                ],
               ],
             ),
           ),

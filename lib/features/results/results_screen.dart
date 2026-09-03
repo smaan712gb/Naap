@@ -12,6 +12,7 @@ import '../../core/fabric.dart';
 import '../../core/models/measurements.dart';
 import '../../core/models/profile.dart';
 import '../../core/parchi/parchi_pdf.dart';
+import '../../core/parchi/reports_pdf.dart';
 import '../../core/shop_api.dart';
 import '../../core/silhouettes.dart';
 import '../../core/sizing.dart';
@@ -85,6 +86,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         style: s.style,
         silhouette: s.silhouette,
         measuredBy: s.shopName,
+        bilingual: s.parchiBilingual,
       );
       final summary =
           'Naap parchi for ${s.profile.name} — ${kGarments[s.garment]!.english} '
@@ -270,6 +272,12 @@ class _ResultsScreenState extends State<ResultsScreen> {
           _fitReportCard(context, s),
           const SizedBox(height: 16),
           _sizeCard(context, s),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () => _shareSizePassport(s),
+            icon: const Icon(Icons.badge_outlined),
+            label: const Text('Share my Size Passport (PDF)'),
+          ),
           const SizedBox(height: 16),
           Text(
             'Estimates from on-device analysis. Values marked ~ are lower-confidence — '
@@ -300,6 +308,19 @@ class _ResultsScreenState extends State<ResultsScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
           const SizedBox(height: 10),
+          if (entries.length >= 2)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  _shareDriftReport(s);
+                },
+                icon: const Icon(Icons.trending_up),
+                label: const Text(
+                    'Share Body Drift Report for your tailor (PDF)'),
+              ),
+            ),
           for (var i = 0; i < entries.length; i++)
             Card(
               elevation: 0,
@@ -371,6 +392,48 @@ class _ResultsScreenState extends State<ResultsScreen> {
             'Drop ${sm.drop}',
         sm.notes,
         'For off-the-rack suits and jackets.');
+  }
+
+  /// The mainstream artifact: shareable one-page international size card.
+  Future<void> _shareSizePassport(AppState s) async {
+    final box = context.findRenderObject() as RenderBox?;
+    final origin = box != null
+        ? box.localToGlobal(Offset.zero) & box.size
+        : const Rect.fromLTWH(0, 0, 1, 1);
+    try {
+      final file = await ReportsPdf.buildSizePassport(
+          profile: s.profile, naap: s.naap);
+      await Share.shareXFiles([XFile(file.path)],
+          text: 'My measured sizes — Naap Size Passport. getnaap.com',
+          sharePositionOrigin: origin);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Could not share passport: $e')));
+      }
+    }
+  }
+
+  /// The bespoke-house artifact: baseline vs latest scan with deltas.
+  Future<void> _shareDriftReport(AppState s) async {
+    final h = s.active.history;
+    if (h.length < 2) return;
+    final box = context.findRenderObject() as RenderBox?;
+    final origin = box != null
+        ? box.localToGlobal(Offset.zero) & box.size
+        : const Rect.fromLTWH(0, 0, 1, 1);
+    try {
+      final file = await ReportsPdf.buildDriftReport(
+          profile: s.profile, baseline: h.last, latest: h.first);
+      await Share.shareXFiles([XFile(file.path)],
+          text: 'Body drift report for my tailor — Naap. getnaap.com',
+          sharePositionOrigin: origin);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Could not share report: $e')));
+      }
+    }
   }
 
   /// Design/fabric reference photos (Imran's request: tailors often ask

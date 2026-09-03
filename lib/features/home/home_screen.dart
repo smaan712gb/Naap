@@ -95,6 +95,13 @@ void _showClients(BuildContext context, AppState state) {
             if (name != null) await state.setShopName(name);
           },
         ),
+        SwitchListTile(
+          secondary: const Icon(Icons.translate),
+          title: const Text('Bilingual parchi (EN + اردو)'),
+          subtitle: const Text('Off = English-only, for Western tailors'),
+          value: state.parchiBilingual,
+          onChanged: (v) => state.setParchiBilingual(v),
+        ),
         ListTile(
           leading: const Icon(Icons.person_add_alt),
           title: const Text('Add person — نیا گاہک'),

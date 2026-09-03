@@ -107,6 +107,12 @@ class AppState extends ChangeNotifier {
   /// phone generates (the tailor-branded viral artifact).
   String shopName = '';
 
+  static const _kBilingual = 'naap.parchiBilingual';
+
+  /// Parchi language: bilingual EN/UR (Pakistan default) or English-only
+  /// (Western/EU tailors). Device-level.
+  bool parchiBilingual = true;
+
   final List<ClientRecord> clients = [];
   String _activeId = '';
   GarmentType garment = GarmentType.shalwarKameez;
@@ -157,7 +163,15 @@ class AppState extends ChangeNotifier {
     }
     if (!clients.any((c) => c.id == _activeId)) _activeId = clients.first.id;
     shopName = sp.getString(_kShopName) ?? '';
+    parchiBilingual = sp.getBool(_kBilingual) ?? true;
     hydrated = true;
+    notifyListeners();
+  }
+
+  Future<void> setParchiBilingual(bool v) async {
+    parchiBilingual = v;
+    final sp = await SharedPreferences.getInstance();
+    await sp.setBool(_kBilingual, v);
     notifyListeners();
   }
 
