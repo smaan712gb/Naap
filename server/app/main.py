@@ -218,12 +218,15 @@ def catalog(audience: Optional[str] = None,
             occasion: Optional[str] = None,
             buying_option: Optional[str] = None,
             brand_id: Optional[str] = None,
-            color: Optional[str] = None) -> list[Fabric]:
+            color: Optional[str] = None,
+            tier: Optional[str] = None) -> list[Fabric]:
     items = db.list_fabrics(verified_only=True)
     if audience:
         items = [f for f in items if f.audience in (audience, None)]
     if color:
         items = [f for f in items if f.color == color]
+    if tier:
+        items = [f for f in items if f.tier == tier]
     if category_id:
         items = [f for f in items if f.category_id == category_id]
     if season:

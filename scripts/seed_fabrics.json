@@ -24,7 +24,10 @@
   "availability": "ready-to-dispatch",
   "image_url": "https://getnaap.com/img/lawn-classic-white.jpg",
   "color": "white",
-  "added_at": "2026-08-15"
+  "added_at": "2026-08-15",
+  "tier": "everyday",
+  "drape": "crisp",
+  "swatch_available": true
  },
  {
   "id": "emblawn-festive-teal",
@@ -54,7 +57,10 @@
   "availability": "ready-to-dispatch",
   "image_url": "https://getnaap.com/img/emblawn-festive-teal.jpg",
   "color": "teal",
-  "added_at": "2026-08-15"
+  "added_at": "2026-08-15",
+  "tier": "occasion",
+  "drape": "crisp",
+  "swatch_available": true
  },
  {
   "id": "khaddar-winter-brown",
@@ -80,7 +86,10 @@
   "availability": "ready-to-dispatch",
   "image_url": "https://getnaap.com/img/khaddar-winter-brown.jpg",
   "color": "brown",
-  "added_at": "2026-08-15"
+  "added_at": "2026-08-15",
+  "tier": "everyday",
+  "drape": "structured",
+  "swatch_available": true
  },
  {
   "id": "dhanak-rose-2pc",
@@ -110,7 +119,10 @@
   "availability": "ready-to-dispatch",
   "image_url": "https://getnaap.com/img/dhanak-rose-2pc.jpg",
   "color": "pink",
-  "added_at": "2026-08-15"
+  "added_at": "2026-08-15",
+  "tier": "everyday",
+  "drape": "fluid",
+  "swatch_available": true
  },
  {
   "id": "washwear-slate",
@@ -141,7 +153,10 @@
   "availability": "ready-to-dispatch",
   "image_url": "https://getnaap.com/img/washwear-slate.jpg",
   "color": "grey",
-  "added_at": "2026-08-15"
+  "added_at": "2026-08-15",
+  "tier": "everyday",
+  "drape": "structured",
+  "swatch_available": true
  },
  {
   "id": "latha-white",
@@ -171,7 +186,10 @@
   "availability": "ready-to-dispatch",
   "image_url": "https://getnaap.com/img/latha-white.jpg",
   "color": "white",
-  "added_at": "2026-08-15"
+  "added_at": "2026-08-15",
+  "tier": "everyday",
+  "drape": "crisp",
+  "swatch_available": true
  },
  {
   "id": "boski-cream",
@@ -203,7 +221,10 @@
   "availability": "ready-to-dispatch",
   "image_url": "https://getnaap.com/img/boski-cream.jpg",
   "color": "cream",
-  "added_at": "2026-08-15"
+  "added_at": "2026-08-15",
+  "tier": "occasion",
+  "drape": "fluid",
+  "swatch_available": true
  },
  {
   "id": "rawsilk-ivory",
@@ -233,7 +254,10 @@
   "image_url": "https://getnaap.com/img/rawsilk-ivory.jpg",
   "audience": "men",
   "color": "ivory",
-  "added_at": "2026-08-15"
+  "added_at": "2026-08-15",
+  "tier": "ceremonial",
+  "drape": "structured",
+  "swatch_available": true
  },
  {
   "id": "velvet-emerald",
@@ -265,7 +289,10 @@
   "availability": "made-to-order",
   "image_url": "https://getnaap.com/img/velvet-emerald.jpg",
   "color": "green",
-  "added_at": "2026-08-15"
+  "added_at": "2026-08-15",
+  "tier": "ceremonial",
+  "drape": "structured",
+  "swatch_available": true
  },
  {
   "id": "organza-blush",
@@ -296,7 +323,10 @@
   "availability": "made-to-order",
   "image_url": "https://getnaap.com/img/organza-blush.jpg",
   "color": "pink",
-  "added_at": "2026-08-15"
+  "added_at": "2026-08-15",
+  "tier": "occasion",
+  "drape": "crisp",
+  "swatch_available": true
  },
  {
   "id": "atelier-kurta-boski",
@@ -323,7 +353,8 @@
   "availability": "made-to-measure",
   "image_url": "https://getnaap.com/img/atelier-kurta-boski.jpg",
   "color": "cream",
-  "added_at": "2026-09-01"
+  "added_at": "2026-09-01",
+  "tier": "occasion"
  },
  {
   "id": "atelier-blazer-wool",
@@ -349,7 +380,8 @@
   "availability": "made-to-measure",
   "image_url": "https://getnaap.com/img/atelier-blazer-wool.jpg",
   "color": "grey",
-  "added_at": "2026-09-01"
+  "added_at": "2026-09-01",
+  "tier": "occasion"
  },
  {
   "id": "atelier-occasion-sk",
@@ -376,7 +408,8 @@
   "image_url": "https://getnaap.com/img/atelier-occasion-sk.jpg",
   "audience": "men",
   "color": "ivory",
-  "added_at": "2026-09-01"
+  "added_at": "2026-09-01",
+  "tier": "ceremonial"
  },
  {
   "id": "atelier-formal-ladies",
@@ -404,6 +437,216 @@
   "availability": "made-to-measure",
   "image_url": "https://getnaap.com/img/atelier-formal-ladies.jpg",
   "color": "green",
-  "added_at": "2026-09-03"
+  "added_at": "2026-09-03",
+  "tier": "ceremonial"
+ },
+ {
+  "id": "boski-6lb-summer",
+  "name": "Boski 6lb — Featherweight Summer",
+  "composition": "boski",
+  "price_usd": 120.0,
+  "meters": 5.0,
+  "description": "The lightest boski grade: airy, breathable, with the signature liquid sheen. For summer eid and nikkah wear.",
+  "source": "manual",
+  "verified": true,
+  "season": "all-season",
+  "occasions": [
+   "eid",
+   "nikkah",
+   "wedding-guest"
+  ],
+  "buying_options": [
+   "unstitched",
+   "custom-stitching"
+  ],
+  "design": "plain",
+  "availability": "made-to-order",
+  "tier": "occasion",
+  "added_at": "2026-09-03",
+  "image_url": "https://getnaap.com/img/boski-6lb-summer.jpg",
+  "audience": "men",
+  "weight_grade": "6lb",
+  "drape": "fluid",
+  "color": "cream",
+  "fabric_label": "Boski · 6lb",
+  "swatch_available": true
+ },
+ {
+  "id": "boski-8lb-classic",
+  "name": "Boski 8lb — The Classic",
+  "composition": "boski",
+  "price_usd": 185.0,
+  "meters": 5.0,
+  "description": "The definitive boski weight — substantial drape, deep lustre, the grade most masters recommend first.",
+  "source": "manual",
+  "verified": true,
+  "season": "all-season",
+  "occasions": [
+   "eid",
+   "nikkah",
+   "walima",
+   "wedding-guest"
+  ],
+  "buying_options": [
+   "unstitched",
+   "custom-stitching"
+  ],
+  "design": "plain",
+  "availability": "made-to-order",
+  "tier": "occasion",
+  "added_at": "2026-09-03",
+  "image_url": "https://getnaap.com/img/boski-8lb-classic.jpg",
+  "audience": "men",
+  "weight_grade": "8lb",
+  "drape": "fluid",
+  "color": "cream",
+  "fabric_label": "Boski · 8lb",
+  "swatch_available": true
+ },
+ {
+  "id": "boski-12lb-groom",
+  "name": "Boski 12lb — Groom Weight",
+  "composition": "boski",
+  "price_usd": 390.0,
+  "meters": 5.0,
+  "description": "Dense, sculptural, ceremonial: the heaviest boski grade, cut for barat and walima. Holds its fold like armor made of silk.",
+  "source": "manual",
+  "verified": true,
+  "season": "all-season",
+  "occasions": [
+   "barat",
+   "walima",
+   "groom"
+  ],
+  "buying_options": [
+   "unstitched",
+   "custom-stitching"
+  ],
+  "design": "plain",
+  "availability": "made-to-order",
+  "tier": "ceremonial",
+  "added_at": "2026-09-03",
+  "image_url": "https://getnaap.com/img/boski-12lb-groom.jpg",
+  "audience": "men",
+  "weight_grade": "12lb",
+  "drape": "structured",
+  "color": "ivory",
+  "fabric_label": "Boski · 12lb",
+  "swatch_available": true
+ },
+ {
+  "id": "jamawar-heritage",
+  "name": "Jamawar — Heritage Brocade",
+  "composition": "jamawar",
+  "price_usd": 680.0,
+  "meters": 4.5,
+  "description": "Woven-motif jamawar brocade in maroon and gold — the subcontinent's ceremonial masterweave.",
+  "source": "manual",
+  "verified": true,
+  "season": "all-season",
+  "occasions": [
+   "barat",
+   "walima",
+   "groom",
+   "bridal"
+  ],
+  "buying_options": [
+   "unstitched",
+   "custom-stitching"
+  ],
+  "design": "plain",
+  "availability": "made-to-order",
+  "tier": "ceremonial",
+  "added_at": "2026-09-03",
+  "image_url": "https://getnaap.com/img/jamawar-heritage.jpg",
+  "drape": "structured",
+  "color": "red",
+  "fabric_label": "Jamawar",
+  "swatch_available": true
+ },
+ {
+  "id": "banarsi-tissue-gold",
+  "name": "Banarsi Tissue — Gold",
+  "composition": "net_tissue",
+  "price_usd": 590.0,
+  "meters": 5.0,
+  "description": "Fine metallic banarsi tissue that moves like candlelight. For bridal overlays and walima ensembles.",
+  "source": "manual",
+  "verified": true,
+  "season": "all-season",
+  "occasions": [
+   "walima",
+   "bridal",
+   "nikkah"
+  ],
+  "buying_options": [
+   "unstitched",
+   "custom-stitching"
+  ],
+  "design": "plain",
+  "availability": "made-to-order",
+  "tier": "ceremonial",
+  "added_at": "2026-09-03",
+  "image_url": "https://getnaap.com/img/banarsi-tissue-gold.jpg",
+  "audience": "women",
+  "drape": "fluid",
+  "color": "gold",
+  "fabric_label": "Banarsi Tissue",
+  "swatch_available": true
+ },
+ {
+  "id": "zardozi-bridal",
+  "name": "Hand-Zardozi Bridal — Crimson Velvet",
+  "composition": "velvet",
+  "price_usd": 1450.0,
+  "meters": 4.5,
+  "description": "Raised gold bullion zardozi with pearl accents, hand-embroidered on deep crimson velvet. Commissioned per order.",
+  "source": "manual",
+  "verified": true,
+  "season": "all-season",
+  "occasions": [
+   "bridal",
+   "barat"
+  ],
+  "buying_options": [
+   "unstitched",
+   "custom-stitching"
+  ],
+  "design": "embellished",
+  "availability": "made-to-order",
+  "tier": "ceremonial",
+  "added_at": "2026-09-03",
+  "image_url": "https://getnaap.com/img/zardozi-bridal.jpg",
+  "audience": "women",
+  "drape": "structured",
+  "color": "red",
+  "fabric_label": "Hand Zardozi · Velvet",
+  "swatch_available": false
+ },
+ {
+  "id": "swatch-box",
+  "name": "The Naap Swatch Box",
+  "composition": "other",
+  "price_usd": 19.0,
+  "meters": 0.5,
+  "description": "Cuttings of every cloth in the house, in a presentation box. The $19 is credited toward your first order.",
+  "source": "manual",
+  "verified": true,
+  "season": "all-season",
+  "occasions": [
+   "daily"
+  ],
+  "buying_options": [
+   "unstitched",
+   "custom-stitching"
+  ],
+  "design": "plain",
+  "availability": "ready-to-dispatch",
+  "tier": null,
+  "added_at": "2026-09-03",
+  "image_url": "https://getnaap.com/img/swatch-box.jpg",
+  "color": "green",
+  "fabric_label": "Swatch Box",
+  "swatch_available": false
  }
 ]

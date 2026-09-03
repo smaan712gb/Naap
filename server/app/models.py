@@ -101,6 +101,21 @@ class Fabric(BaseModel):
                                             # pink, red, gold, multi)
     added_at: Optional[str] = None          # ISO date — drives "New in"
 
+    # ---- Tiered-house merchandising (docs/SHOP-BRIEF.md) ----
+    tier: Optional[str] = None              # everyday | occasion | ceremonial
+    images: list[str] = Field(default_factory=list)  # extra views (first 3:4)
+    # Provenance — ONLY filled from a real supplier's own statements;
+    # never invented (fabricated provenance = fabricated record).
+    mill: Optional[str] = None
+    mill_city: Optional[str] = None
+    loom_type: Optional[str] = None
+    story: Optional[str] = None             # 60-90 word origin, supplier-sourced
+    # Hard specifications — the measurement company's love language.
+    weight_grade: Optional[str] = None      # "6lb", "8lb", "Super 120s"
+    gsm: Optional[int] = None
+    drape: Optional[str] = None             # fluid | structured | crisp
+    swatch_available: bool = False
+
 
 # ---------------------------------------------------------------- orders
 

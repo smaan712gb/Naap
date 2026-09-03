@@ -27,21 +27,25 @@
   .hero h1{font-family:var(--serif);font-weight:600;font-size:clamp(1.9rem,4vw,3rem);line-height:1.15}
   .hero h1 em{font-style:italic;color:var(--gold)}
   .hero p{color:#B9CDC3;margin:16px auto 0;max-width:560px;font-size:1.02rem}
-  main{max-width:1160px;margin:0 auto;padding:38px 4vw 80px}
+  main{max-width:none;margin:0;padding:34px 0 80px}
+  .tabs,.filters,.chips{padding-left:3vw;padding-right:3vw}
+  .cta{margin-left:3vw;margin-right:3vw}
   .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:30px}
   select{padding:10px 14px;border:1px solid #DCD8D0;background:#fff;font-size:.9rem;font-family:var(--sans);color:var(--ink)}
   select:focus{outline:2px solid var(--green-2)}
   .tabs{display:flex;gap:26px;margin:6px 0 24px;border-bottom:1px solid #E3E7E4;flex-wrap:wrap}
   .tabs button{border:none;background:none;font-family:var(--sans);font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:10px 2px;cursor:pointer;border-bottom:2px solid transparent}
   .tabs button.on{color:var(--green);border-bottom-color:var(--gold);font-weight:600}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:34px 26px}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:44px 16px;padding:0 16px}
+  @media(max-width:1200px){.grid{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:720px){.grid{grid-template-columns:repeat(2,1fr);gap:30px 8px;padding:0 8px}}
   .card{background:none;display:flex;flex-direction:column;cursor:pointer}
   .swatch{aspect-ratio:4/5;position:relative;overflow:hidden;background:#ECEAE4;transition:opacity .3s}
   .card:hover .swatch{opacity:.96}
   .card:hover h3{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
   .swatch .label{position:absolute;top:12px;left:12px;background:rgba(14,32,25,.55);backdrop-filter:blur(4px);color:#fff;font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border-radius:999px}
   .swatch .atelier{position:absolute;top:12px;right:12px;background:var(--gold);color:#fff;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 11px}
-  .card .body{padding:14px 2px 0;display:flex;flex-direction:column;gap:4px;flex:1}
+  .card .body{padding:14px 4px 0;display:flex;flex-direction:column;gap:4px;flex:1}
   .card h3{font-family:var(--serif);font-weight:500;font-size:1.02rem;line-height:1.35}
   .card .meta{color:var(--muted);font-size:.72rem;letter-spacing:.09em;text-transform:uppercase}
   .card .desc{display:none}
@@ -54,6 +58,13 @@
   .cta .btn{display:inline-block;margin-top:20px;background:var(--gold);color:#fff;font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:.75rem;padding:15px 32px;text-decoration:none}
   .cta .btn:hover{filter:brightness(1.06)}
   .empty,.loading{color:var(--muted);text-align:center;padding:60px 0}
+  #tierhead{position:relative;height:300px;margin:0 0 34px;background-size:cover;background-position:center 40%}
+  #tierhead .tt{position:absolute;left:3vw;bottom:26px;color:#fff}
+  #tierhead .tt h2{font-family:var(--serif);font-weight:400;font-size:2rem}
+  #tierhead .tt p{font-size:.85rem;opacity:.9;max-width:460px}
+  #tierhead::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(10,14,12,.55))}
+  #tierhead .tt{z-index:1}
+  .spec{color:var(--muted);font-size:.7rem;letter-spacing:.06em}
   .chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:26px}
   .chips .lbl{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:4px}
   .chip{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #D7DDD9;cursor:pointer;transition:transform .15s}
@@ -82,11 +93,15 @@
 <main>
   <div class="tabs" id="tabs">
     <button class="on" data-t="all">All</button>
+    <button data-t="everyday">Everyday</button>
+    <button data-t="occasion">Occasion</button>
+    <button data-t="ceremonial">Ceremonial</button>
     <button data-t="new">New In</button>
     <button data-t="atelier">Atelier</button>
     <button data-t="women">Women</button>
     <button data-t="men">Men</button>
   </div>
+  <div id="tierhead" hidden></div>
   <div class="filters">
     <select id="f-aud"><option value="">Everyone</option>
       <option value="women">Women خواتین</option>
@@ -130,7 +145,9 @@ function hueFor(s){let h=0;for(const c of s)h+=c.charCodeAt(0);return (h*37)%360
 const IMG_IDS = ["lawn-classic-white","emblawn-festive-teal","khaddar-winter-brown",
   "dhanak-rose-2pc","washwear-slate","latha-white","boski-cream","rawsilk-ivory",
   "velvet-emerald","organza-blush","atelier-kurta-boski","atelier-blazer-wool",
-  "atelier-occasion-sk","atelier-formal-ladies"];
+  "atelier-occasion-sk","atelier-formal-ladies","boski-6lb-summer",
+  "boski-8lb-classic","boski-12lb-groom","jamawar-heritage",
+  "banarsi-tissue-gold","zardozi-bridal","swatch-box"];
 const IMG = Object.fromEntries(IMG_IDS.map(id => [id, `https://getnaap.com/img/${id}.jpg`]));
 
 const COLOR_HEX = {white:"#FAFAF7",cream:"#F1E7CF",ivory:"#F4EFE3",beige:"#D8C2A0",
@@ -152,16 +169,32 @@ for(const [c,hex] of Object.entries(COLOR_HEX)){
 const DAY = 864e5;
 const isNew = f => f.added_at && (Date.now() - Date.parse(f.added_at)) < 14*DAY;
 
+// The three rooms of the house — each with its own banner and voice.
+const TIERS = {
+  everyday: {img:'tier-everyday', title:'Everyday',
+    sub:'Lawn, latha, khaddar — the cloth of daily life, cut honestly.'},
+  occasion: {img:'tier-occasion', title:'Occasion',
+    sub:'Boski and organza for eid, nikkah and evenings that matter.'},
+  ceremonial: {img:'tier-ceremonial', title:'Ceremonial',
+    sub:'Raw silk, velvet, jamawar, hand-zardozi — for the days a family remembers.'},
+};
 let tab = "all";
 $('tabs').querySelectorAll('button').forEach(b => b.onclick = () => {
   tab = b.dataset.t;
   $('tabs').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
   if(tab==='women'||tab==='men') $('f-aud').value = tab; else $('f-aud').value = "";
+  const th = $('tierhead'), t = TIERS[tab];
+  if(t){
+    th.hidden = false;
+    th.style.backgroundImage = `url('https://getnaap.com/img/${t.img}.jpg')`;
+    th.innerHTML = `<div class="tt"><h2>${t.title}</h2><p>${t.sub}</p></div>`;
+  } else { th.hidden = true; }
   load();
 });
 const tabFilter = items =>
   tab==='new' ? items.filter(isNew) :
-  tab==='atelier' ? items.filter(f=>f.availability==='made-to-measure') : items;
+  tab==='atelier' ? items.filter(f=>f.availability==='made-to-measure') :
+  TIERS[tab] ? items.filter(f=>f.tier===tab) : items;
 
 function sortItems(items){
   const mode = $('f-sort').value;
@@ -275,6 +308,7 @@ async function load(){
         <div class="body">
           <h3>${f.name}</h3>
           <div class="meta">${f.brand || 'Naap select'} · ${f.fabric_label || f.composition}${f.meters ? ` · ${f.meters} m` : ""}</div>
+          ${(f.weight_grade || f.drape) ? `<div class="spec">${[f.weight_grade, f.drape, f.gsm ? f.gsm + ' gsm' : null].filter(Boolean).join(' · ')}</div>` : ""}
           <div class="desc">${f.description || ""}</div>
           <div class="price-row">
             <span class="price">$${Number(f.price_usd).toFixed(0)}</span>
