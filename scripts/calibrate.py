@@ -28,7 +28,7 @@ ENGINE = Path(__file__).resolve().parent.parent / "lib" / "core" / "measure" / "
 VALID = {
     "neck", "shoulder", "chest", "waist", "trouserWaist", "belly", "hip",
     "sleeveLength", "bicep", "armhole", "wrist", "kameezLength",
-    "shalwarLength", "inseam", "thigh", "ankleOpening", "hem",
+    "shalwarLength", "inseam", "thigh", "ankleOpening", "hem", "forearm", "calf",
     "jacketLength", "frontChest", "backWidth",
 }
 

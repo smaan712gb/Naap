@@ -18,12 +18,14 @@ enum MeasurementKey {
   hip, // Hip / Seat
   sleeveLength, // Baazu
   bicep,
+  forearm, // below the elbow — fitted sleeves
   armhole, // Baghal
   wrist, // Kalai
   kameezLength, // Qameez Lambai
   shalwarLength, // Shalwar Lambai
   inseam,
   thigh, // Raan
+  calf, // Pindli — floors the minimum paicha on trousers
   ankleOpening, // Paincha
   hem, // Ghera (kameez bottom sweep)
   jacketLength, // Coat Lambai — nape to hip, European jackets
@@ -92,6 +94,18 @@ const Map<MeasurementKey, MeasurementDef> kMeasurementDefs = {
       english: 'Bicep',
       urdu: 'ڈولا',
       tailorTerm: 'Dola',
+      isCircumference: true),
+  MeasurementKey.forearm: MeasurementDef(
+      key: MeasurementKey.forearm,
+      english: 'Forearm',
+      urdu: 'بازو (کہنی کے نیچے)',
+      tailorTerm: 'Forearm',
+      isCircumference: true),
+  MeasurementKey.calf: MeasurementDef(
+      key: MeasurementKey.calf,
+      english: 'Calf',
+      urdu: 'پنڈلی',
+      tailorTerm: 'Pindli',
       isCircumference: true),
   MeasurementKey.armhole: MeasurementDef(
       key: MeasurementKey.armhole,

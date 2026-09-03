@@ -190,6 +190,30 @@ void main() {
     });
   });
 
+  group('darzi heuristics', () {
+    test('trouser paicha is floored at calf minus margin', () {
+      final naap = Naap.empty()
+        ..set(MeasurementKey.ankleOpening, const MeasurementValue(28.0))
+        ..set(MeasurementKey.calf, const MeasurementValue(37.0));
+      final lines = EaseEngine.buildParchi(
+          naap, GarmentType.trousersShirt, FitPreference.fitted);
+      final paicha = lines
+          .firstWhere((l) => l.def.key == MeasurementKey.ankleOpening);
+      expect(paicha.stitchCm, 34.5); // 37 calf - 2.5 margin
+    });
+
+    test('shalwar paicha stays a pure style number', () {
+      final naap = Naap.empty()
+        ..set(MeasurementKey.ankleOpening, const MeasurementValue(28.0))
+        ..set(MeasurementKey.calf, const MeasurementValue(37.0));
+      final lines = EaseEngine.buildParchi(
+          naap, GarmentType.shalwarKameez, FitPreference.regular);
+      final paicha = lines
+          .firstWhere((l) => l.def.key == MeasurementKey.ankleOpening);
+      expect(paicha.stitchCm, 28.0);
+    });
+  });
+
   group('per-user learning', () {
     test('learns a correction and applies it to the next AI value', () {
       final cal = PersonalCalibration();

@@ -256,6 +256,7 @@ class _CaptureScreenState extends State<CaptureScreen>
   Widget _buildIntro() {
     const steps = [
       (Icons.checkroom, 'Wear fitted clothes (not baggy) so the camera sees your shape.'),
+      (Icons.smartphone, 'Empty your pockets — a phone in the pocket distorts thigh and hip.'),
       (Icons.light_mode, 'Stand in good, even light against a plain background.'),
       (Icons.straighten, 'Prop the phone at waist height, 2.5–3 m away — or have someone hold it.'),
       (Icons.accessibility_new, 'Front photo: stand tall, feet slightly apart, arms lifted ~30° from your sides.'),

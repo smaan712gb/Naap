@@ -43,8 +43,12 @@ const double _kCrotchRowT = 0.16; // hip landmark → knee fraction for crotch
 /// first professional darzi tape sheet (subject: founder; app waist was
 /// within 0.1" of the tailor's, validating the pipeline; chest/seat read
 /// ~4-5" low from over-tight caps + the ellipse under-modeling a tape's
-/// real path over lats/glutes, so their factors rise above 1). Single
-/// subject so far — refine with calibrate.py as more pairs arrive.
+/// real path over lats/glutes, so their factors rise above 1). Note also
+/// the darzi "one-finger ease" rule observed on video: a tailor keeps an
+/// index finger under the tape on every girth, so professional tape
+/// numbers run ~1.5-2 cm above skin-tight — our factors calibrate to THAT
+/// convention, which is what a parchi means. Single subject so far —
+/// refine with calibrate.py as more pairs arrive.
 const double _kChestShape = 1.06;
 const double _kWaistShape = 0.99; // tape-validated, do not touch casually
 const double _kBellyShape = 0.99;
@@ -319,6 +323,19 @@ class MeasurementEngine {
             (naap[MeasurementKey.chest]?.cm ?? h * 0.55) * 0.32,
             source: MeasurementSource.regression,
             confidence: 0.4));
+    // Forearm just below the elbow (darzi video: measured for fitted
+    // sleeves) tracks the bicep.
+    naap.set(
+        MeasurementKey.forearm,
+        MeasurementValue(
+            (naap[MeasurementKey.bicep]?.cm ?? h * 0.17) * 0.82,
+            source: MeasurementSource.regression,
+            confidence: 0.35));
+    // Calf (Pindli) floors the minimum trouser paicha — see ease.dart.
+    naap.set(
+        MeasurementKey.calf,
+        MeasurementValue(h * 0.205,
+            source: MeasurementSource.regression, confidence: 0.4));
     // Armscye circumference tracks chest size closely (~0.45x).
     naap.set(
         MeasurementKey.armhole,

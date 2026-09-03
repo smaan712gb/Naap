@@ -87,6 +87,7 @@ const Map<GarmentType, GarmentDef> kGarments = {
       MeasurementKey.shalwarLength,
       MeasurementKey.inseam,
       MeasurementKey.thigh,
+      MeasurementKey.calf,
       MeasurementKey.ankleOpening,
     ],
   ),
@@ -106,9 +107,22 @@ const Map<GarmentType, GarmentDef> kGarments = {
       MeasurementKey.shalwarLength,
       MeasurementKey.inseam,
       MeasurementKey.thigh,
+      MeasurementKey.calf,
       MeasurementKey.ankleOpening,
     ],
   ),
+};
+
+/// Darzi heuristic (observed on video, 2026-09-03): a narrow trouser leg
+/// opening must still pass over the calf — paicha can never be cut more
+/// than ~1 inch under the calf circumference.
+const double _kPaichaCalfMarginCm = 2.5;
+
+/// Garments where the paicha floor applies (a loose shalwar's paicha is a
+/// pure style number and never binds on the calf).
+const Set<GarmentType> _kPaichaFloorGarments = {
+  GarmentType.suitTwoPiece,
+  GarmentType.trousersShirt,
 };
 
 /// Ease in cm for [FitPreference.regular]; fitted subtracts, loose adds, per
@@ -210,10 +224,19 @@ class EaseEngine {
           fabricDef.affectedKeys.contains(key)) {
         e += fabricDef.easeDeltaCm;
       }
+      var stitch = v.cm + e;
+      // Paicha floor: the opening must clear the calf (darzi heuristic).
+      if (key == MeasurementKey.ankleOpening &&
+          _kPaichaFloorGarments.contains(garment)) {
+        final calf = naap[MeasurementKey.calf]?.cm;
+        if (calf != null && stitch < calf - _kPaichaCalfMarginCm) {
+          stitch = calf - _kPaichaCalfMarginCm;
+        }
+      }
       lines.add(ParchiLine(
         def: kMeasurementDefs[key]!,
         bodyCm: v.cm,
-        stitchCm: v.cm + e,
+        stitchCm: stitch,
         source: v.source,
         confidence: v.confidence,
       ));
