@@ -320,21 +320,28 @@ class MeasurementEngine {
     }
 
     // ---- Regression fallbacks (low confidence, always editable) ----
+    // Coefficients refit 2026-09-03 against ANSUR II (4,082 men / 1,986
+    // women, professionally measured) — gendered stature+BMI forms replace
+    // single-scalar guesses. Where a darzi-taped calibration existed it is
+    // kept when the survey agrees (male neck: darzi 0.237/0.45 vs ANSUR
+    // neck-base 0.2348/0.468 — two independent sources within 1%).
     final weight = profile.weightKg;
+    final male = profile.bodyType == BodyType.male;
+    final bmi = weight != null ? weight / ((h / 100) * (h / 100)) : 23.0;
+    final dBmi = bmi - 23.0;
     if (naap[MeasurementKey.neck] == null) {
-      // Neck circumference scales with stature and BMI; simple linear model.
-      // Coefficients calibrated twice: 2026-09-02 (collar sizes) and
-      // 2026-09-03 (professional darzi taped ~17.5" where 0.225 gave 16.2").
-      final bmi = weight != null ? weight / ((h / 100) * (h / 100)) : 23.0;
-      final neck = (profile.bodyType == BodyType.male ? 0.237 : 0.215) * h +
-          (bmi - 23.0) * 0.45;
+      // Male: darzi-calibrated (collar sizes + taped 17.5"), ANSUR-confirmed.
+      // Female: ANSUR II neck-base fit (no tape calibration yet).
+      final neck = male ? 0.237 * h + 0.45 * dBmi : 0.2226 * h + 0.337 * dBmi;
       naap.set(MeasurementKey.neck,
           MeasurementValue(neck, source: MeasurementSource.regression, confidence: 0.4));
     }
+    // Wrist: ANSUR II fit (sd 0.6cm); darzi 2026-09-03 taped 7" ≈ this line.
     naap.set(
         MeasurementKey.wrist,
-        MeasurementValue(h * 0.106, // darzi-calibrated 2026-09-03
-            source: MeasurementSource.regression, confidence: 0.4));
+        MeasurementValue(
+            male ? 0.0967 * h + 0.127 * dBmi : 0.0933 * h + 0.111 * dBmi,
+            source: MeasurementSource.regression, confidence: 0.45));
     naap.set(
         MeasurementKey.bicep,
         MeasurementValue(
@@ -342,18 +349,21 @@ class MeasurementEngine {
             source: MeasurementSource.regression,
             confidence: 0.4));
     // Forearm just below the elbow (darzi video: measured for fitted
-    // sleeves) tracks the bicep.
+    // sleeves) tracks the bicep (ANSUR II ratio 0.87, sd 0.04).
     naap.set(
         MeasurementKey.forearm,
         MeasurementValue(
-            (naap[MeasurementKey.bicep]?.cm ?? h * 0.17) * 0.82,
+            (naap[MeasurementKey.bicep]?.cm ?? h * 0.17) * 0.87,
             source: MeasurementSource.regression,
             confidence: 0.35));
     // Calf (Pindli) floors the minimum trouser paicha — see ease.dart.
+    // ANSUR II: BMI carries ~0.6cm per unit — a scalar-only form was
+    // 3-4cm off for heavy or lean bodies.
     naap.set(
         MeasurementKey.calf,
-        MeasurementValue(h * 0.205,
-            source: MeasurementSource.regression, confidence: 0.4));
+        MeasurementValue(
+            male ? 0.2073 * h + 0.595 * dBmi : 0.2200 * h + 0.591 * dBmi,
+            source: MeasurementSource.regression, confidence: 0.45));
     // Armscye circumference tracks chest size closely (~0.45x).
     naap.set(
         MeasurementKey.armhole,
@@ -385,17 +395,22 @@ class MeasurementEngine {
         MeasurementKey.backWidth,
         MeasurementValue(chestCm * 0.43,
             source: MeasurementSource.regression, confidence: 0.35));
-    // Over-arm (chest + both arms at their widest) — standard drafting
-    // offset of ~9-11 cm over the chest; jacket armhole clearance check.
+    // Over-arm (chest + both arms at their widest) — jacket armhole
+    // clearance check. ANSUR II: +12.0cm men / +8.1cm women over chest.
     naap.set(
         MeasurementKey.overArm,
-        MeasurementValue(chestCm + 10.0,
+        MeasurementValue(chestCm + (male ? 12.0 : 8.1),
             source: MeasurementSource.regression, confidence: 0.35));
     // Knee circumference anchors trouser silhouettes (wide → skinny).
+    // ANSUR II lower-thigh/thigh ratio 0.656 M / 0.651 F (0.72 ran ~3.5cm
+    // large); height fallback from the same survey.
     final thighCm = naap[MeasurementKey.thigh]?.cm;
     naap.set(
         MeasurementKey.knee,
-        MeasurementValue(thighCm != null ? thighCm * 0.72 : h * 0.215,
+        MeasurementValue(
+            thighCm != null
+                ? thighCm * 0.655
+                : (male ? 0.2152 * h + 0.663 * dBmi : 0.2340 * h + 0.778 * dBmi),
             source: MeasurementSource.regression, confidence: 0.35));
     naap.set(
         MeasurementKey.ankleOpening,
