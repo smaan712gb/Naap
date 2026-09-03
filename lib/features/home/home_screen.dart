@@ -1,11 +1,34 @@
+import 'dart:convert';
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/app_state.dart';
+import '../../core/app_version.dart';
 import '../capture/capture_screen.dart';
 import '../profile/profile_screen.dart';
 import '../results/results_screen.dart';
 import '../shop/shop_screen.dart';
+
+/// Sideloaded Android has no store auto-update: check the published build
+/// stamp and offer the download when a newer one exists. iOS updates flow
+/// through TestFlight automatically, so the card is Android-only.
+Future<bool> _updateAvailable() async {
+  if (!Platform.isAndroid) return false;
+  try {
+    final resp = await http
+        .get(Uri.parse(kVersionUrl))
+        .timeout(const Duration(seconds: 6));
+    if (resp.statusCode != 200) return false;
+    final j = jsonDecode(resp.body) as Map<String, dynamic>;
+    return (j['build'] as num? ?? 0) > kNaapBuild;
+  } catch (_) {
+    return false; // offline = no nagging
+  }
+}
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -31,6 +54,26 @@ class HomeScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
+          FutureBuilder<bool>(
+            future: _updateAvailable(),
+            builder: (context, snap) => snap.data == true
+                ? Card(
+                    color: const Color(0xFFFFF6E0),
+                    elevation: 0,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    child: ListTile(
+                      leading: const Icon(Icons.system_update,
+                          color: Color(0xFFC9A227)),
+                      title: const Text('Update available — نئی اپڈیٹ'),
+                      subtitle: const Text(
+                          'A newer Naap with better measurements is ready.'),
+                      trailing: const Icon(Icons.download),
+                      onTap: () => launchUrl(Uri.parse(kDownloadUrl),
+                          mode: LaunchMode.externalApplication),
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
           Card(
             color: const Color(0xFFE8F1EC),
             elevation: 0,
