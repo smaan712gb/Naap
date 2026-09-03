@@ -129,6 +129,24 @@ monetization opens — distinct economics from Pakistani tailors, who
 stay free forever. Banked wants: parchi language toggle (Urdu column is
 odd in Milan), richer tailor branding.
 
+## Segment: time-poor affluent Western professionals (2026-09-03)
+
+The largest TAM this product touches — the hedge-fund-manager archetype
+(finance/law/tech, any ethnicity, money-rich hour-poor) who will never
+visit a showroom. Two-stage play: (1) TODAY, FREE — "scan once, never
+buy the wrong size online again": the size card + growing fit library
+as the universal returns-problem answer and the mainstream acquisition
+hook (also feeds the library the Western-brand data it needs); (2) at
+Atelier Gate 4 — the 2-minute home scan replacing the showroom for MTM
+suiting at Lahore economics; edges over Indochino-class competitors:
+zero appointments, on-device privacy, body-drift reorders, and
+eventually per-brand fit ("cut to fit like your ZEGNA 50"). Deliberately
+NOT first: a canvassed suit is the costliest garment to get wrong and
+this customer gives one chance — the diaspora/kameez beachhead exists to
+make the mistakes cheaply first. Marketing note: the landing page is
+100% desi-positioned today; a mainstream-positioned page/mode comes when
+accuracy is proven.
+
 ## Segment: bespoke/couture houses for ultra-rich clients (2026-09-03)
 
 The apex segment — Savile Row, Neapolitan sartorias, Paris ateliers, NYC
