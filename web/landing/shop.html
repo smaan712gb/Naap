@@ -100,6 +100,18 @@ const $ = id => document.getElementById(id);
 
 function hueFor(s){let h=0;for(const c of s)h+=c.charCodeAt(0);return (h*37)%360;}
 
+// Interim photography (free-license, Pexels) until the API serves image_url.
+const PX = id => `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=800`;
+const IMG = {
+  "lawn-classic-white": PX(30550128), "emblawn-festive-teal": PX(8749980),
+  "khaddar-winter-brown": PX(6331032), "dhanak-rose-2pc": PX(14944284),
+  "washwear-slate": PX(7988109), "latha-white": PX(5908326),
+  "boski-cream": PX(7988399), "rawsilk-ivory": PX(8465934),
+  "velvet-emerald": PX(35974685), "organza-blush": PX(7956629),
+  "atelier-kurta-boski": PX(35491621), "atelier-blazer-wool": PX(35865086),
+  "atelier-occasion-sk": PX(8588636),
+};
+
 // Draped-cloth swatch: layered gradients render hanging fabric with folds
 // and sheen, tuned per fabric family. Photography wins when image_url is
 // set (partner feeds / the image agent); this is the premium fallback.
@@ -142,8 +154,9 @@ async function load(){
       const card = document.createElement('div');
       card.className = 'card';
       const mtm = f.availability === 'made-to-measure';
-      const sw = f.image_url
-        ? `style="background:url('${f.image_url}') center/cover"`
+      const img = f.image_url || IMG[f.id];
+      const sw = img
+        ? `style="${clothCSS(f)}background-image:url('${img}');background-size:cover;background-position:center"`
         : `style="${clothCSS(f)}"`;
       card.innerHTML = `
         <div class="swatch" ${sw}>

@@ -40,6 +40,35 @@ def customer_llm():
     return sourcing_llm()
 
 
+def vision_llm():
+    """DeepSeek's vision model (V4 Flash Vision Exp) — the agents' cheap
+    eyes. Understanding only: it reads public catalog imagery; it cannot
+    generate images (that needs the separate image-gen key). User body
+    photos never reach it or any cloud model (product laws 1 & 4)."""
+    from langchain_deepseek import ChatDeepSeek
+    if not os.environ.get("DEEPSEEK_API_KEY"):
+        raise RuntimeError("DEEPSEEK_API_KEY is not set")
+    return ChatDeepSeek(model="deepseek-v4-flash-vision-exp", temperature=0)
+
+
+def screen_image(url: str, expect: str) -> bool:
+    """True if the image plausibly shows `expect` (a clean garment/fabric
+    shot, not a logo/banner/sprite). Fail-open: the model is experimental,
+    so on any error we keep the image rather than silently dropping it."""
+    try:
+        out = vision_llm().invoke([("human", [
+            {"type": "text", "text":
+                f"Does this image clearly show: {expect}? It must be a "
+                "product, garment, or fabric photograph — not a logo, "
+                "banner, icon, or sprite. Answer YES or NO only."},
+            {"type": "image_url", "image_url": {"url": url}},
+        ])]).text
+        return "YES" in out.upper()
+    except Exception:  # noqa: BLE001
+        log.warning("vision screen failed for %s — keeping image", url)
+        return True
+
+
 def llm_configured() -> dict:
     return {
         "deepseek": bool(os.environ.get("DEEPSEEK_API_KEY")),

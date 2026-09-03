@@ -26,7 +26,7 @@ import httpx
 
 from .. import db
 from ..taxonomy import BRANDS
-from .llm import sourcing_llm
+from .llm import screen_image, sourcing_llm
 
 log = logging.getLogger("naap.agents.monitor")
 
@@ -154,6 +154,8 @@ def trend_scan(max_brands: int = 3, offset: int = 0) -> dict:
         for b in picks:
             try:
                 text, images = _fetch_page(client, b["url"])
+                images = [u for u in images if screen_image(
+                    u, f"{b['name']} garment, outfit, or fabric")][:4]
                 note = llm.invoke(
                     [("system", _TREND_PROMPT),
                      ("human", f"Brand: {b['name']}\nPage text:\n{text}")]
