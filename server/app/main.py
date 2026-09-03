@@ -256,8 +256,8 @@ def _stripe_checkout(order: Order) -> Optional[str]:
         auth=(key, ""),
         data={
             "mode": "payment",
-            "success_url": "https://naap.app/order/success",
-            "cancel_url": "https://naap.app/order/cancel",
+            "success_url": "https://getnaap.com/?order=success",
+            "cancel_url": "https://getnaap.com/?order=cancelled",
             "line_items[0][price_data][currency]": "usd",
             "line_items[0][price_data][product_data][name]":
                 f"Naap order {order.id} ({order.detail.mode.value})",
@@ -270,6 +270,35 @@ def _stripe_checkout(order: Order) -> Optional[str]:
     )
     resp.raise_for_status()
     return resp.json()["url"]
+
+
+class QuoteRequest(BaseModel):
+    mode: CheckoutMode
+    fabric_id: Optional[str] = None
+
+
+@app.post("/orders/quote")
+def quote_order(req: QuoteRequest) -> dict:
+    """Price breakdown BEFORE ordering — no surprises at checkout."""
+    fabric_usd = 0.0
+    fabric_name = None
+    if req.mode != CheckoutMode.measurement_only:
+        if not req.fabric_id:
+            raise HTTPException(422, "fabric_id required for this mode")
+        fabric = db.get_fabric(req.fabric_id)
+        if not fabric or not fabric.verified:
+            raise HTTPException(404, "fabric not available")
+        fabric_usd = fabric.price_usd
+        fabric_name = fabric.name
+    fee = STITCHING_FEE_USD[req.mode]
+    shipping = SHIPPING_USD[req.mode]
+    return {
+        "fabric_name": fabric_name,
+        "fabric_usd": fabric_usd,
+        "service_usd": fee,
+        "shipping_usd": shipping,
+        "total_usd": round(fabric_usd + fee + shipping, 2),
+    }
 
 
 @app.post("/orders")

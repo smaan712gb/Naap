@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Naap Fabrics — unstitched cloth, stitched to your naap</title>
+<meta name="description" content="Pakistani fabrics for the diaspora — buy unstitched, or have it stitched to your exact measurements by a vetted master tailor.">
+<link rel="canonical" href="https://getnaap.com/shop.html">
+<style>
+  :root{--green:#1B4D3E;--soft:#E8F1EC;--gold:#C9A227;--bg:#FAF9F6;--muted:#5b6b64}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#17211d}
+  header{background:var(--green);color:#fff;padding:14px 6vw;display:flex;justify-content:space-between;align-items:center}
+  header a{color:#fff;text-decoration:none}
+  header .brand{font-size:1.3rem;font-weight:700}
+  .hero{background:var(--green);color:#fff;text-align:center;padding:5vh 6vw 6vh}
+  .hero h1{font-size:clamp(1.5rem,3.5vw,2.3rem)}
+  .hero p{color:#cfe0d8;margin-top:10px;max-width:600px;margin-inline:auto}
+  main{max-width:1080px;margin:0 auto;padding:28px 4vw 60px}
+  .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+  select{padding:9px 12px;border:1.5px solid #cbd6d0;border-radius:9px;background:#fff;font-size:.92rem}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
+  .card{background:#fff;border:1px solid #e4e9e6;border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+  .swatch{aspect-ratio:1;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.85);font-size:2.6rem;font-weight:700;position:relative}
+  .badge{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.45);color:#fff;font-size:.72rem;font-weight:600;padding:3px 9px;border-radius:999px}
+  .card .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:4px;flex:1}
+  .card h3{font-size:.98rem;line-height:1.3}
+  .card .meta{color:var(--muted);font-size:.8rem}
+  .card .price-row{margin-top:auto;display:flex;justify-content:space-between;align-items:baseline;padding-top:8px}
+  .card .price{font-weight:700;font-size:1.05rem;color:var(--green)}
+  .cta{background:var(--soft);border-radius:14px;padding:22px;margin-top:34px;text-align:center}
+  .cta .btn{display:inline-block;margin-top:12px;background:var(--gold);color:#1c1503;font-weight:600;padding:12px 24px;border-radius:10px;text-decoration:none}
+  .empty,.loading{color:var(--muted);text-align:center;padding:50px 0}
+  footer{background:var(--green);color:#cfe0d8;text-align:center;padding:22px;font-size:.85rem}
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="/">Naap <span style="font-weight:400">ناپ</span></a>
+  <a href="/#get">Get the app</a>
+</header>
+<div class="hero">
+  <h1>Fabrics of Pakistan, stitched to <em>your</em> naap</h1>
+  <p>Buy the cloth unstitched — or let a vetted master tailor stitch it to
+  the measurements your phone took. Fit risk: removed. کپڑا آپ کا، ناپ آپ کا۔</p>
+</div>
+<main>
+  <div class="filters">
+    <select id="f-aud"><option value="">Everyone</option>
+      <option value="women">Women خواتین</option>
+      <option value="men">Men حضرات</option></select>
+    <select id="f-season"><option value="">All seasons</option>
+      <option value="summer">Summer گرمی</option>
+      <option value="winter">Winter سردی</option>
+      <option value="all-season">All-season</option></select>
+    <select id="f-occ"><option value="">Any occasion</option>
+      <option value="daily">Daily روزمرہ</option>
+      <option value="eid">Eid عید</option>
+      <option value="nikkah">Nikkah نکاح</option>
+      <option value="barat">Barat بارات</option>
+      <option value="walima">Walima ولیمہ</option>
+      <option value="bridal">Bridal دلہن</option>
+      <option value="groom">Groom دولہا</option></select>
+  </div>
+  <div id="grid" class="grid"></div>
+  <div id="state" class="loading">Loading the catalog…</div>
+  <div class="cta">
+    <strong>Ready to order?</strong><br>
+    Ordering lives in the Naap app — where your measurements are — so every
+    stitched order fits. Unstitched fabric ships worldwide either way.
+    <br><a class="btn" href="/#get">Get the Naap app</a>
+  </div>
+</main>
+<footer>Naap (ناپ) · getnaap.com · Photos never leave your phone</footer>
+<script>
+const API = "https://naap-api.m9vte9fmk66k4.us-west-2.cs.amazonlightsail.com";
+const $ = id => document.getElementById(id);
+
+function hueFor(s){let h=0;for(const c of s)h+=c.charCodeAt(0);return (h*37)%360;}
+
+async function load(){
+  $('state').textContent = "Loading the catalog…"; $('state').style.display='block';
+  const p = new URLSearchParams();
+  if($('f-aud').value) p.set('audience', $('f-aud').value);
+  if($('f-season').value) p.set('season', $('f-season').value);
+  if($('f-occ').value) p.set('occasion', $('f-occ').value);
+  try{
+    const r = await fetch(API + "/catalog?" + p);
+    const items = await r.json();
+    $('grid').innerHTML = "";
+    if(!items.length){$('state').textContent = "Nothing matches those filters yet."; return;}
+    $('state').style.display = 'none';
+    for(const f of items){
+      const hue = hueFor(f.composition || 'other');
+      const card = document.createElement('div');
+      card.className = 'card';
+      const img = f.image_url
+        ? `<div class="swatch" style="background:url('${f.image_url}') center/cover">`
+        : `<div class="swatch" style="background:linear-gradient(135deg,
+             hsl(${hue},35%,66%),hsl(${hue},42%,40%))">${(f.name||'?')[0]}`;
+      card.innerHTML = `${img}
+          ${f.season ? `<span class="badge">${f.season}</span>` : ""}</div>
+        <div class="body">
+          <h3>${f.name}</h3>
+          <div class="meta">${f.brand || 'Wholesale'} · ${f.fabric_label || f.composition}
+            · ${f.meters} m</div>
+          <div class="meta">${f.description || ""}</div>
+          <div class="price-row"><span class="price">$${Number(f.price_usd).toFixed(0)}</span>
+            <span class="meta">unstitched</span></div>
+        </div>`;
+      $('grid').appendChild(card);
+    }
+  }catch(e){$('state').textContent = "Catalog unreachable right now — try again shortly.";}
+}
+for(const id of ['f-aud','f-season','f-occ']) $(id).onchange = load;
+load();
+</script>
+</body>
+</html>

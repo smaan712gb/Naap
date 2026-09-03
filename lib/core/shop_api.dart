@@ -131,6 +131,21 @@ class ShopApi {
         _kOrders, jsonEncode([for (final x in current) x.toJson()]));
   }
 
+  /// Price breakdown before ordering — no surprises at checkout.
+  static Future<Map<String, dynamic>> quote(
+      {required String mode, String? fabricId}) async {
+    final base = await baseUrl();
+    final resp = await http
+        .post(Uri.parse('$base/orders/quote'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'mode': mode, 'fabric_id': fabricId}))
+        .timeout(const Duration(seconds: 12));
+    if (resp.statusCode != 200) {
+      throw Exception('Quote failed (HTTP ${resp.statusCode})');
+    }
+    return jsonDecode(resp.body) as Map<String, dynamic>;
+  }
+
   static Future<OrderStatus> fetchOrder(String orderId) async {
     final base = await baseUrl();
     final resp = await http

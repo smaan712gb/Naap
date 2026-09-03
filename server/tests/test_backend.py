@@ -101,6 +101,19 @@ def test_su_misura_extended_bespoke_deltas():
     assert s.back_width_delta_cm == 2.0
 
 
+def test_order_quote_breakdown(client):
+    _seed_fabric(client)
+    q = client.post("/orders/quote", json={
+        "mode": "stitch_and_ship", "fabric_id": "lawn1"}).json()
+    assert q["fabric_usd"] == 28.0
+    assert q["service_usd"] == 35.0
+    assert q["shipping_usd"] == 25.0
+    assert q["total_usd"] == 88.0
+    q2 = client.post("/orders/quote",
+                     json={"mode": "measurement_only"}).json()
+    assert q2["total_usd"] == 1.99
+
+
 def test_fit_report_flywheel(client):
     r = client.post("/fit-reports", json={
         "brand": "ZEGNA", "garment": "jacket", "size_label": "EU 50",

@@ -57,8 +57,8 @@ class _FabricDetailScreenState extends State<FabricDetailScreen> {
           EaseEngine.buildParchi(s.naap, s.garment, s.fit, fabric: s.fabric);
     }
 
-    final email = await _askEmail();
-    if (email == null) return;
+    final checkout = await _confirmCheckout(mode);
+    if (checkout == null) return;
 
     setState(() => _busy = true);
     try {
@@ -68,7 +68,8 @@ class _FabricDetailScreenState extends State<FabricDetailScreen> {
         garment: kGarments[s.garment]!.english,
         fit: s.fit.name,
         customerName: s.profile.name,
-        customerEmail: email,
+        customerEmail: checkout.email,
+        shipTo: checkout.shipTo,
         parchi: parchi,
       );
       await ShopApi.rememberOrder(PlacedOrder(
@@ -94,25 +95,112 @@ class _FabricDetailScreenState extends State<FabricDetailScreen> {
     }
   }
 
-  Future<String?> _askEmail() async {
-    final ctrl = TextEditingController();
-    return showDialog<String>(
+  /// Checkout confirmation: live price breakdown, email, and — for modes
+  /// that ship — the delivery address. No surprises after the tap.
+  Future<({String email, String? shipTo})?> _confirmCheckout(
+      String mode) async {
+    final needsShipping = mode != 'measurement_only';
+    final emailCtrl = TextEditingController();
+    final addrCtrl = TextEditingController();
+    return showDialog<({String email, String? shipTo})>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Email for order updates'),
-        content: TextField(
-            controller: ctrl,
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(hintText: 'you@example.com')),
+        title: const Text('Confirm your order'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FutureBuilder<Map<String, dynamic>>(
+                future: ShopApi.quote(mode: mode, fabricId: widget.fabric.id),
+                builder: (ctx, snap) {
+                  if (snap.connectionState != ConnectionState.done) {
+                    return const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: Center(
+                            child: SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2))));
+                  }
+                  if (snap.hasError) {
+                    return Text('Could not fetch pricing: ${snap.error}',
+                        style: const TextStyle(color: Colors.orange));
+                  }
+                  final q = snap.data!;
+                  Widget row(String label, num v, {bool bold = false}) =>
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(label,
+                                style: TextStyle(
+                                    fontWeight: bold
+                                        ? FontWeight.bold
+                                        : FontWeight.normal)),
+                            Text('\$${v.toStringAsFixed(2)}',
+                                style: TextStyle(
+                                    fontWeight: bold
+                                        ? FontWeight.bold
+                                        : FontWeight.normal)),
+                          ],
+                        ),
+                      );
+                  return Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                        color: const Color(0xFFE8F1EC),
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Column(children: [
+                      if ((q['fabric_usd'] as num) > 0)
+                        row('Fabric', q['fabric_usd'] as num),
+                      if ((q['service_usd'] as num) > 0)
+                        row('Stitching & service', q['service_usd'] as num),
+                      if ((q['shipping_usd'] as num) > 0)
+                        row('Worldwide shipping', q['shipping_usd'] as num),
+                      const Divider(height: 12),
+                      row('Total', q['total_usd'] as num, bold: true),
+                    ]),
+                  );
+                },
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                  controller: emailCtrl,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                      labelText: 'Email for order updates',
+                      hintText: 'you@example.com',
+                      border: OutlineInputBorder())),
+              if (needsShipping) ...[
+                const SizedBox(height: 10),
+                TextField(
+                    controller: addrCtrl,
+                    minLines: 2,
+                    maxLines: 4,
+                    decoration: const InputDecoration(
+                        labelText: 'Shipping address',
+                        hintText: 'Name, street, city, country',
+                        border: OutlineInputBorder())),
+              ],
+            ],
+          ),
+        ),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           FilledButton(
               onPressed: () {
-                final v = ctrl.text.trim();
-                if (v.contains('@')) Navigator.pop(ctx, v);
+                final email = emailCtrl.text.trim();
+                final addr = addrCtrl.text.trim();
+                if (!email.contains('@')) return;
+                if (needsShipping && addr.length < 10) return;
+                Navigator.pop(ctx,
+                    (email: email, shipTo: needsShipping ? addr : null));
               },
-              child: const Text('Continue')),
+              child: const Text('Place order')),
         ],
       ),
     );
