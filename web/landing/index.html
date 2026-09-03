@@ -3,175 +3,185 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Naap (ناپ) — Your measurements, your tailor, one parchi</title>
-<meta name="description" content="Two photos → a bilingual digital parchi your tailor can cut from. Measured on your phone. Photos never leave your device.">
+<title>Naap (ناپ) — measured once, cut to you</title>
+<meta name="description" content="Two photos become a bilingual parchi your tailor can cut from. Measured on your phone. Photos never leave your device.">
 <link rel="canonical" href="https://getnaap.com/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Inter:wght@400;500;600&family=Noto+Naskh+Arabic:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400&text=%D9%86%D8%A7%D9%BE&display=swap" rel="stylesheet">
 <style>
   :root{
-    --green:#153B2F; --green-2:#1B4D3E; --green-soft:#EDF3EF; --gold:#C9A227;
-    --ink:#161D1A; --muted:#66736D; --bg:#F7F5F0;
-    --serif:'Fraunces',Georgia,serif; --sans:'Inter','Segoe UI',system-ui,sans-serif;
+    --ink:#14110F; --bone:#F4F2ED; --stone:#8C877D; --line:#DCD8D0;
+    --green:#0C1F19; --accent:#8C7A4B;
+    --display:'Bodoni Moda',Didot,Georgia,serif;
+    --sans:'Inter','Segoe UI',system-ui,sans-serif;
+    --ur-display:'Noto Nastaliq Urdu',serif;
+    --ur-body:'Noto Naskh Arabic',serif;
+    --ease:cubic-bezier(0.16,1,0.3,1); --dur:900ms;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:var(--sans);color:var(--ink);background:var(--bg);line-height:1.65}
-  .ur{font-family:'Noto Naskh Arabic','Segoe UI',serif;direction:rtl}
-  header{background:var(--green);color:#fff;padding:18px 6vw;display:flex;justify-content:space-between;align-items:center}
-  header .brand{font-family:var(--serif);font-size:1.5rem;font-weight:700;letter-spacing:.3px}
-  header .brand .ur{display:inline;margin-right:.4rem;font-weight:400;opacity:.85}
-  .hero{background:linear-gradient(170deg,var(--green) 50%,#0E2A21);color:#fff;padding:10vh 6vw 11vh;text-align:center}
-  .hero h1{font-family:var(--serif);font-weight:600;font-size:clamp(2rem,4.6vw,3.4rem);line-height:1.14;max-width:840px;margin:0 auto}
-  .hero .ur{font-size:clamp(1.15rem,2.6vw,1.55rem);margin-top:16px;color:#CBDCD3}
-  .hero p.sub{max-width:620px;margin:22px auto 0;color:#B9CDC3;font-size:1.04rem}
-  .privacy-pill{display:inline-block;background:rgba(255,255,255,.08);border:1px solid rgba(201,162,39,.55);border-radius:999px;padding:9px 20px;margin-top:28px;font-size:.93rem;color:#EADFBE}
-  .cta-row{margin-top:36px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
-  .btn{display:inline-block;padding:15px 28px;border-radius:12px;font-weight:600;text-decoration:none;font-size:.98rem;transition:transform .15s,filter .15s}
-  .btn:hover{transform:translateY(-1px);filter:brightness(1.05)}
-  .btn-gold{background:var(--gold);color:#241B02}
-  .btn-ghost{border:1.5px solid rgba(255,255,255,.65);color:#fff}
-  section{padding:8vh 6vw;max-width:1080px;margin:0 auto}
-  h2{font-family:var(--serif);font-weight:600;color:var(--green);font-size:1.9rem;margin-bottom:6px}
-  h2 + .ur{color:var(--muted);font-size:1.1rem;margin-bottom:26px}
-  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:24px;margin-top:26px}
-  .step{background:#fff;border-radius:16px;padding:24px;box-shadow:0 1px 3px rgba(21,59,47,.07),0 10px 28px rgba(21,59,47,.06)}
-  .step .num{width:36px;height:36px;border-radius:50%;background:var(--green-soft);color:var(--green);font-family:var(--serif);font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
-  .step h3{font-family:var(--serif);font-weight:600;font-size:1.1rem;margin-bottom:6px}
-  .step p{color:var(--muted);font-size:.93rem}
-  .promise{background:var(--green-soft);border-radius:18px;padding:28px;margin-top:32px;display:flex;gap:16px;align-items:flex-start}
-  .promise .lock{font-size:1.6rem}
-  .tailor{background:#fff;border-radius:24px;max-width:1080px;box-shadow:0 1px 3px rgba(21,59,47,.07),0 12px 32px rgba(21,59,47,.06)}
-  .tailor .ur-block{background:var(--green-soft);border-radius:16px;padding:26px;margin-top:22px;font-size:1.12rem;line-height:2.1}
-  .waitlist{text-align:center}
-  .waitlist form{margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-  .waitlist input{padding:14px 18px;border:1.5px solid #D7DDD9;border-radius:12px;font-size:1rem;min-width:270px;font-family:var(--sans)}
-  .waitlist input:focus{outline:2px solid var(--green-2)}
-  .waitlist .btn{border:none;cursor:pointer;background:var(--green);color:#fff}
-  .waitlist .note{color:var(--muted);font-size:.84rem;margin-top:12px}
-  .wl-done{color:var(--green);font-weight:600;margin-top:16px;display:none}
-  footer{background:var(--green);color:#9DB6AB;padding:28px 6vw;text-align:center;font-size:.88rem}
-  footer a{color:#fff}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bone);line-height:1.7;font-size:15px}
+  .ur{font-family:var(--ur-body);direction:rtl}
+  a{color:inherit}
+
+  header{position:absolute;top:0;left:0;right:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:26px 5vw;color:#fff}
+  .brand{font-family:var(--display);font-size:1.35rem;font-weight:500;letter-spacing:.04em;text-decoration:none}
+  .brand .ur-mark{font-family:var(--ur-display);font-size:1.15rem;margin-right:.5rem;font-weight:400}
+  nav{display:flex;gap:30px}
+  nav a{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;opacity:.85;padding-bottom:3px;border-bottom:1px solid transparent;transition:border-color var(--dur) var(--ease),opacity var(--dur) var(--ease)}
+  nav a:hover{opacity:1;border-bottom-color:rgba(255,255,255,.6)}
+
+  .hero{position:relative;height:100svh;min-height:560px;background:var(--green)}
+  .hero img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .hero::after{content:"";position:absolute;inset:0;background:rgba(20,17,15,.28)}
+  .hero-type{position:absolute;left:5vw;bottom:9vh;z-index:2;color:#fff;max-width:640px}
+  .hero-type h1{font-family:var(--display);font-weight:400;font-size:clamp(2.4rem,5.4vw,4.4rem);line-height:1.08;letter-spacing:.01em}
+  .hero-type .ur-line{font-family:var(--ur-body);font-size:1.02rem;margin-top:18px;color:rgba(255,255,255,.82);direction:rtl;text-align:left}
+  .hero-link{display:inline-block;margin-top:34px;color:#fff;text-decoration:none;font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.55);transition:border-color var(--dur) var(--ease),letter-spacing var(--dur) var(--ease)}
+  .hero-link:hover{border-bottom-color:#fff;letter-spacing:.26em}
+
+  section{padding:14vh 5vw;max-width:1120px;margin:0 auto}
+  .kicker{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-bottom:20px}
+  h2{font-family:var(--display);font-weight:400;font-size:clamp(1.7rem,3vw,2.4rem);line-height:1.2;max-width:640px}
+  .lede{max-width:560px;color:var(--stone);margin-top:22px;font-size:1.02rem}
+  .lede strong{color:var(--ink);font-weight:500}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+  @media(max-width:760px){.two-col{grid-template-columns:1fr}}
+
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0;margin-top:64px;border-top:1px solid var(--line)}
+  .step{padding:34px 26px 0 0;border-top:1px solid transparent}
+  .step .num{font-family:var(--display);font-size:.9rem;color:var(--accent);margin-bottom:16px}
+  .step h3{font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;margin-bottom:10px}
+  .step p{color:var(--stone);font-size:.9rem}
+
+  .promise{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:64px 0;margin-top:10vh}
+  .promise p{max-width:620px;font-size:1.05rem}
+  .promise .ur{margin-top:22px;color:var(--stone);max-width:620px}
+
+  .tailors .ur-block{font-family:var(--ur-body);direction:rtl;font-size:1.08rem;line-height:2.2;border-right:2px solid var(--accent);padding-right:26px;margin-top:34px;max-width:640px}
+
+  .waitlist form{margin-top:38px;display:flex;gap:0;max-width:460px;border-bottom:1px solid var(--ink)}
+  .waitlist input{flex:1;border:none;background:none;padding:12px 0;font-size:.95rem;font-family:var(--sans);color:var(--ink)}
+  .waitlist input:focus{outline:none}
+  .waitlist input::placeholder{color:var(--stone)}
+  .waitlist button{border:none;background:none;cursor:pointer;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);padding:12px 0 12px 20px}
+  .waitlist button:hover{color:var(--accent)}
+  .waitlist .note{color:var(--stone);font-size:.78rem;margin-top:14px}
+  .wl-done{display:none;margin-top:24px;color:var(--accent);font-size:.9rem}
+
+  footer{border-top:1px solid var(--line);padding:44px 5vw;display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;color:var(--stone);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase}
+  footer a{text-decoration:none}
+  footer a:hover{color:var(--ink)}
+
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease)}
+  .reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
 </style>
 </head>
 <body>
+
 <header>
-  <div class="brand">Naap <span class="ur">ناپ</span></div>
+  <a class="brand" href="/"><span class="ur-mark">ناپ</span>Naap</a>
+  <nav>
+    <a href="/shop.html">Shop</a>
+    <a href="#tailors">Tailors</a>
+    <a href="/get.html">Get the app</a>
+  </nav>
 </header>
 
 <div class="hero">
-  <h1>Two photos. One parchi.<br>A perfect fit from your own tailor.</h1>
-  <div class="ur">دو تصویریں، ایک پرچی — اپنے درزی سے بہترین فٹنگ</div>
-  <p class="sub">Naap measures you with your phone's camera, applies real
-  Pakistani tailoring ease (asan), and makes a bilingual measurement parchi
-  you send to your darzi on WhatsApp.</p>
-  <div class="privacy-pill">🔒 Photos are analyzed on your phone and deleted.
-  They are never uploaded. Only numbers go on the parchi.</div>
-  <div class="cta-row">
-    <a class="btn btn-gold" href="#get">Get the app</a>
-    <a class="btn btn-ghost" href="/shop.html">Browse fabrics — کپڑے دیکھیں</a>
-    <a class="btn btn-ghost" href="#tailors">درزیوں کے لیے — For tailors</a>
+  <img class="bg" src="/img/hero-silk.jpg" alt="" fetchpriority="high">
+  <div class="hero-type">
+    <h1>Measured once.<br>Cut to you.</h1>
+    <div class="ur-line">ایک بار ناپ — ہمیشہ درست فٹنگ</div>
+    <a class="hero-link" href="/get.html">Begin</a>
   </div>
 </div>
 
-<section>
-  <h2>How it works</h2>
-  <div class="ur">یہ کیسے کام کرتا ہے</div>
-  <div class="steps">
-    <div class="step"><div class="num">1</div>
-      <h3>Stand in front of your phone</h3>
-      <p>Prop it up, step back, and the app coaches you into place — with a
-      voice, in Urdu or English — then takes the photos itself.</p></div>
-    <div class="step"><div class="num">2</div>
-      <h3>Measured on your phone</h3>
-      <p>On-device AI reads your body measurements and applies traditional
-      asan for the garment, fit, and fabric you choose.</p></div>
-    <div class="step"><div class="num">3</div>
-      <h3>Review &amp; adjust</h3>
-      <p>Every number is editable. Choose fitted, regular, or loose; pick your
-      neckline, sleeve, and daman style.</p></div>
-    <div class="step"><div class="num">4</div>
-      <h3>WhatsApp it to your darzi</h3>
-      <p>A clean bilingual PDF parchi with the exact terms tailors use —
-      Teera, Chaati, Kamar, Ghera, Paincha.</p></div>
+<section class="reveal">
+  <div class="kicker">The idea — تعارف</div>
+  <div class="two-col">
+    <h2>Two photographs become a parchi your tailor can cut from.</h2>
+    <p class="lede">Naap reads your measurements with your phone's camera,
+    applies real tailoring ease — the asan a master darzi would add — and
+    writes a bilingual parchi you send on WhatsApp. <strong>Your photos
+    are analysed on the device and deleted. Only numbers leave.</strong>
+    No account. No studio visit. No guessing.</p>
   </div>
+  <div class="steps">
+    <div class="step"><div class="num">01</div><h3>Stand</h3>
+      <p>Prop the phone, step back. A voice — Urdu or English — guides you
+      into place and takes the photographs itself.</p></div>
+    <div class="step"><div class="num">02</div><h3>Measured</h3>
+      <p>On-device intelligence reads your body and applies the asan for
+      your garment, fabric, and preferred fit.</p></div>
+    <div class="step"><div class="num">03</div><h3>Refined</h3>
+      <p>Every number stays editable. Fitted, regular, or loose — the
+      choice is drawn before it is stitched.</p></div>
+    <div class="step"><div class="num">04</div><h3>Sent</h3>
+      <p>A clean bilingual parchi, in the words written on every parchi
+      in the bazaar — Teera, Chaati, Kamar, Ghera, Paincha.</p></div>
+  </div>
+</section>
+
+<section class="reveal" style="padding-top:0">
   <div class="promise">
-    <div class="lock">🔒</div>
-    <div><strong>The Naap promise:</strong> your photos never leave your
-    phone. They are analyzed on the device and deleted immediately. No
-    account is required, and your measurements are stored only on your own
-    phone.<br><span class="ur">آپ کی تصاویر کبھی فون سے باہر نہیں جاتیں —
-    تجزیہ فون پر ہوتا ہے اور تصاویر فوراً حذف کر دی جاتی ہیں۔</span></div>
+    <div class="kicker">The Naap promise — وعدہ</div>
+    <p>Your photographs never leave your phone. They are analysed on the
+    device and deleted immediately. Your measurements are stored only on
+    your own phone, and the parchi carries numbers — never imagery.</p>
+    <p class="ur">آپ کی تصاویر کبھی فون سے باہر نہیں جاتیں — تجزیہ فون پر
+    ہوتا ہے اور تصاویر فوراً حذف کر دی جاتی ہیں۔ پرچی پر صرف ناپ ہوتا ہے،
+    تصویر کبھی نہیں۔</p>
   </div>
 </section>
 
-<section>
-  <h2>Never buy the wrong size again</h2>
-  <div class="ur">اب سائز کبھی غلط نہیں</div>
-  <p>One two-minute scan gives you a <strong>Size Passport</strong> — your
-  measured EU, IT, FR, UK and US sizes for online shopping without the
-  returns lottery. Your tailor gets exact numbers; your favourite stores
-  get the right size, first time. And for bespoke clients: a
-  <strong>Body Drift Report</strong> shows your tailor exactly how your
-  measurements changed since your last fitting — no flight required.</p>
-</section>
-
-<section id="get">
-  <h2>Get the app</h2>
-  <div class="ur">ایپ حاصل کریں</div>
-  <div class="steps">
-    <div class="step">
-      <h3>📱 iPhone — TestFlight beta</h3>
-      <p>Naap for iOS is in private beta. Join the waitlist below and we'll
-      send you a TestFlight invite.</p>
-    </div>
-    <div class="step">
-      <h3>🤖 Android — direct download</h3>
-      <p><a class="btn btn-gold" style="margin:6px 0"
-        href="/app/naap-latest.apk">⬇ Download Naap (beta APK)</a></p>
-      <p>After downloading: tap the file → allow "install unknown apps"
-      (normal for beta software) → Install. If Play&nbsp;Protect asks,
-      choose "Install anyway".</p>
-      <p class="ur" style="margin-top:8px">ڈاؤن لوڈ کے بعد فائل پر ٹیپ کریں،
-      "نامعلوم ایپس" کی اجازت دیں، اور انسٹال کریں۔</p>
-      <p style="margin-top:8px;font-size:.85rem">Older or budget phone
-      (Tecno, Infinix, etc.) and the main file won't install?
-      <a href="/app/naap-arm32.apk">Download the version for older phones</a>
-      <span class="ur">— پرانے فون کے لیے</span></p>
-    </div>
+<section class="reveal" style="padding-top:0">
+  <div class="kicker">Beyond the parchi</div>
+  <div class="two-col">
+    <h2>Never buy the wrong size again.</h2>
+    <p class="lede">One scan yields a <strong>Size Passport</strong> — your
+    measured EU, IT, FR, UK and US sizes for shopping without the returns
+    lottery. For bespoke clients, a <strong>Body Drift Report</strong> shows
+    your tailor precisely how you have changed since the last fitting — no
+    flight required. And in the <a href="/shop.html" style="color:var(--accent)">Naap
+    atelier</a>, cloth is cut to your exact scan.</p>
   </div>
 </section>
 
-<section id="tailors" class="tailor">
-  <h2>For tailors — درزیوں کے لیے</h2>
-  <div class="ur">آپ کے گاہک کی پرچی، سیدھی واٹس ایپ پر</div>
-  <p>When a customer sends you a Naap parchi, you get their naap and their
-  stitching naap — with asan already added — in the same words written on
-  every parchi in the bazaar. Cut to the highlighted column; fitted, regular
-  and loose are all shown so you can advise your customer.</p>
+<section id="tailors" class="tailors reveal" style="padding-top:0">
+  <div class="kicker">For tailors — درزیوں کے لیے</div>
+  <h2>Your customer's naap, straight to WhatsApp.</h2>
+  <p class="lede">A Naap parchi carries the body naap and the stitching
+  naap — asan already added — in the same words on every parchi in the
+  bazaar. Fitted, regular and loose are all shown; cut to the highlighted
+  column.</p>
   <div class="ur-block">
     ناپ پرچی میں گاہک کا جسمانی ناپ اور سلائی کا ناپ (آسان شامل) دونوں درج
     ہوتے ہیں — تیرا، چھاتی، کمر، گھیرا، پائنچہ، وہی الفاظ جو آپ روز استعمال
-    کرتے ہیں۔ نمایاں خانے کے مطابق کاٹیں؛ فٹڈ، ریگولر اور کھلا تینوں درج ہیں
-    تاکہ آپ گاہک کو مشورہ دے سکیں۔ کوئی تصویر نہیں — صرف ناپ۔
+    کرتے ہیں۔ نمایاں خانے کے مطابق کاٹیں۔ کوئی تصویر نہیں — صرف ناپ۔
   </div>
 </section>
 
-<section class="waitlist">
-  <h2>Join the waitlist</h2>
-  <div class="ur">ویٹ لسٹ میں شامل ہوں</div>
-  <p>Beta invites for iPhone and Android, and first access to Naap fabrics
-  &amp; stitching when the shop opens.</p>
+<section class="waitlist reveal" style="padding-top:0;padding-bottom:16vh">
+  <div class="kicker">Join — شامل ہوں</div>
+  <h2>First access.</h2>
+  <p class="lede">Beta invitations for iPhone and Android, and first word
+  when new cloth enters the atelier.</p>
   <form id="wl" onsubmit="return joinWaitlist(event)">
     <input type="email" id="wl-email" required placeholder="your@email.com">
-    <button class="btn" type="submit">Join — شامل ہوں</button>
+    <button type="submit">Join</button>
   </form>
-  <div class="wl-done" id="wl-done">شکریہ! You're on the list — invites go out
-  regularly.</div>
-  <p class="note">Email only, used only for the invite. No spam, no sharing.</p>
+  <div class="wl-done" id="wl-done">شکریہ — you are on the list.</div>
+  <p class="note">Email only, used only for the invitation.</p>
 </section>
 
 <footer>
-  Naap (ناپ) — privacy-first tailoring · Photos never leave your phone
+  <span>Naap (ناپ) — privacy-first tailoring</span>
+  <span>Photos never leave your phone</span>
+  <a href="/get.html">Get the app</a>
 </footer>
 
 <script>
@@ -183,11 +193,15 @@ async function joinWaitlist(e){
     await fetch(API + "/waitlist", {method:"POST",
       headers:{"Content-Type":"application/json"},
       body: JSON.stringify({email})});
-  }catch(_){/* best effort — show success either way */}
+  }catch(_){/* best effort */}
   document.getElementById('wl').style.display = 'none';
   document.getElementById('wl-done').style.display = 'block';
   return false;
 }
+const io = new IntersectionObserver(es => es.forEach(x => {
+  if(x.isIntersecting){ x.target.classList.add('in'); io.unobserve(x.target); }
+}), {threshold: 0.15});
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 </script>
 </body>
 </html>

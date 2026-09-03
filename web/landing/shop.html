@@ -7,12 +7,12 @@
 <meta name="description" content="Pakistani fabrics for the diaspora — buy unstitched, or have it stitched to your exact measurements by a vetted master tailor.">
 <link rel="canonical" href="https://getnaap.com/shop.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --green:#153B2F; --green-2:#1B4D3E; --soft:#EDF3EF; --gold:#C9A227;
-    --ink:#161D1A; --muted:#66736D; --bg:#F7F5F0; --card:#FFFFFF;
-    --serif:'Fraunces',Georgia,serif; --sans:'Inter','Segoe UI',system-ui,sans-serif;
+    --green:#0C1F19; --green-2:#123128; --soft:#ECEAE3; --gold:#8C7A4B;
+    --ink:#14110F; --muted:#8C877D; --bg:#F4F2ED; --card:#FFFFFF;
+    --serif:'Bodoni Moda',Didot,Georgia,serif; --sans:'Inter','Segoe UI',system-ui,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
@@ -29,7 +29,7 @@
   .hero p{color:#B9CDC3;margin:16px auto 0;max-width:560px;font-size:1.02rem}
   main{max-width:1160px;margin:0 auto;padding:38px 4vw 80px}
   .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:30px}
-  select{padding:10px 14px;border:1px solid #D7DDD9;border-radius:10px;background:#fff;font-size:.9rem;font-family:var(--sans);color:var(--ink)}
+  select{padding:10px 14px;border:1px solid #DCD8D0;background:#fff;font-size:.9rem;font-family:var(--sans);color:var(--ink)}
   select:focus{outline:2px solid var(--green-2)}
   .tabs{display:flex;gap:26px;margin:6px 0 24px;border-bottom:1px solid #E3E7E4;flex-wrap:wrap}
   .tabs button{border:none;background:none;font-family:var(--sans);font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:10px 2px;cursor:pointer;border-bottom:2px solid transparent}
@@ -40,7 +40,7 @@
   .card:hover .swatch{opacity:.96}
   .card:hover h3{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
   .swatch .label{position:absolute;top:12px;left:12px;background:rgba(14,32,25,.55);backdrop-filter:blur(4px);color:#fff;font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border-radius:999px}
-  .swatch .atelier{position:absolute;top:12px;right:12px;background:var(--gold);color:#241B02;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 11px;border-radius:999px}
+  .swatch .atelier{position:absolute;top:12px;right:12px;background:var(--gold);color:#fff;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 11px}
   .card .body{padding:14px 2px 0;display:flex;flex-direction:column;gap:4px;flex:1}
   .card h3{font-family:var(--serif);font-weight:500;font-size:1.02rem;line-height:1.35}
   .card .meta{color:var(--muted);font-size:.72rem;letter-spacing:.09em;text-transform:uppercase}
@@ -48,10 +48,10 @@
   .price-row{display:flex;justify-content:space-between;align-items:baseline;padding-top:6px}
   .price{font-family:var(--sans);font-weight:500;font-size:.95rem;color:var(--ink)}
   .mode{color:var(--muted);font-size:.74rem;font-style:italic}
-  .cta{background:var(--green);color:#fff;border-radius:20px;padding:40px;margin-top:52px;text-align:center}
+  .cta{background:var(--green);color:#fff;padding:40px;margin-top:52px;text-align:center}
   .cta h2{font-family:var(--serif);font-weight:600;font-size:1.5rem}
   .cta p{color:#B9CDC3;max-width:520px;margin:10px auto 0;font-size:.95rem}
-  .cta .btn{display:inline-block;margin-top:20px;background:var(--gold);color:#241B02;font-weight:600;padding:14px 30px;border-radius:12px;text-decoration:none}
+  .cta .btn{display:inline-block;margin-top:20px;background:var(--gold);color:#fff;font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:.75rem;padding:15px 32px;text-decoration:none}
   .cta .btn:hover{filter:brightness(1.06)}
   .empty,.loading{color:var(--muted);text-align:center;padding:60px 0}
   .chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:26px}
@@ -62,7 +62,7 @@
   .newpill{position:absolute;bottom:12px;left:12px;background:#fff;color:var(--green);font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 11px;border-radius:999px}
   .fitrow{position:absolute;bottom:12px;right:12px;display:flex;gap:4px}
   .fitrow button{border:none;background:rgba(14,32,25,.55);backdrop-filter:blur(4px);color:#fff;font-size:.66rem;font-weight:600;padding:4px 9px;border-radius:999px;cursor:pointer}
-  .fitrow button.on{background:var(--gold);color:#241B02}
+  .fitrow button.on{background:var(--gold);color:#fff}
   footer{background:var(--green);color:#9DB6AB;text-align:center;padding:26px;font-size:.85rem;margin-top:0}
 </style>
 </head>
@@ -70,7 +70,7 @@
 <header>
   <a class="brand" href="/">Naap <span>ناپ</span></a>
   <nav>
-    <a href="/#get">Get the app</a>
+    <a href="/get.html">Get the app</a>
     <a href="/#tailors">For tailors</a>
   </nav>
 </header>
@@ -116,7 +116,7 @@
     <h2>Ready to order?</h2>
     <p>Ordering lives in the Naap app — where your measurements are — so
     every stitched piece fits. Unstitched fabric ships worldwide either way.</p>
-    <a class="btn" href="/#get">Get the Naap app</a>
+    <a class="btn" href="/get.html">Get the Naap app</a>
   </div>
 </main>
 <footer>Naap (ناپ) · getnaap.com · Photos never leave your phone</footer>
