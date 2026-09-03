@@ -81,6 +81,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         fabric: s.fabric,
         style: s.style,
         silhouette: s.silhouette,
+        measuredBy: s.shopName,
       );
       final summary =
           'Naap parchi for ${s.profile.name} — ${kGarments[s.garment]!.english} '
@@ -133,7 +134,19 @@ class _ResultsScreenState extends State<ResultsScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Your Naap')),
+      appBar: AppBar(
+        title: Text(s.profile.name.isEmpty
+            ? 'Your Naap'
+            : '${s.profile.name} — Naap'),
+        actions: [
+          if (s.active.history.length > 1)
+            IconButton(
+              tooltip: 'Naap history',
+              icon: const Icon(Icons.history),
+              onPressed: () => _showHistory(context, s),
+            ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -277,6 +290,48 @@ class _ResultsScreenState extends State<ResultsScreen> {
             'verify with a tape for your first order, then Naap learns from your edits.',
             style: Theme.of(context).textTheme.bodySmall,
           ),
+        ],
+      ),
+    );
+  }
+
+  /// Naap over time: girths per scan, newest first, with deltas — the
+  /// "watch your body change" retention loop.
+  void _showHistory(BuildContext context, AppState s) {
+    final entries = s.active.history;
+    const keys = [
+      MeasurementKey.chest,
+      MeasurementKey.waist,
+      MeasurementKey.hip,
+    ];
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => ListView(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+        children: [
+          const Text('Naap history — ناپ کی تاریخ',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+          const SizedBox(height: 10),
+          for (var i = 0; i < entries.length; i++)
+            Card(
+              elevation: 0,
+              color: i == 0 ? const Color(0xFFE8F1EC) : null,
+              child: ListTile(
+                dense: true,
+                title: Text(
+                    '${entries[i].date.toLocal().toString().substring(0, 16)}'
+                    '${i == 0 ? '  · current' : ''}'),
+                subtitle: Text([
+                  for (final k in keys)
+                    if (entries[i].naap[k] != null)
+                      '${kMeasurementDefs[k]!.tailorTerm} '
+                          '${_fmt(s, entries[i].naap[k]!.cm)}'
+                          '${i + 1 < entries.length && entries[i + 1].naap[k] != null ? ' (${(entries[i].naap[k]!.cm - entries[i + 1].naap[k]!.cm) >= 0 ? '+' : ''}${((entries[i].naap[k]!.cm - entries[i + 1].naap[k]!.cm) / (s.profile.unit == PreferredUnit.inches ? 2.54 : 1)).toStringAsFixed(1)})' : ''}'
+                ].join('  ·  ')),
+              ),
+            ),
         ],
       ),
     );

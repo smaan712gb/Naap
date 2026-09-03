@@ -10,7 +10,13 @@ import 'fabric.dart';
 import 'models/measurements.dart';
 import 'silhouettes.dart';
 
-enum GarmentType { shalwarKameez, kurtaPajama, suitTwoPiece, trousersShirt }
+enum GarmentType {
+  shalwarKameez,
+  kurtaPajama,
+  ladiesSuit, // women's kameez + trouser (3pc with dupatta by style)
+  suitTwoPiece,
+  trousersShirt,
+}
 
 enum FitPreference { fitted, regular, loose }
 
@@ -66,6 +72,28 @@ const Map<GarmentType, GarmentDef> kGarments = {
       MeasurementKey.sleeveLength,
       MeasurementKey.armhole,
       MeasurementKey.neck,
+      MeasurementKey.shalwarLength,
+      MeasurementKey.thigh,
+      MeasurementKey.ankleOpening,
+    ],
+  ),
+  GarmentType.ladiesSuit: GarmentDef(
+    type: GarmentType.ladiesSuit,
+    english: 'Ladies Suit',
+    urdu: 'لیڈیز سوٹ',
+    keys: [
+      MeasurementKey.kameezLength,
+      MeasurementKey.shoulder,
+      MeasurementKey.chest, // bust — fullest point, same tape line
+      MeasurementKey.waist,
+      MeasurementKey.trouserWaist,
+      MeasurementKey.hip,
+      MeasurementKey.sleeveLength,
+      MeasurementKey.bicep,
+      MeasurementKey.armhole,
+      MeasurementKey.wrist,
+      MeasurementKey.neck,
+      MeasurementKey.hem,
       MeasurementKey.shalwarLength,
       MeasurementKey.thigh,
       MeasurementKey.ankleOpening,
@@ -159,6 +187,22 @@ const Map<GarmentType, Map<MeasurementKey, double>> _regularEase = {
     MeasurementKey.neck: 1.5,
     MeasurementKey.armhole: 2.5,
     MeasurementKey.thigh: 8.0,
+  },
+  GarmentType.ladiesSuit: {
+    // Ladies kameez is cut closer than men's — asan values a lady master
+    // reviews the same way (starting points, tunable per shop).
+    MeasurementKey.chest: 7.0, // bust asan
+    MeasurementKey.waist: 6.0,
+    MeasurementKey.hip: 7.0,
+    MeasurementKey.shoulder: 0.8,
+    MeasurementKey.neck: 1.0,
+    MeasurementKey.armhole: 2.5,
+    MeasurementKey.bicep: 5.0,
+    MeasurementKey.wrist: 4.0,
+    MeasurementKey.trouserWaist: 2.0,
+    MeasurementKey.thigh: 8.0,
+    MeasurementKey.hem: 0.0,
+    MeasurementKey.ankleOpening: 0.0,
   },
   GarmentType.suitTwoPiece: {
     MeasurementKey.chest: 8.5, // classic drafting ease for a canvassed jacket

@@ -65,6 +65,37 @@ void _showClients(BuildContext context, AppState state) {
             },
           ),
         ListTile(
+          leading: const Icon(Icons.storefront_outlined),
+          title: Text(state.shopName.isEmpty
+              ? 'Tailor? Add your shop name — دکان کا نام'
+              : 'Shop: ${state.shopName}'),
+          subtitle: const Text('Printed on every parchi you make'),
+          onTap: () async {
+            Navigator.pop(ctx);
+            final ctrl = TextEditingController(text: state.shopName);
+            final name = await showDialog<String>(
+              context: context,
+              builder: (dctx) => AlertDialog(
+                title: const Text('Your shop name'),
+                content: TextField(
+                    controller: ctrl,
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                        hintText: 'e.g. Khan Tailors, Lahore')),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(dctx),
+                      child: const Text('Cancel')),
+                  FilledButton(
+                      onPressed: () => Navigator.pop(dctx, ctrl.text),
+                      child: const Text('Save')),
+                ],
+              ),
+            );
+            if (name != null) await state.setShopName(name);
+          },
+        ),
+        ListTile(
           leading: const Icon(Icons.person_add_alt),
           title: const Text('Add person — نیا گاہک'),
           onTap: () async {

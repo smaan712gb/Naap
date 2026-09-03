@@ -12,6 +12,22 @@ import 'models/profile.dart';
 import 'silhouettes.dart';
 import 'styles.dart';
 
+/// One completed scan, kept so a person can watch their naap change over
+/// time (weight journeys, growing kids, pre-wedding tailoring seasons).
+class ScanRecord {
+  final DateTime date;
+  final Naap naap;
+  const ScanRecord({required this.date, required this.naap});
+
+  Map<String, dynamic> toJson() =>
+      {'date': date.toIso8601String(), 'naap': naap.toJson()};
+
+  factory ScanRecord.fromJson(Map<String, dynamic> j) => ScanRecord(
+        date: DateTime.tryParse(j['date'] as String? ?? '') ?? DateTime.now(),
+        naap: Naap.fromJson(j['naap'] as Map<String, dynamic>),
+      );
+}
+
 /// One measured person. A phone can hold many — the household, or a
 /// tailor's/associate's whole client book (Phase 2 assisted mode).
 /// Everything stays on-device, per the product law.
@@ -21,6 +37,7 @@ class ClientRecord {
   Naap naap;
   KameezStyle style;
   PersonalCalibration calibration;
+  final List<ScanRecord> history;
 
   ClientRecord({
     required this.id,
@@ -28,10 +45,12 @@ class ClientRecord {
     Naap? naap,
     KameezStyle? style,
     PersonalCalibration? calibration,
+    List<ScanRecord>? history,
   })  : profile = profile ?? UserProfile(),
         naap = naap ?? Naap.empty(),
         style = style ?? KameezStyle(),
-        calibration = calibration ?? PersonalCalibration();
+        calibration = calibration ?? PersonalCalibration(),
+        history = history ?? [];
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -39,6 +58,7 @@ class ClientRecord {
         'naap': naap.toJson(),
         'style': style.toJson(),
         'calibration': calibration.toJsonString(),
+        'history': [for (final h in history) h.toJson()],
       };
 
   factory ClientRecord.fromJson(Map<String, dynamic> j) => ClientRecord(
@@ -55,6 +75,12 @@ class ClientRecord {
         calibration: j['calibration'] != null
             ? PersonalCalibration.fromJsonString(j['calibration'] as String)
             : null,
+        history: j['history'] != null
+            ? [
+                for (final h in j['history'] as List<dynamic>)
+                  ScanRecord.fromJson(h as Map<String, dynamic>)
+              ]
+            : null,
       );
 }
 
@@ -62,6 +88,11 @@ class ClientRecord {
 class AppState extends ChangeNotifier {
   static const _kClients = 'naap.clients';
   static const _kActive = 'naap.activeClient';
+  static const _kShopName = 'naap.shopName';
+
+  /// Device-level: a tailor's shop name, printed on every parchi this
+  /// phone generates (the tailor-branded viral artifact).
+  String shopName = '';
 
   final List<ClientRecord> clients = [];
   String _activeId = '';
@@ -112,7 +143,15 @@ class AppState extends ChangeNotifier {
       await _persist();
     }
     if (!clients.any((c) => c.id == _activeId)) _activeId = clients.first.id;
+    shopName = sp.getString(_kShopName) ?? '';
     hydrated = true;
+    notifyListeners();
+  }
+
+  Future<void> setShopName(String name) async {
+    shopName = name.trim();
+    final sp = await SharedPreferences.getInstance();
+    await sp.setString(_kShopName, shopName);
     notifyListeners();
   }
 
@@ -164,6 +203,15 @@ class AppState extends ChangeNotifier {
     active.naap = r.naap;
     // v1.5 per-user learning: apply this client's remembered corrections.
     active.calibration.apply(active.naap);
+    // Scan history: a deep copy per scan, newest first, capped.
+    active.history.insert(
+        0,
+        ScanRecord(
+            date: DateTime.now(),
+            naap: Naap.fromJson(active.naap.toJson())));
+    if (active.history.length > 12) {
+      active.history.removeRange(12, active.history.length);
+    }
     lastIssues = r.issues;
     await _persist();
     notifyListeners();

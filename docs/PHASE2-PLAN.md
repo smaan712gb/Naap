@@ -1,5 +1,17 @@
 # Phase 2 — Luxury Su Misura: strategy, scaling, monetization
 
+> **FOUNDER DIRECTIVE (2026-09-03): monetization is DEFERRED.** The
+> product runs free-first until it is feature-complete, habit-forming,
+> and demonstrably viral across every user type. The measurement tool is
+> free FOREVER for individuals AND tailors — revenue only ever enters
+> through commerce (fabric, stitch-and-ship, atelier garments, and much
+> later data/SaaS), never through the measuring itself. Signals that
+> reopen the monetization conversation: repeat scans per user, parchis
+> shared per week, active tailor nodes, and QR-driven installs (the
+> viral coefficient). Growth features in service of this: scan history,
+> tailor shop branding on parchis, parchi QR install loop, women's
+> garment coverage.
+
 Decision memo, 2026-09-02. Founder asked: fit-library/translation play, or
 enter the business directly with custom-made garments in the styles people
 covet, at a fraction of the price. **Recommendation: both, sequenced — the

@@ -21,6 +21,11 @@ class UserProfile {
   /// Tailor's WhatsApp number in international format, e.g. +923001234567.
   String? tailorWhatsApp;
 
+  /// When a TAILOR runs Naap for their customers (client book), their shop
+  /// name goes on every parchi they generate — the parchi becomes their
+  /// branded artifact, carrying Naap with it. App-level, set once.
+  String? shopName;
+
   UserProfile({
     this.name = '',
     this.heightCm = 170,
@@ -28,6 +33,7 @@ class UserProfile {
     this.bodyType = BodyType.male,
     this.unit = PreferredUnit.inches,
     this.tailorWhatsApp,
+    this.shopName,
   });
 
   Map<String, dynamic> toJson() => {
@@ -37,6 +43,7 @@ class UserProfile {
         'bodyType': bodyType.name,
         'unit': unit.name,
         'tailorWhatsApp': tailorWhatsApp,
+        'shopName': shopName,
       };
 
   factory UserProfile.fromJson(Map<String, dynamic> j) => UserProfile(
@@ -48,6 +55,7 @@ class UserProfile {
         unit: PreferredUnit.values
             .firstWhere((u) => u.name == j['unit'], orElse: () => PreferredUnit.inches),
         tailorWhatsApp: j['tailorWhatsApp'] as String?,
+        shopName: j['shopName'] as String?,
       );
 }
 

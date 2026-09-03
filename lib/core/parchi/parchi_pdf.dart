@@ -55,6 +55,7 @@ class ParchiPdf {
     FabricType? fabric,
     KameezStyle? style,
     SilhouetteProfile? silhouette,
+    String? measuredBy, // tailor's shop name (device-level)
   }) async {
     await _ensureFonts();
     final lines = EaseEngine.buildParchi(naap, garment, fit,
@@ -241,10 +242,22 @@ class ParchiPdf {
               pw.Expanded(
                 flex: 1,
                 child: pw.Column(children: [
-                  pw.SvgImage(svg: _mannequinSvg, height: 180),
-                  pw.SizedBox(height: 6),
+                  pw.SvgImage(svg: _mannequinSvg, height: 150),
+                  pw.SizedBox(height: 4),
                   pw.Text('Generic avatar — not a photo',
                       style: en(7).copyWith(color: PdfColors.grey600),
+                      textAlign: pw.TextAlign.center),
+                  pw.SizedBox(height: 10),
+                  // The viral loop: whoever receives this parchi can scan
+                  // straight into their own naap.
+                  pw.BarcodeWidget(
+                      barcode: pw.Barcode.qrCode(),
+                      data: 'https://getnaap.com',
+                      width: 54,
+                      height: 54),
+                  pw.SizedBox(height: 3),
+                  pw.Text('Apna naap len\ngetnaap.com',
+                      style: en(7).copyWith(color: brandGreen),
                       textAlign: pw.TextAlign.center),
                 ]),
               ),
@@ -328,6 +341,7 @@ class ParchiPdf {
           ),
           pw.SizedBox(height: 8),
           pw.Text(
+              '${measuredBy != null && measuredBy.isNotEmpty ? 'Measured at $measuredBy · ' : ''}'
               'Generated on-device by Naap (ناپ). No photos were uploaded — measurements only. getnaap.com',
               style: en(7.5).copyWith(color: PdfColors.grey600)),
         ],
