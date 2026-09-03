@@ -179,6 +179,31 @@ void main() {
     });
   });
 
+  group('ladies sizing', () {
+    Naap lady(double bust, double waist, double hip) => Naap.empty()
+      ..set(MeasurementKey.chest, MeasurementValue(bust))
+      ..set(MeasurementKey.waist, MeasurementValue(waist))
+      ..set(MeasurementKey.hip, MeasurementValue(hip));
+
+    test('EU 36 bust maps across conventions', () {
+      final ls = mapLadiesSizes(lady(84, 66, 92))!;
+      expect(ls.eu, 36);
+      expect(ls.it, 40);
+      expect(ls.fr, 38);
+      expect(ls.uk, 8);
+      expect(ls.us, 6);
+    });
+
+    test('pear figure gets a bottoms note', () {
+      final ls = mapLadiesSizes(lady(84, 70, 104))!;
+      expect(ls.notes.any((n) => n.contains('Hips size EU')), isTrue);
+    });
+
+    test('out-of-range bust returns null', () {
+      expect(mapLadiesSizes(lady(50, 40, 60)), isNull);
+    });
+  });
+
   group('serialization', () {
     test('naap roundtrips through json', () {
       final n = Naap.empty();

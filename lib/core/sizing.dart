@@ -26,6 +26,64 @@ class SuMisura {
   });
 }
 
+/// Women's European ready-to-wear sizing — a different convention entirely
+/// from men's suiting (no half-chest, no drop). EU/DE base size from the
+/// bust on the standard 4 cm grid (EU 36 ≈ 84 cm bust), hip cross-checked;
+/// IT runs +4, FR +2, UK +4 relative to EU/DE. Deterministic conventions —
+/// per-BRAND truth still comes from the fit library, garment by garment.
+class LadiesSizes {
+  final int eu; // German/EU convention (34-52)
+  final int it; // Italian (38-56)
+  final int fr; // French (36-54)
+  final int uk; // UK (6-24)
+  final int us; // US (2-20)
+  final List<String> notes;
+
+  const LadiesSizes({
+    required this.eu,
+    required this.it,
+    required this.fr,
+    required this.uk,
+    required this.us,
+    required this.notes,
+  });
+}
+
+LadiesSizes? mapLadiesSizes(Naap naap) {
+  final bust = naap[MeasurementKey.chest]?.cm;
+  final waist = naap[MeasurementKey.waist]?.cm;
+  final hip = naap[MeasurementKey.hip]?.cm;
+  if (bust == null || hip == null) return null;
+  if (bust < 70 || bust > 140) return null;
+
+  // EU 32 = 76 cm bust, +4 cm per size step.
+  var eu = 32 + (((bust - 76.0) / 4.0).round()) * 2;
+  eu = eu.clamp(32, 54);
+
+  // Hip-based size on the same grid (EU 32 = 84 cm hip): pear/hourglass
+  // figures often need the larger of the two for bottoms.
+  var euHip = 32 + (((hip - 84.0) / 4.0).round()) * 2;
+  euHip = euHip.clamp(32, 54);
+
+  final notes = <String>[];
+  if (euHip > eu) {
+    notes.add('Hips size EU $euHip — size bottoms up, or made-to-measure');
+  } else if (euHip < eu - 2) {
+    notes.add('Hips size EU $euHip — tops and bottoms differ');
+  }
+  if (waist != null && bust - waist >= 24) {
+    notes.add('Defined waist — off-the-rack will gape; MTM fits far better');
+  }
+  return LadiesSizes(
+    eu: eu,
+    it: eu + 4,
+    fr: eu + 2,
+    uk: eu - 28,
+    us: eu - 30,
+    notes: notes,
+  );
+}
+
 /// Returns null when the naap lacks chest/waist/hip.
 SuMisura? mapSuMisura(Naap naap) {
   final chest = naap[MeasurementKey.chest]?.cm;

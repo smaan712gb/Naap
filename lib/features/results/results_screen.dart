@@ -269,33 +269,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           const SizedBox(height: 16),
           _fitReportCard(context, s),
           const SizedBox(height: 16),
-          if (mapSuMisura(s.naap) case final sm?)
-            Card(
-              color: const Color(0xFFF7F1E1),
-              elevation: 0,
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(children: [
-                      const Icon(Icons.public, color: Color(0xFFC9A227)),
-                      const SizedBox(width: 8),
-                      Text('European size: EU ${sm.euSize}, Drop ${sm.drop}',
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w600, fontSize: 15)),
-                    ]),
-                    const SizedBox(height: 4),
-                    Text(
-                      'For off-the-rack suits and jackets. Computed on your '
-                      'phone — nothing was uploaded.'
-                      '${sm.notes.isNotEmpty ? '\n• ${sm.notes.join('\n• ')}' : ''}',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          _sizeCard(context, s),
           const SizedBox(height: 16),
           Text(
             'Estimates from on-device analysis. Values marked ~ are lower-confidence — '
@@ -347,6 +321,56 @@ class _ResultsScreenState extends State<ResultsScreen> {
         ],
       ),
     );
+  }
+
+  /// International size card, gendered correctly: women get EU/IT/FR/UK/US
+  /// ready-to-wear conversions, men get EU suiting + drop + US suit size.
+  /// Per-BRAND accuracy comes later from the fit library — these are the
+  /// standard conventions, computed on-device.
+  Widget _sizeCard(BuildContext context, AppState s) {
+    Widget card(String title, List<String> notes, String caption) => Card(
+          color: const Color(0xFFF7F1E1),
+          elevation: 0,
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(children: [
+                  const Icon(Icons.public, color: Color(0xFFC9A227)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                      child: Text(title,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w600, fontSize: 15))),
+                ]),
+                const SizedBox(height: 4),
+                Text(
+                  '$caption Computed on your phone — nothing was uploaded.'
+                  '${notes.isNotEmpty ? '\n• ${notes.join('\n• ')}' : ''}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+        );
+
+    if (s.profile.bodyType == BodyType.female) {
+      final ls = mapLadiesSizes(s.naap);
+      if (ls == null) return const SizedBox.shrink();
+      return card(
+          'Your sizes: EU ${ls.eu} · IT ${ls.it} · FR ${ls.fr} · '
+              'UK ${ls.uk} · US ${ls.us}',
+          ls.notes,
+          'For off-the-rack ready-to-wear.');
+    }
+    final sm = mapSuMisura(s.naap);
+    if (sm == null) return const SizedBox.shrink();
+    return card(
+        'Your suit size: EU ${sm.euSize} / US ${sm.euSize - 10} · '
+            'Drop ${sm.drop}',
+        sm.notes,
+        'For off-the-rack suits and jackets.');
   }
 
   /// Design/fabric reference photos (Imran's request: tailors often ask
