@@ -8,6 +8,7 @@ library;
 
 import 'fabric.dart';
 import 'models/measurements.dart';
+import 'silhouettes.dart';
 
 enum GarmentType { shalwarKameez, kurtaPajama, suitTwoPiece, trousersShirt }
 
@@ -113,6 +114,7 @@ const Map<GarmentType, GarmentDef> kGarments = {
       MeasurementKey.shalwarLength,
       MeasurementKey.inseam,
       MeasurementKey.thigh,
+      MeasurementKey.knee,
       MeasurementKey.calf,
       MeasurementKey.ankleOpening,
     ],
@@ -215,11 +217,17 @@ class EaseEngine {
   /// (see `fabric.dart`); null means the lawn/cotton baseline.
   static List<ParchiLine> buildParchi(
       Naap naap, GarmentType garment, FitPreference fit,
-      {FabricType? fabric}) {
+      {FabricType? fabric, SilhouetteProfile? silhouette}) {
     final def = kGarments[garment]!;
     final ease = _regularEase[garment] ?? const {};
     final mult = _fitMultiplier[fit]!;
     final fabricDef = fabric != null ? kFabrics[fabric] : null;
+    // Silhouette layer: trend offsets over the immutable body, trouser
+    // family only (a shalwar's shape is its own tradition).
+    final silDef = (silhouette != null &&
+            _kPaichaFloorGarments.contains(garment))
+        ? kSilhouettes[silhouette]
+        : null;
     final lines = <ParchiLine>[];
     for (final key in def.keys) {
       final v = naap[key];
@@ -233,6 +241,17 @@ class EaseEngine {
         e += fabricDef.easeDeltaCm;
       }
       var stitch = v.cm + e;
+      // Silhouette offsets (knee ease, hem opening target, length delta).
+      if (silDef != null) {
+        if (key == MeasurementKey.knee) {
+          stitch = v.cm + silDef.kneeEaseCm;
+        } else if (key == MeasurementKey.ankleOpening) {
+          stitch = resolveOpeningCm(silDef,
+              calfCm: naap[MeasurementKey.calf]?.cm);
+        } else if (key == MeasurementKey.shalwarLength) {
+          stitch = v.cm + silDef.lengthDeltaCm;
+        }
+      }
       // Paicha floor: the opening must clear the calf (darzi heuristic).
       if (key == MeasurementKey.ankleOpening &&
           _kPaichaFloorGarments.contains(garment)) {

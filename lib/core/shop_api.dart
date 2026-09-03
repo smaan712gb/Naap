@@ -131,6 +131,31 @@ class ShopApi {
         _kOrders, jsonEncode([for (final x in current) x.toJson()]));
   }
 
+  /// Anonymous brand-size self-report — the Phase 2 fit-library flywheel.
+  /// Numbers only, never identity.
+  static Future<void> submitFitReport({
+    required String brand,
+    required String sizeLabel,
+    required String fitVerdict,
+    String garment = 'jacket',
+    double? bodyChestCm,
+    double? bodyWaistCm,
+  }) async {
+    final base = await baseUrl();
+    await http
+        .post(Uri.parse('$base/fit-reports'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'brand': brand,
+              'size_label': sizeLabel,
+              'fit_verdict': fitVerdict,
+              'garment': garment,
+              'body_chest_cm': bodyChestCm,
+              'body_waist_cm': bodyWaistCm,
+            }))
+        .timeout(const Duration(seconds: 12));
+  }
+
   /// Price breakdown before ordering — no surprises at checkout.
   static Future<Map<String, dynamic>> quote(
       {required String mode, String? fabricId}) async {

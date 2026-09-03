@@ -30,6 +30,76 @@ Future<bool> _updateAvailable() async {
   }
 }
 
+void _showClients(BuildContext context, AppState state) {
+  showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    builder: (ctx) => SafeArea(
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        const Padding(
+          padding: EdgeInsets.only(bottom: 4),
+          child: Text('Who is being measured? — کس کا ناپ؟',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+        ),
+        for (final c in state.clients)
+          ListTile(
+            leading: Icon(c.id == state.active.id
+                ? Icons.radio_button_checked
+                : Icons.radio_button_off),
+            title: Text(
+                c.profile.name.isEmpty ? '(no name yet)' : c.profile.name),
+            subtitle: Text(c.naap.values.isEmpty
+                ? 'not measured yet'
+                : 'measured · ${c.profile.heightCm.toStringAsFixed(0)} cm'),
+            trailing: state.clients.length > 1
+                ? IconButton(
+                    icon: const Icon(Icons.delete_outline, size: 20),
+                    onPressed: () async {
+                      await state.deleteClient(c.id);
+                      if (ctx.mounted) Navigator.pop(ctx);
+                    })
+                : null,
+            onTap: () async {
+              await state.switchClient(c.id);
+              if (ctx.mounted) Navigator.pop(ctx);
+            },
+          ),
+        ListTile(
+          leading: const Icon(Icons.person_add_alt),
+          title: const Text('Add person — نیا گاہک'),
+          onTap: () async {
+            Navigator.pop(ctx);
+            final ctrl = TextEditingController();
+            final name = await showDialog<String>(
+              context: context,
+              builder: (dctx) => AlertDialog(
+                title: const Text('New person'),
+                content: TextField(
+                    controller: ctrl,
+                    autofocus: true,
+                    decoration:
+                        const InputDecoration(hintText: 'Name / نام')),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(dctx),
+                      child: const Text('Cancel')),
+                  FilledButton(
+                      onPressed: () => Navigator.pop(dctx, ctrl.text.trim()),
+                      child: const Text('Add')),
+                ],
+              ),
+            );
+            if (name != null && name.isNotEmpty) {
+              await state.newClient(name);
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+      ]),
+    ),
+  );
+}
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -50,6 +120,15 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
         centerTitle: true,
+        actions: [
+          // Phase 2 assisted mode: one phone, many measured people — a
+          // family, or a tailor's whole client book.
+          IconButton(
+            tooltip: 'Clients / گاہک',
+            icon: const Icon(Icons.people_alt_outlined),
+            onPressed: () => _showClients(context, state),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),

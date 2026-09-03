@@ -9,6 +9,8 @@ import '../../core/fabric.dart';
 import '../../core/models/measurements.dart';
 import '../../core/models/profile.dart';
 import '../../core/parchi/parchi_pdf.dart';
+import '../../core/shop_api.dart';
+import '../../core/silhouettes.dart';
 import '../../core/sizing.dart';
 import '../../core/styles.dart';
 
@@ -78,6 +80,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         fit: s.fit,
         fabric: s.fabric,
         style: s.style,
+        silhouette: s.silhouette,
       );
       final summary =
           'Naap parchi for ${s.profile.name} — ${kGarments[s.garment]!.english} '
@@ -104,14 +107,17 @@ class _ResultsScreenState extends State<ResultsScreen> {
   @override
   Widget build(BuildContext context) {
     final s = context.watch<AppState>();
-    final lines =
-        EaseEngine.buildParchi(s.naap, s.garment, s.fit, fabric: s.fabric);
+    final lines = EaseEngine.buildParchi(s.naap, s.garment, s.fit,
+        fabric: s.fabric, silhouette: s.silhouette);
     // All three fits side by side, so the fitted/regular/loose variation is
     // visible at a glance instead of only changing one number in place.
     final byFit = {
       for (final f in FitPreference.values)
-        f: EaseEngine.buildParchi(s.naap, s.garment, f, fabric: s.fabric)
+        f: EaseEngine.buildParchi(s.naap, s.garment, f,
+            fabric: s.fabric, silhouette: s.silhouette)
     };
+    final isTrouserGarment = s.garment == GarmentType.suitTwoPiece ||
+        s.garment == GarmentType.trousersShirt;
     String stitchRow(int i) {
       final fitted = byFit[FitPreference.fitted]![i].stitchCm;
       final regular = byFit[FitPreference.regular]![i].stitchCm;
@@ -170,6 +176,22 @@ class _ResultsScreenState extends State<ResultsScreen> {
             selected: {s.fit},
             onSelectionChanged: (sel) => s.setFit(sel.first),
           ),
+          if (isTrouserGarment) ...[
+            const SizedBox(height: 12),
+            DropdownButtonFormField<SilhouetteProfile>(
+              initialValue: s.silhouette,
+              decoration: const InputDecoration(
+                  labelText: 'Trouser silhouette (trend layer)',
+                  border: OutlineInputBorder()),
+              items: [
+                for (final d in kSilhouettes.values)
+                  DropdownMenuItem(
+                      value: d.profile,
+                      child: Text('${d.english}  ${d.urdu}')),
+              ],
+              onChanged: (v) => v != null ? s.setSilhouette(v) : null,
+            ),
+          ],
           const SizedBox(height: 12),
           if (s.garment == GarmentType.shalwarKameez ||
               s.garment == GarmentType.kurtaPajama)
@@ -220,6 +242,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
             ),
           ],
           const SizedBox(height: 16),
+          _fitReportCard(context, s),
+          const SizedBox(height: 16),
           if (mapSuMisura(s.naap) case final sm?)
             Card(
               color: const Color(0xFFF7F1E1),
@@ -252,6 +276,90 @@ class _ResultsScreenState extends State<ResultsScreen> {
             'Estimates from on-device analysis. Values marked ~ are lower-confidence — '
             'verify with a tape for your first order, then Naap learns from your edits.',
             style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool _fitReportSent = false;
+
+  /// Phase 2 fit-library flywheel: one optional question after a scan.
+  /// Anonymous — brand + size + verdict + this body's chest/waist numbers.
+  Widget _fitReportCard(BuildContext context, AppState s) {
+    if (_fitReportSent) {
+      return Card(
+        color: const Color(0xFFE8F1EC),
+        elevation: 0,
+        child: const ListTile(
+            leading: Icon(Icons.check_circle, color: Color(0xFF1B4D3E)),
+            title: Text('Shukriya! That helps Naap size every brand.')),
+      );
+    }
+    final brandCtrl = TextEditingController();
+    final sizeCtrl = TextEditingController();
+    String verdict = 'true-to-size';
+    return Card(
+      child: ExpansionTile(
+        leading: const Icon(Icons.checkroom_outlined),
+        title: const Text('Help Naap learn brand sizes (optional)'),
+        subtitle: const Text(
+            'e.g. "I wear EU 50 in ZEGNA" — anonymous, numbers only'),
+        childrenPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        children: [
+          Row(children: [
+            Expanded(
+                child: TextField(
+                    controller: brandCtrl,
+                    decoration: const InputDecoration(
+                        labelText: 'Brand',
+                        hintText: 'ZEGNA, BOSS, Khaadi…',
+                        border: OutlineInputBorder()))),
+            const SizedBox(width: 8),
+            SizedBox(
+                width: 110,
+                child: TextField(
+                    controller: sizeCtrl,
+                    decoration: const InputDecoration(
+                        labelText: 'Size',
+                        hintText: '50 / M / 40R',
+                        border: OutlineInputBorder()))),
+          ]),
+          const SizedBox(height: 10),
+          StatefulBuilder(
+            builder: (ctx, setLocal) => Column(children: [
+              SegmentedButton<String>(
+                segments: const [
+                  ButtonSegment(value: 'runs-small', label: Text('Small')),
+                  ButtonSegment(
+                      value: 'true-to-size', label: Text('True to size')),
+                  ButtonSegment(value: 'runs-large', label: Text('Large')),
+                ],
+                selected: {verdict},
+                onSelectionChanged: (sel) =>
+                    setLocal(() => verdict = sel.first),
+              ),
+              const SizedBox(height: 10),
+              FilledButton(
+                onPressed: () async {
+                  final brand = brandCtrl.text.trim();
+                  final size = sizeCtrl.text.trim();
+                  if (brand.isEmpty || size.isEmpty) return;
+                  try {
+                    await ShopApi.submitFitReport(
+                      brand: brand,
+                      sizeLabel: size,
+                      fitVerdict: verdict,
+                      bodyChestCm: s.naap[MeasurementKey.chest]?.cm,
+                      bodyWaistCm: s.naap[MeasurementKey.waist]?.cm,
+                    );
+                  } catch (_) {/* best effort */}
+                  if (mounted) setState(() => _fitReportSent = true);
+                },
+                child: const Text('Send'),
+              ),
+            ]),
           ),
         ],
       ),

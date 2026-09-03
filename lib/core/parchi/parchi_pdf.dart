@@ -16,6 +16,7 @@ import '../ease.dart';
 import '../fabric.dart';
 import '../models/measurements.dart';
 import '../models/profile.dart';
+import '../silhouettes.dart';
 import '../styles.dart';
 
 /// Simple generic mannequin sketch (front view) — the privacy-preserving
@@ -53,15 +54,18 @@ class ParchiPdf {
     required FitPreference fit,
     FabricType? fabric,
     KameezStyle? style,
+    SilhouetteProfile? silhouette,
   }) async {
     await _ensureFonts();
-    final lines = EaseEngine.buildParchi(naap, garment, fit, fabric: fabric);
+    final lines = EaseEngine.buildParchi(naap, garment, fit,
+        fabric: fabric, silhouette: silhouette);
     // All three fits appear on the parchi; the selected one is highlighted
     // as the cutting column, the others are reference for the tailor's
     // "kaisi fitting?" conversation.
     final byFit = {
       for (final f in FitPreference.values)
-        f: EaseEngine.buildParchi(naap, garment, f, fabric: fabric)
+        f: EaseEngine.buildParchi(naap, garment, f,
+            fabric: fabric, silhouette: silhouette)
     };
     final gdef = kGarments[garment]!;
     final fdef = fabric != null ? kFabrics[fabric] : null;

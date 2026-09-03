@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:naap/core/ease.dart';
 import 'package:naap/core/fabric.dart';
 import 'package:naap/core/learning.dart';
+import 'package:naap/core/silhouettes.dart';
 import 'package:naap/core/measure/geometry.dart';
 import 'package:naap/core/models/measurements.dart';
 import 'package:naap/core/sizing.dart';
@@ -211,6 +212,53 @@ void main() {
       final paicha = lines
           .firstWhere((l) => l.def.key == MeasurementKey.ankleOpening);
       expect(paicha.stitchCm, 28.0);
+    });
+  });
+
+  group('silhouette engine', () {
+    Naap body() => Naap.empty()
+      ..set(MeasurementKey.knee, const MeasurementValue(38.0))
+      ..set(MeasurementKey.calf, const MeasurementValue(37.0))
+      ..set(MeasurementKey.ankleOpening, const MeasurementValue(30.0))
+      ..set(MeasurementKey.shalwarLength, const MeasurementValue(94.0));
+
+    double stitchOf(List<ParchiLine> lines, MeasurementKey k) =>
+        lines.firstWhere((l) => l.def.key == k).stitchCm;
+
+    test('wide flare opens the hem and pools length', () {
+      final lines = EaseEngine.buildParchi(
+          body(), GarmentType.trousersShirt, FitPreference.regular,
+          silhouette: SilhouetteProfile.wideFlared);
+      expect(stitchOf(lines, MeasurementKey.knee), 48.0); // 38 + 10
+      expect(stitchOf(lines, MeasurementKey.ankleOpening), 51.0);
+      expect(stitchOf(lines, MeasurementKey.shalwarLength), 96.5);
+    });
+
+    test('skinny is defined by the calf feasibility floor', () {
+      final lines = EaseEngine.buildParchi(
+          body(), GarmentType.trousersShirt, FitPreference.regular,
+          silhouette: SilhouetteProfile.skinny);
+      expect(stitchOf(lines, MeasurementKey.ankleOpening),
+          closeTo(38.3, 0.001)); // calf 37 + 1.3 — never narrower
+      expect(stitchOf(lines, MeasurementKey.shalwarLength), 91.5);
+    });
+
+    test('silhouette never touches a shalwar kameez', () {
+      final naap = body()
+        ..set(MeasurementKey.chest, const MeasurementValue(100.0));
+      final lines = EaseEngine.buildParchi(
+          naap, GarmentType.shalwarKameez, FitPreference.regular,
+          silhouette: SilhouetteProfile.skinny);
+      expect(stitchOf(lines, MeasurementKey.ankleOpening), 30.0);
+    });
+
+    test('body column is silhouette-independent (immutable truth)', () {
+      final lines = EaseEngine.buildParchi(
+          body(), GarmentType.trousersShirt, FitPreference.regular,
+          silhouette: SilhouetteProfile.wideFlared);
+      final knee =
+          lines.firstWhere((l) => l.def.key == MeasurementKey.knee);
+      expect(knee.bodyCm, 38.0);
     });
   });
 
