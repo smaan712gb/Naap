@@ -15,9 +15,9 @@ computer vision.
 
 | Phase | What | Status |
 | --- | --- | --- |
-| **1 — Measurement utility** | The trust wedge: scan → bilingual Digital Parchi → WhatsApp to your tailor. Free; later a small export micro-fee. | **Built (MVP)** — this repo |
-| **1.5 — Fabric marketplace** | Unstitched fabric e-commerce for the diaspora (US/UK/CA/UAE): branded (affiliate/partnership feeds preferred over scraping) + Faisalabad/Lahore wholesale. Tri-modal checkout: One-Click Stitch (vetted tailor network), DIY fabric export (fabric + parchi shipped), or measurement-only. | After scan trust is earned |
-| **2 — Luxury su misura** | EU size/drop translation (affiliate), MTM suiting stitched in Lahore/Karachi with pattern deltas → `.DXF` for CAD cutting, white-label iPad clienteling SaaS for luxury stores. | After Phase 1.5 network is battle-tested |
+| **1 — Measurement utility** | The trust wedge: scan → bilingual Digital Parchi → WhatsApp to your tailor. Free; later a small export micro-fee. | **Shipped** — both platforms, calibration round 1 tape-validated |
+| **1.5 — Fabric marketplace** | Unstitched fabric e-commerce for the diaspora (US/UK/CA/UAE): branded (affiliate/partnership feeds preferred over scraping) + Faisalabad/Lahore wholesale. Tri-modal checkout: One-Click Stitch (vetted tailor network), DIY fabric export (fabric + parchi shipped), or measurement-only. | **Storefront live in beta** (getnaap.com + app); commerce ops pending: Stripe key, durable order store, real supplier + tailor network |
+| **2 — Luxury su misura** | EU size/drop translation (affiliate), MTM suiting stitched in Lahore/Karachi with pattern deltas → `.DXF` for CAD cutting, white-label iPad clienteling SaaS for luxury stores. | Primitives live (sizing, DXF, dual-layer spec, fit-library schema, Atelier MTM listings); the per-brand fit library — the moat — is still nearly empty |
 
 Rationale for sequencing: the measurement utility earns the trust and the
 tape-verified accuracy data that everything downstream depends on. Marketplace
@@ -93,14 +93,34 @@ Target roster (founder's list):
   storage.
 - Every AI measurement is user-editable; manual edits win.
 
-## What is built today (Phase 1 MVP)
+## What is built today
 
-Flutter app (Android + iOS): guided front/side capture with ghost overlay →
-ML Kit pose + segmentation engine (height-calibrated, elliptical
-circumference model) → Pakistani ease tables (asan/teera/chaak,
-fitted/regular/loose) → bilingual EN/Urdu PDF Digital Parchi → WhatsApp
-share. Unit-tested engine; CI builds both platforms; AWS Device Farm smoke
-gate on rented phones (`scripts/devicefarm_smoke.py`).
+**Phase 1 (shipped):** Flutter app (Android + iOS): guided auto-capture
+with live pose coaching + Urdu/English voice → ML Kit pose + segmentation
+engine (height-calibrated, elliptical circumference model, EXIF-safe,
+posture profile) → Pakistani ease tables + fabric stretch + silhouettes →
+three-fit bilingual PDF parchi (QR, measured-by, style box) → WhatsApp.
+Multi-client book for tailors, per-user calibration learning, scan
+history + Body Drift Report, Size Passport (EU/IT/FR/UK/US, gendered),
+per-house brand-fit advice, reference-photo attachments. Delivery:
+TestFlight (Codemagic) + direct APK with in-app update card
+(getnaap.com/app, arm64+arm32).
+
+**Phase 1.5 (storefront live, beta):** FastAPI on Lightsail — bilingual
+taxonomy, 14-item seeded catalog with founder-approved AI photography,
+tri-modal orders + quotes, waitlist, fit reports. Web: getnaap.com
+(restraint-spine landing per web/WEBSITE-BRIEF.md, full-bleed luxury shop
+grid with New In/Atelier tabs, colour/material/sort filters,
+fit-preview hover) + token-gated admin console.
+
+**Imagery & agent layer (2026-09-03):** in-house image studio
+(`scripts/image_studio.py`, Gemini image gen; DeepSeek vision screens) —
+catalog stills, worn/ghost-mannequin/fitted-regular-loose variants, and
+campaign heroes, all founder-reviewed then served from our CDN. Agent
+team on the server scheduler: seasonal (Mon), link-health (Tue), trends
+(Wed), **curator (Thu)** — drafts seasonal items into the review queue
+with prices from a deterministic price book; human verify gates publish.
+The catalog is designed to evolve weekly without new code.
 
 ## Near-term roadmap
 
