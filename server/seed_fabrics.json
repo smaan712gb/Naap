@@ -22,7 +22,7 @@
   "pieces": 1,
   "piece_contents": "5m fabric cut",
   "availability": "ready-to-dispatch",
-  "image_url": "https://images.pexels.com/photos/30550128/pexels-photo-30550128.jpeg?auto=compress&cs=tinysrgb&w=800"
+  "image_url": "https://getnaap.com/img/lawn-classic-white.jpg"
  },
  {
   "id": "emblawn-festive-teal",
@@ -50,7 +50,7 @@
   "pieces": 3,
   "piece_contents": "shirt + trouser + silk dupatta",
   "availability": "ready-to-dispatch",
-  "image_url": "https://images.pexels.com/photos/27603163/pexels-photo-27603163.jpeg?auto=compress&cs=tinysrgb&w=800"
+  "image_url": "https://getnaap.com/img/emblawn-festive-teal.jpg"
  },
  {
   "id": "khaddar-winter-brown",
@@ -74,7 +74,7 @@
   "pieces": 1,
   "piece_contents": "5m fabric cut",
   "availability": "ready-to-dispatch",
-  "image_url": "https://images.pexels.com/photos/6331032/pexels-photo-6331032.jpeg?auto=compress&cs=tinysrgb&w=800"
+  "image_url": "https://getnaap.com/img/khaddar-winter-brown.jpg"
  },
  {
   "id": "dhanak-rose-2pc",
@@ -102,7 +102,7 @@
   "pieces": 2,
   "piece_contents": "shirt + trouser",
   "availability": "ready-to-dispatch",
-  "image_url": "https://images.pexels.com/photos/25184995/pexels-photo-25184995.jpeg?auto=compress&cs=tinysrgb&w=800"
+  "image_url": "https://getnaap.com/img/dhanak-rose-2pc.jpg"
  },
  {
   "id": "washwear-slate",
@@ -131,7 +131,7 @@
   "pieces": 1,
   "piece_contents": "5m fabric cut",
   "availability": "ready-to-dispatch",
-  "image_url": "https://images.pexels.com/photos/7988109/pexels-photo-7988109.jpeg?auto=compress&cs=tinysrgb&w=800"
+  "image_url": "https://getnaap.com/img/washwear-slate.jpg"
  },
  {
   "id": "latha-white",
@@ -159,7 +159,7 @@
   "pieces": 1,
   "piece_contents": "5m fabric cut",
   "availability": "ready-to-dispatch",
-  "image_url": "https://images.pexels.com/photos/5908326/pexels-photo-5908326.jpeg?auto=compress&cs=tinysrgb&w=800"
+  "image_url": "https://getnaap.com/img/latha-white.jpg"
  },
  {
   "id": "boski-cream",
@@ -189,7 +189,7 @@
   "pieces": 1,
   "piece_contents": "5m fabric cut",
   "availability": "ready-to-dispatch",
-  "image_url": "https://images.pexels.com/photos/7988399/pexels-photo-7988399.jpeg?auto=compress&cs=tinysrgb&w=800"
+  "image_url": "https://getnaap.com/img/boski-cream.jpg"
  },
  {
   "id": "rawsilk-ivory",
@@ -216,7 +216,7 @@
   "pieces": 1,
   "piece_contents": "5m fabric cut",
   "availability": "made-to-order",
-  "image_url": "https://images.pexels.com/photos/8465934/pexels-photo-8465934.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "image_url": "https://getnaap.com/img/rawsilk-ivory.jpg",
   "audience": "men"
  },
  {
@@ -247,7 +247,7 @@
   "pieces": 1,
   "piece_contents": "shirt-length cut",
   "availability": "made-to-order",
-  "image_url": "https://images.pexels.com/photos/35974685/pexels-photo-35974685.jpeg?auto=compress&cs=tinysrgb&w=800"
+  "image_url": "https://getnaap.com/img/velvet-emerald.jpg"
  },
  {
   "id": "organza-blush",
@@ -276,7 +276,7 @@
   "pieces": 1,
   "piece_contents": "shirt-length + dupatta cut",
   "availability": "made-to-order",
-  "image_url": "https://images.pexels.com/photos/7956629/pexels-photo-7956629.jpeg?auto=compress&cs=tinysrgb&w=800"
+  "image_url": "https://getnaap.com/img/organza-blush.jpg"
  },
  {
   "id": "atelier-kurta-boski",
@@ -301,7 +301,7 @@
   "fabric_label": "Atelier · Boski",
   "design": "plain",
   "availability": "made-to-measure",
-  "image_url": "https://images.pexels.com/photos/35491621/pexels-photo-35491621.jpeg?auto=compress&cs=tinysrgb&w=800"
+  "image_url": "https://getnaap.com/img/atelier-kurta-boski.jpg"
  },
  {
   "id": "atelier-blazer-wool",
@@ -325,7 +325,7 @@
   "fabric_label": "Atelier · Wool",
   "design": "plain",
   "availability": "made-to-measure",
-  "image_url": "https://images.pexels.com/photos/35865086/pexels-photo-35865086.jpeg?auto=compress&cs=tinysrgb&w=800"
+  "image_url": "https://getnaap.com/img/atelier-blazer-wool.jpg"
  },
  {
   "id": "atelier-occasion-sk",
@@ -349,7 +349,7 @@
   "fabric_label": "Atelier · Raw Silk",
   "design": "plain",
   "availability": "made-to-measure",
-  "image_url": "https://images.pexels.com/photos/8588636/pexels-photo-8588636.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "image_url": "https://getnaap.com/img/atelier-occasion-sk.jpg",
   "audience": "men"
  },
  {
@@ -376,6 +376,6 @@
   "fabric_label": "Atelier · Raw Silk",
   "design": "embellished",
   "availability": "made-to-measure",
-  "image_url": "https://images.pexels.com/photos/33210512/pexels-photo-33210512.jpeg?auto=compress&cs=tinysrgb&w=800"
+  "image_url": "https://getnaap.com/img/atelier-formal-ladies.jpg"
  }
 ]

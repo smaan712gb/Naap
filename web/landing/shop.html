@@ -100,18 +100,12 @@ const $ = id => document.getElementById(id);
 
 function hueFor(s){let h=0;for(const c of s)h+=c.charCodeAt(0);return (h*37)%360;}
 
-// Interim photography (free-license, Pexels) until the API serves image_url.
-const PX = id => `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=800`;
-const IMG = {
-  "lawn-classic-white": PX(30550128), "emblawn-festive-teal": PX(27603163),
-  "atelier-formal-ladies": PX(33210512),
-  "khaddar-winter-brown": PX(6331032), "dhanak-rose-2pc": PX(25184995),
-  "washwear-slate": PX(7988109), "latha-white": PX(5908326),
-  "boski-cream": PX(7988399), "rawsilk-ivory": PX(8465934),
-  "velvet-emerald": PX(35974685), "organza-blush": PX(7956629),
-  "atelier-kurta-boski": PX(35491621), "atelier-blazer-wool": PX(35865086),
-  "atelier-occasion-sk": PX(8588636),
-};
+// Fallback to our own AI-studio imagery if the API row lacks image_url.
+const IMG_IDS = ["lawn-classic-white","emblawn-festive-teal","khaddar-winter-brown",
+  "dhanak-rose-2pc","washwear-slate","latha-white","boski-cream","rawsilk-ivory",
+  "velvet-emerald","organza-blush","atelier-kurta-boski","atelier-blazer-wool",
+  "atelier-occasion-sk","atelier-formal-ladies"];
+const IMG = Object.fromEntries(IMG_IDS.map(id => [id, `https://getnaap.com/img/${id}.jpg`]));
 
 // Draped-cloth swatch: layered gradients render hanging fabric with folds
 // and sheen, tuned per fabric family. Photography wins when image_url is
