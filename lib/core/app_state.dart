@@ -164,12 +164,21 @@ class AppState extends ChangeNotifier {
 
   // ---- client book (Phase 2 assisted mode) ----
 
+  /// Default garment follows the active person: women land on Ladies Suit,
+  /// men on Shalwar Kameez. Only a default — always changeable.
+  void _defaultGarmentForActive() {
+    garment = active.profile.bodyType == BodyType.female
+        ? GarmentType.ladiesSuit
+        : GarmentType.shalwarKameez;
+  }
+
   Future<ClientRecord> newClient(String name) async {
     final c = ClientRecord(
         id: DateTime.now().millisecondsSinceEpoch.toRadixString(36));
     c.profile.name = name;
     clients.add(c);
     _activeId = c.id;
+    _defaultGarmentForActive();
     await _persist();
     notifyListeners();
     return c;
@@ -178,6 +187,7 @@ class AppState extends ChangeNotifier {
   Future<void> switchClient(String id) async {
     if (clients.any((c) => c.id == id)) {
       _activeId = id;
+      _defaultGarmentForActive();
       await _persist();
       notifyListeners();
     }
@@ -195,6 +205,7 @@ class AppState extends ChangeNotifier {
 
   Future<void> saveProfile(UserProfile p) async {
     active.profile = p;
+    _defaultGarmentForActive();
     await _persist();
     notifyListeners();
   }
