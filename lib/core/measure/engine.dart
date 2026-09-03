@@ -39,27 +39,30 @@ const double _kBellyRowT = 0.92; // widest stomach, just above the navel
 const double _kSeatRowT = 0.22; // hip landmark → knee fraction for seat fullest point
 const double _kCrotchRowT = 0.16; // hip landmark → knee fraction for crotch
 
-/// Elliptical-model shape factors: human cross-sections are not perfect
-/// ellipses. Tuned starting points; calibrate against tape measurements.
-const double _kChestShape = 0.97;
-const double _kWaistShape = 0.99;
+/// Elliptical-model shape factors. CALIBRATED 2026-09-03 against the
+/// first professional darzi tape sheet (subject: founder; app waist was
+/// within 0.1" of the tailor's, validating the pipeline; chest/seat read
+/// ~4-5" low from over-tight caps + the ellipse under-modeling a tape's
+/// real path over lats/glutes, so their factors rise above 1). Single
+/// subject so far — refine with calibrate.py as more pairs arrive.
+const double _kChestShape = 1.06;
+const double _kWaistShape = 0.99; // tape-validated, do not touch casually
 const double _kBellyShape = 0.99;
-const double _kSeatShape = 0.96;
+const double _kSeatShape = 1.08;
 
-/// Anti-contamination bounds (first real session read chest AND waist at
-/// ~131 cm on a 40R body: hanging arms merge with the torso silhouette in
-/// both views). Shoulder landmarks are joints — arms cannot contaminate
-/// them — so torso width at a row is capped as a fraction of the shoulder
-/// landmark span, and depth as a fraction of that row's width. Generous
-/// caps: they only cut obvious arm merges, real bodies stay untouched.
-const double _kChestWidthOfShoulder = 0.85;
-const double _kWaistWidthOfShoulder = 0.90;
-const double _kBellyWidthOfShoulder = 0.95;
-const double _kSeatWidthOfShoulder = 0.95;
+/// Anti-contamination bounds: torso width per row capped as a fraction of
+/// the shoulder-landmark span, depth as a fraction of that row's width.
+/// Loosened 2026-09-03: the original caps clamped an honest 40.5" chest
+/// down to 36.3" (the landmark span itself underestimates the frame).
+/// Arm-merge contamination adds 40%+, so these still catch it.
+const double _kChestWidthOfShoulder = 1.0;
+const double _kWaistWidthOfShoulder = 1.0;
+const double _kBellyWidthOfShoulder = 1.05;
+const double _kSeatWidthOfShoulder = 1.05;
 const double _kChestDepthOfWidth = 0.85;
 const double _kWaistDepthOfWidth = 0.95;
 const double _kBellyDepthOfWidth = 1.0; // bellies legitimately run deep
-const double _kSeatDepthOfWidth = 0.95;
+const double _kSeatDepthOfWidth = 1.0;
 
 class CaptureIssue {
   final String message;
@@ -160,10 +163,12 @@ class MeasurementEngine {
     final torsoMidX = ((lSh.x + rSh.x) / 2 + (lHip.x + rHip.x) / 2) / 2;
 
     // ---- Lengths (landmark-based, high confidence) ----
-    // Shoulder landmarks sit at the joints; real shoulder points (acromion)
-    // are slightly outside, hence the 1.06 factor.
+    // Teera on a parchi is the tailor's seam-to-seam span across the back —
+    // wider than both the joint centers ML Kit reports AND the bare
+    // acromion points. Factor calibrated 2026-09-03 against a professional
+    // darzi sheet (landmarks gave 16.0" where the darzi taped 19.25").
     final shoulderCm =
-        dist(lSh.x, lSh.y, rSh.x, rSh.y) * cmPerPxF * 1.06;
+        dist(lSh.x, lSh.y, rSh.x, rSh.y) * cmPerPxF * 1.25;
     naap.set(MeasurementKey.shoulder,
         MeasurementValue(shoulderCm, source: MeasurementSource.landmarks, confidence: 0.9));
 
@@ -179,9 +184,11 @@ class MeasurementEngine {
     naap.set(MeasurementKey.inseam,
         MeasurementValue(inseamCm, source: MeasurementSource.landmarks, confidence: 0.8));
 
-    // Outseam-style shalwar/trouser length: natural waist to ankle bone.
+    // Outseam-style shalwar/trouser length: natural waist to ankle bone,
+    // plus the waistband/break allowance tailors include (calibrated
+    // 2026-09-03: darzi taped 37" where waist->ankle gave 35.1").
     final waistY = shoulderY + _kWaistRowT * (hipY - shoulderY);
-    final shalwarCm = (ankleY - waistY) * cmPerPxF + 2.0; // +2 to shoe top
+    final shalwarCm = (ankleY - waistY) * cmPerPxF + 4.5;
     naap.set(MeasurementKey.shalwarLength,
         MeasurementValue(shalwarCm, source: MeasurementSource.landmarks, confidence: 0.8));
 
@@ -294,18 +301,17 @@ class MeasurementEngine {
     final weight = profile.weightKg;
     if (naap[MeasurementKey.neck] == null) {
       // Neck circumference scales with stature and BMI; simple linear model.
-      // Coefficients raised 2026-09-02 from the first calibration data
-      // point: a 16-17 collar tester (body neck ~39-41 cm) read 36.6 cm at
-      // the old 0.20 male coefficient.
+      // Coefficients calibrated twice: 2026-09-02 (collar sizes) and
+      // 2026-09-03 (professional darzi taped ~17.5" where 0.225 gave 16.2").
       final bmi = weight != null ? weight / ((h / 100) * (h / 100)) : 23.0;
-      final neck = (profile.bodyType == BodyType.male ? 0.225 : 0.205) * h +
+      final neck = (profile.bodyType == BodyType.male ? 0.237 : 0.215) * h +
           (bmi - 23.0) * 0.45;
       naap.set(MeasurementKey.neck,
           MeasurementValue(neck, source: MeasurementSource.regression, confidence: 0.4));
     }
     naap.set(
         MeasurementKey.wrist,
-        MeasurementValue(h * 0.098,
+        MeasurementValue(h * 0.106, // darzi-calibrated 2026-09-03
             source: MeasurementSource.regression, confidence: 0.4));
     naap.set(
         MeasurementKey.bicep,
