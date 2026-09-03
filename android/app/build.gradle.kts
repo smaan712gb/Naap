@@ -35,6 +35,13 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            // R8 shrinking disabled: the first real-device release install
+            // (Xiaomi, 2026-09-03) crash-looped at startup while the debug
+            // build passed Device Farm — classic stripped-class territory.
+            // ~8 MB larger APK is the right trade for a beta; revisit with
+            // proper keep rules before Play Store.
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }
