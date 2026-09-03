@@ -158,6 +158,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--app", default=APP)
     ap.add_argument("--test", default=TEST)
+    ap.add_argument("--model", help="target a specific device model "
+                    "(MODEL CONTAINS match), e.g. 'A13' for the arm32 "
+                    "budget-class Galaxy A13 5G")
+    ap.add_argument("--os-min", default="12",
+                    help="minimum Android version (default 12)")
     ap.add_argument("--poll-only", metavar="RUN_ARN")
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args()
@@ -180,21 +185,26 @@ def main():
                          f"--debug` then `gradlew app:assembleDebugAndroidTest`")
         app_arn = upload(df, proj, args.app, "ANDROID_APP")
         test_arn = upload(df, proj, args.test, "INSTRUMENTATION_TEST_PACKAGE")
+        # ONE device keeps a run ~1 dollar. Default filters pick any healthy
+        # modern Android handset; --model pins a specific device (e.g. the
+        # armeabi-v7a Galaxy A13 5G as the Tecno/Infinix budget proxy).
+        filters = [
+            {"attribute": "PLATFORM", "operator": "EQUALS",
+             "values": ["ANDROID"]},
+            {"attribute": "OS_VERSION", "operator": "GREATER_THAN_OR_EQUALS",
+             "values": [args.os_min]},
+            {"attribute": "AVAILABILITY", "operator": "EQUALS",
+             "values": ["HIGHLY_AVAILABLE"]},
+        ]
+        if args.model:
+            filters.append({"attribute": "MODEL", "operator": "CONTAINS",
+                            "values": [args.model]})
         run = df.schedule_run(
             projectArn=proj, appArn=app_arn,
             name=f"naap-smoke-{time.strftime('%Y%m%d-%H%M')}",
             test={"type": "INSTRUMENTATION", "testPackageArn": test_arn},
-            # ONE device keeps a run ~1 dollar. Filters pick any healthy
-            # modern Android handset.
             deviceSelectionConfiguration={
-                "filters": [
-                    {"attribute": "PLATFORM", "operator": "EQUALS",
-                     "values": ["ANDROID"]},
-                    {"attribute": "OS_VERSION", "operator": "GREATER_THAN_OR_EQUALS",
-                     "values": ["12"]},
-                    {"attribute": "AVAILABILITY", "operator": "EQUALS",
-                     "values": ["HIGHLY_AVAILABLE"]},
-                ],
+                "filters": filters,
                 "maxDevices": 1,
             },
             executionConfiguration={"jobTimeoutMinutes": 20},
