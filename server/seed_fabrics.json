@@ -50,7 +50,7 @@
   "pieces": 3,
   "piece_contents": "shirt + trouser + silk dupatta",
   "availability": "ready-to-dispatch",
-  "image_url": "https://images.pexels.com/photos/8749980/pexels-photo-8749980.jpeg?auto=compress&cs=tinysrgb&w=800"
+  "image_url": "https://images.pexels.com/photos/27603163/pexels-photo-27603163.jpeg?auto=compress&cs=tinysrgb&w=800"
  },
  {
   "id": "khaddar-winter-brown",
@@ -102,7 +102,7 @@
   "pieces": 2,
   "piece_contents": "shirt + trouser",
   "availability": "ready-to-dispatch",
-  "image_url": "https://images.pexels.com/photos/14944284/pexels-photo-14944284.jpeg?auto=compress&cs=tinysrgb&w=800"
+  "image_url": "https://images.pexels.com/photos/25184995/pexels-photo-25184995.jpeg?auto=compress&cs=tinysrgb&w=800"
  },
  {
   "id": "washwear-slate",
@@ -216,7 +216,8 @@
   "pieces": 1,
   "piece_contents": "5m fabric cut",
   "availability": "made-to-order",
-  "image_url": "https://images.pexels.com/photos/8465934/pexels-photo-8465934.jpeg?auto=compress&cs=tinysrgb&w=800"
+  "image_url": "https://images.pexels.com/photos/8465934/pexels-photo-8465934.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "audience": "men"
  },
  {
   "id": "velvet-emerald",
@@ -348,6 +349,33 @@
   "fabric_label": "Atelier · Raw Silk",
   "design": "plain",
   "availability": "made-to-measure",
-  "image_url": "https://images.pexels.com/photos/8588636/pexels-photo-8588636.jpeg?auto=compress&cs=tinysrgb&w=800"
+  "image_url": "https://images.pexels.com/photos/8588636/pexels-photo-8588636.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "audience": "men"
+ },
+ {
+  "id": "atelier-formal-ladies",
+  "name": "Atelier Ladies Formal — cut to your naap",
+  "composition": "raw_silk",
+  "price_usd": 279.0,
+  "meters": 5.5,
+  "description": "Occasion kameez, trouser and organza dupatta, made to measure from your scan by a vetted master. Fit guarantee: free remake.",
+  "source": "manual",
+  "verified": true,
+  "audience": "women",
+  "category_id": "w-luxury-pret",
+  "season": "all-season",
+  "occasions": [
+   "eid",
+   "nikkah",
+   "walima",
+   "wedding-guest"
+  ],
+  "buying_options": [
+   "custom-stitching"
+  ],
+  "fabric_label": "Atelier · Raw Silk",
+  "design": "embellished",
+  "availability": "made-to-measure",
+  "image_url": "https://images.pexels.com/photos/33210512/pexels-photo-33210512.jpeg?auto=compress&cs=tinysrgb&w=800"
  }
 ]
