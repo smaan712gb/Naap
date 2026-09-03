@@ -103,6 +103,7 @@
       <option value="walima">Walima ولیمہ</option>
       <option value="bridal">Bridal دلہن</option>
       <option value="groom">Groom دولہا</option></select>
+    <select id="f-mat"><option value="">All materials</option></select>
     <select id="f-sort"><option value="rec">Recommended</option>
       <option value="new">New arrivals</option>
       <option value="plo">Price low to high</option>
@@ -175,17 +176,15 @@ function sortItems(items){
 // Fit preview: swap the card photo between fitted / regular / loose cuts.
 // The numbers behind each fit stay in the deterministic ease engine — this
 // is the visual of what those numbers mean.
-// Hover preview: card image glides to the fitted cut (luxury-grid pattern),
+// Hover preview: flat garment comes alive on the model (Armani pattern),
 // unless the user has pinned a fit via the chips.
-window.hoverFit = function(sw, id, on){
+window.hoverFit = function(sw, wornUrl, on){
   if(sw.dataset.pinned) return;
-  const url = on ? `https://getnaap.com/img/${id}-fitted.jpg`
-                 : (sw.dataset.baseImg || "");
   if(!sw.dataset.baseImg) sw.dataset.baseImg = sw.style.backgroundImage;
   if(on){
     const probe = new Image();
-    probe.onload = () => { if(!sw.dataset.pinned) sw.style.backgroundImage = `url('${url}')`; };
-    probe.src = url;
+    probe.onload = () => { if(!sw.dataset.pinned) sw.style.backgroundImage = `url('${wornUrl}')`; };
+    probe.src = wornUrl;
   } else {
     sw.style.backgroundImage = sw.dataset.baseImg;
   }
@@ -236,7 +235,15 @@ async function load(){
   if(selColor) p.set('color', selColor);
   try{
     const r = await fetch(API + "/catalog?" + p);
-    const items = sortItems(tabFilter(await r.json()));
+    let items = tabFilter(await r.json());
+    // Material options populate from the live catalog itself, once.
+    const matSel = $('f-mat');
+    if(matSel.options.length === 1){
+      const mats = [...new Set(items.map(f=>f.fabric_label||f.composition))].sort();
+      for(const m of mats) matSel.add(new Option(m, m));
+    }
+    if(matSel.value) items = items.filter(f=>(f.fabric_label||f.composition)===matSel.value);
+    items = sortItems(items);
     $('grid').innerHTML = "";
     if(!items.length){$('state').textContent = "Nothing matches those filters yet."; return;}
     $('state').style.display = 'none';
@@ -244,13 +251,15 @@ async function load(){
       const card = document.createElement('div');
       card.className = 'card';
       const mtm = f.availability === 'made-to-measure';
-      const img = f.image_url || IMG[f.id];
+      // Armani pattern: Atelier cards rest on the garment-only flat shot
+      // and glide to the model wearing it on hover.
+      const worn = f.image_url || IMG[f.id];
+      const img = mtm && worn ? worn.replace(/\.jpg$/, '-flat.jpg') : worn;
       const sw = img
         ? `style="${clothCSS(f)}background-image:url('${img}');background-size:cover;background-position:center"`
         : `style="${clothCSS(f)}"`;
-      // Luxury hover: Atelier cards glide to the fitted cut on mouse-over.
-      const hover = (mtm && img)
-        ? `onmouseenter="hoverFit(this,'${f.id}',1)" onmouseleave="hoverFit(this,'${f.id}',0)"`
+      const hover = (mtm && worn)
+        ? `onmouseenter="hoverFit(this,'${worn}',1)" onmouseleave="hoverFit(this,'${worn}',0)"`
         : "";
       card.innerHTML = `
         <div class="swatch" ${sw} ${hover}>
@@ -276,7 +285,7 @@ async function load(){
     }
   }catch(e){$('state').textContent = "Collection unreachable right now — try again shortly.";}
 }
-for(const id of ['f-aud','f-season','f-occ','f-sort']) $(id).onchange = load;
+for(const id of ['f-aud','f-season','f-occ','f-sort','f-mat']) $(id).onchange = load;
 load();
 </script>
 </body>

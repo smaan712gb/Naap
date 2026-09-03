@@ -4,6 +4,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/app_state.dart';
 import '../../core/ease.dart';
+import '../../core/models/profile.dart';
+import '../../core/sizing.dart';
 import 'fabric_swatch.dart';
 import '../../core/shop_api.dart';
 
@@ -245,9 +247,21 @@ class _FabricDetailScreenState extends State<FabricDetailScreen> {
                   setState(() => _fitPreview = s.first),
             ),
             const SizedBox(height: 4),
-            Text('See the cut change — your exact numbers come from your '
-                'own scan.',
-                style: Theme.of(context).textTheme.bodySmall),
+            Builder(builder: (context) {
+              final s = context.watch<AppState>();
+              final label = s.hasMeasurements
+                  ? sizeLabel(s.naap,
+                      female: s.profile.bodyType == BodyType.female)
+                  : null;
+              return Text(
+                  label != null
+                      ? 'Will be cut to your naap ($label) — the fits '
+                          'above show the silhouette, your scan sets the '
+                          'numbers.'
+                      : 'See the cut change — your exact numbers come '
+                          'from your own scan.',
+                  style: Theme.of(context).textTheme.bodySmall);
+            }),
           ],
           const SizedBox(height: 16),
           Text('${f.brand ?? 'Wholesale'} · '

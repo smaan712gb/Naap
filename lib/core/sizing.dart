@@ -119,3 +119,16 @@ SuMisura? mapSuMisura(Naap naap) {
     notes: notes,
   );
 }
+
+/// One-line size label for shop surfaces ("EU 50 · US 40R"), gendered.
+/// Null when the scan doesn't carry enough measurements yet.
+String? sizeLabel(Naap naap, {required bool female}) {
+  if (female) {
+    final s = mapLadiesSizes(naap);
+    if (s == null) return null;
+    return 'EU ${s.eu} · US ${s.us} · UK ${s.uk}';
+  }
+  final s = mapSuMisura(naap);
+  if (s == null) return null;
+  return 'EU ${s.euSize} · US ${s.euSize - 10}R · drop ${s.drop}';
+}

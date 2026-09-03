@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../core/app_state.dart';
+import '../../core/models/profile.dart';
 import '../../core/shop_api.dart';
+import '../../core/sizing.dart';
 import 'fabric_detail_screen.dart';
 import 'fabric_swatch.dart';
 import 'orders_screen.dart';
@@ -77,6 +81,39 @@ class _ShopScreenState extends State<ShopScreen> {
       if (_occasion != null) 'occasion': _occasion!,
     };
     setState(() => _catalog = ShopApi.fetchCatalog(filters: f));
+  }
+
+  /// Size filters made practical: the scan already knows the answer.
+  /// Shows the client's measured size; every Atelier piece is cut to it.
+  Widget _yourSizeBanner() {
+    final s = context.watch<AppState>();
+    if (!s.hasMeasurements) return const SizedBox.shrink();
+    final label = sizeLabel(s.naap,
+        female: s.profile.bodyType == BodyType.female);
+    if (label == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFFEDF3EF),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(children: [
+          const Icon(Icons.straighten, size: 18, color: Color(0xFF1B4D3E)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Your measured size: $label — Atelier pieces are cut to '
+              'your exact naap.',
+              style: const TextStyle(
+                  fontSize: 12.5, color: Color(0xFF1B4D3E)),
+            ),
+          ),
+        ]),
+      ),
+    );
   }
 
   Widget _filterBar() {
@@ -203,6 +240,7 @@ class _ShopScreenState extends State<ShopScreen> {
           }
           return Column(children: [
             _filterBar(),
+            _yourSizeBanner(),
             const SizedBox(height: 4),
             Expanded(
               child: GridView.builder(
