@@ -149,6 +149,7 @@ class _CaptureScreenState extends State<CaptureScreen>
       if (_stage == _Stage.front) {
         _frontPath = file.path;
         _voice.resetFor('side');
+        _coach.resetStage();
         setState(() {
           _stage = _Stage.side;
           _coachResult = null;
@@ -199,6 +200,7 @@ class _CaptureScreenState extends State<CaptureScreen>
         );
         if (mounted) {
           _voice.resetFor('front');
+          _coach.resetStage();
           setState(() {
             _stage = _Stage.front;
             _coachResult = null;
@@ -214,6 +216,7 @@ class _CaptureScreenState extends State<CaptureScreen>
     } catch (e) {
       await engine.dispose();
       if (mounted) {
+        _coach.resetStage();
         setState(() {
           _error = 'Analysis failed: $e';
           _stage = _Stage.front;
@@ -290,6 +293,7 @@ class _CaptureScreenState extends State<CaptureScreen>
           onPressed: _camera == null
               ? null
               : () async {
+                  _coach.resetStage();
                   setState(() => _stage = _Stage.front);
                   await _ensureStream();
                 },

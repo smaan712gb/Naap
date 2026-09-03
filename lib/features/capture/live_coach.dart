@@ -27,6 +27,8 @@ enum CoachStatus {
   tooSmall,
   tooBig,
   handsInFront,
+  faceCamera, // front stage but the body is angled away
+  turnSide, // side stage but the body still faces the camera
   hold, // good pose — hold still, countdown running
   capture, // stable long enough: take the photo NOW
 }
@@ -58,6 +60,17 @@ class LiveCoach {
   DateTime _lastFrame = DateTime.fromMillisecondsSinceEpoch(0);
   ({double x, double y})? _lastAnchor;
   DateTime? _stableSince;
+  DateTime _stageEnteredAt = DateTime.fromMillisecondsSinceEpoch(0);
+
+  /// Call on every stage change (front→side, retakes). Clears the stability
+  /// anchor so a hold from the previous stage can never carry over — the
+  /// double-fire that shot the "side" photo while the user still faced the
+  /// camera (field regression, 2026-09-03).
+  void resetStage() {
+    _stableSince = null;
+    _lastAnchor = null;
+    _stageEnteredAt = DateTime.now();
+  }
 
   /// Feed one camera frame. Returns null when throttled/busy.
   Future<CoachResult?> process(CameraImage image, CameraDescription camera,
@@ -143,6 +156,29 @@ class LiveCoach {
       return reset(CoachStatus.tooBig, 'Step back a little', 'تھوڑا پیچھے ہٹیں');
     }
 
+    // Facing-angle gate: the shoulder x-span (normalized by body height)
+    // says which way the body points — wide = facing the camera, collapsed
+    // = true side-on. The front photo requires a square stance; the side
+    // photo fires only once the user has ACTUALLY turned, so the coach
+    // watches the turn happen instead of trusting choreography.
+    final lShoulder = lm(PoseLandmarkType.leftShoulder);
+    final rShoulder = lm(PoseLandmarkType.rightShoulder);
+    if (lShoulder != null && rShoulder != null) {
+      final facingRatio =
+          (lShoulder.x - rShoulder.x).abs() / math.max(1, bottomY - top.y);
+      if (!sideView && facingRatio < 0.17) {
+        return reset(CoachStatus.faceCamera,
+            'Face the camera straight on', 'کیمرے کی طرف سیدھا رخ کریں');
+      }
+      if (sideView && facingRatio > 0.12) {
+        return reset(
+            CoachStatus.turnSide,
+            'Turn to your right — keep turning until your side faces the '
+                'camera',
+            'دائیں طرف مڑیں — جب تک آپ کا پہلو کیمرے کی طرف نہ ہو');
+      }
+    }
+
     // Side view: hands drifting in front of the torso are the #1 cause of
     // inflated waist/hip readings — coach them away BEFORE the photo.
     if (sideView) {
@@ -180,7 +216,10 @@ class LiveCoach {
     }
     _stableSince ??= DateTime.now();
     final held = DateTime.now().difference(_stableSince!);
-    if (held >= holdDuration) {
+    // Belt and suspenders for the double-fire: no capture within 1.5s of
+    // entering a stage, whatever the stability anchor says.
+    final dwelt = DateTime.now().difference(_stageEnteredAt).inMilliseconds;
+    if (held >= holdDuration && dwelt >= 1500) {
       _stableSince = null;
       return const CoachResult(CoachStatus.capture, 'Capturing!', 'تصویر لی جا رہی ہے',
           holdProgress: 1);

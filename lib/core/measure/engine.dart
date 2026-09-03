@@ -210,6 +210,22 @@ class MeasurementEngine {
     // the shoulder-landmark span, depths against the row's width; a capped
     // row is flagged low-confidence and reported as a retake hint.
     final shoulderSpanCm = dist(lSh.x, lSh.y, rSh.x, rSh.y) * cmPerPxF;
+
+    // Tripwire (2026-09-03 field regression): a "side" photo that is really
+    // a front view poisons every depth reading — the auto-capture double-fire
+    // produced 11-inch chests in the field. A genuinely turned body shows a
+    // collapsed shoulder x-span; anywhere near the front span means the
+    // person never turned. Block and retake — never emit garbage numbers.
+    final sideShoulderSpanCm = (side.lm(PoseLandmarkType.leftShoulder).x -
+                side.lm(PoseLandmarkType.rightShoulder).x)
+            .abs() *
+        cmPerPxS;
+    if (shoulderSpanCm > 1 && sideShoulderSpanCm > shoulderSpanCm * 0.55) {
+      issues.add(const CaptureIssue(
+          'The side photo shows a front view — turn 90° so your right side '
+          'faces the camera, then retake.',
+          blocking: true));
+    }
     var contaminated = false;
     void circumference(MeasurementKey key, double rowYF, double rowYS,
         double shapeFactor, double conf, double widthCapOfShoulder,
