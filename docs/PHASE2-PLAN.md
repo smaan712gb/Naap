@@ -102,3 +102,29 @@ Every touchpoint feeds the fit library:
 
 Next in code (needs app UI round): the optional brand-size question in
 checkout + post-scan prompt feeding /fit-reports.
+
+## European MTM spec review (2026-09-03) — silhouettes & associate mode
+
+Audit against the detailed EU/MTM requirements confirmed the
+architecture: body truth (naap) is already decoupled from style layers
+(ease/fit/fabric/silhouette), the parchi's Body vs Stitch IS the
+dual-layer (biometric truth / production spec) export, the drop system
+ships (4/6/7/8 taxonomy in sizing.py), and the calf→paicha floor is the
+anatomical feasibility enforcer. Built as regressions today: over-arm
+(chest +10 cm) and knee. Banked for the Atelier trouser pilot — the
+declarative silhouette table (all values are style-layer offsets over
+the immutable body):
+
+| Profile | Knee ease | Opening | Break/length |
+| --- | --- | --- | --- |
+| Wide/flared | +7.5–13 cm | 46–61 cm | full break, +2.5 cm |
+| Relaxed/straight | +5–9 cm | 41–46 cm | medium break |
+| Slim/tapered | +2.5–4 cm | 35.5–39 cm | slight break |
+| Skinny | +1.3 cm | max(calf, instep diagonal)+1.3 cm | no break/cropped |
+
+Gated v2 (needs the mesh): shoulder-slope angle → pad thickness,
+posture profiling → front/back balance, 3D digital twin preview. Gated
+on business: associate iPad AR/LiDAR capture, interactive trend sliders,
+Gerber/Lectra/AAMA-DXF integration (our DXF is an annotation sheet, not
+an AAMA pattern payload — the real integration is built WITH the first
+cutting house, not speculatively).

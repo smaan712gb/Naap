@@ -367,6 +367,18 @@ class MeasurementEngine {
         MeasurementKey.backWidth,
         MeasurementValue(chestCm * 0.43,
             source: MeasurementSource.regression, confidence: 0.35));
+    // Over-arm (chest + both arms at their widest) — standard drafting
+    // offset of ~9-11 cm over the chest; jacket armhole clearance check.
+    naap.set(
+        MeasurementKey.overArm,
+        MeasurementValue(chestCm + 10.0,
+            source: MeasurementSource.regression, confidence: 0.35));
+    // Knee circumference anchors trouser silhouettes (wide → skinny).
+    final thighCm = naap[MeasurementKey.thigh]?.cm;
+    naap.set(
+        MeasurementKey.knee,
+        MeasurementValue(thighCm != null ? thighCm * 0.72 : h * 0.215,
+            source: MeasurementSource.regression, confidence: 0.35));
     naap.set(
         MeasurementKey.ankleOpening,
         MeasurementValue(h * 0.16,

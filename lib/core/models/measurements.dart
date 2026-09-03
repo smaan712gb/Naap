@@ -31,6 +31,8 @@ enum MeasurementKey {
   jacketLength, // Coat Lambai — nape to hip, European jackets
   frontChest, // front chest width, armpit to armpit (drafting)
   backWidth, // back width across the blades (drafting)
+  overArm, // around chest AND both arms — jacket armhole/back clearance
+  knee, // knee circumference — trouser silhouette anchor
 }
 
 class MeasurementDef {
@@ -140,6 +142,18 @@ const Map<MeasurementKey, MeasurementDef> kMeasurementDefs = {
       english: 'Back width',
       urdu: 'پشت چوڑائی',
       tailorTerm: 'Pusht'),
+  MeasurementKey.overArm: MeasurementDef(
+      key: MeasurementKey.overArm,
+      english: 'Over-arm',
+      urdu: 'اوور آرم',
+      tailorTerm: 'Over-arm',
+      isCircumference: true),
+  MeasurementKey.knee: MeasurementDef(
+      key: MeasurementKey.knee,
+      english: 'Knee',
+      urdu: 'گھٹنا',
+      tailorTerm: 'Ghutna',
+      isCircumference: true),
   MeasurementKey.wrist: MeasurementDef(
       key: MeasurementKey.wrist,
       english: 'Wrist / Cuff',

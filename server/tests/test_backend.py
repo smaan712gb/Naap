@@ -74,7 +74,7 @@ def test_su_misura_athletic_drop_note():
     s = map_su_misura(chest_cm=104, waist_cm=86, hip_cm=100,
                       shoulder_cm=43, sleeve_cm=62)
     assert s.drop >= 8
-    assert any("Athletic" in n for n in s.notes)
+    assert any("athletic" in n for n in s.notes)
 
 
 def test_su_misura_rejects_out_of_range():

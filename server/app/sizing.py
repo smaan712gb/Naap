@@ -65,10 +65,19 @@ def map_su_misura(chest_cm: float, waist_cm: float, hip_cm: float,
     drop = round((chest_cm - waist_cm) / 2.0)
     nom = _nominal(size)
     notes = []
+    # European drop taxonomy: 8 slim/athletic, 7 modern/trim, 6 classic,
+    # 4 portly/executive.
     if drop >= 8:
-        notes.append("Athletic drop — take in back waist suppression")
+        notes.append("Drop 8 (slim/athletic) — take in back waist suppression")
+    elif drop == 7:
+        notes.append("Drop 7 (modern/trim) block")
+    elif drop == 6:
+        notes.append("Drop 6 (classic/regular) block")
+    elif drop == 5:
+        notes.append("Between classic and comfort — fit garment advised")
     elif drop <= 4:
-        notes.append("Comfort drop — ease side seams, consider half-lining")
+        notes.append("Drop 4 (portly/executive) — ease side seams, "
+                     "consider half-lining")
     if abs(chest_cm - nom["chest"]) > 4:
         notes.append("Between sizes — verify with a fitting garment")
     if belly_cm is not None and belly_cm >= chest_cm:

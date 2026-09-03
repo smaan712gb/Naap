@@ -76,6 +76,7 @@ const Map<GarmentType, GarmentDef> kGarments = {
     urdu: 'ٹو پیس سوٹ',
     keys: [
       MeasurementKey.chest,
+      MeasurementKey.overArm,
       MeasurementKey.frontChest,
       MeasurementKey.backWidth,
       MeasurementKey.waist,
@@ -91,6 +92,7 @@ const Map<GarmentType, GarmentDef> kGarments = {
       MeasurementKey.shalwarLength,
       MeasurementKey.inseam,
       MeasurementKey.thigh,
+      MeasurementKey.knee,
       MeasurementKey.calf,
       MeasurementKey.ankleOpening,
     ],
