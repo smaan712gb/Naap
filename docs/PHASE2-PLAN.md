@@ -129,6 +129,23 @@ monetization opens — distinct economics from Pakistani tailors, who
 stay free forever. Banked wants: parchi language toggle (Urdu column is
 odd in Milan), richer tailor branding.
 
+## Segment: bespoke/couture houses for ultra-rich clients (2026-09-03)
+
+The apex segment — Savile Row, Neapolitan sartorias, Paris ateliers, NYC
+bespoke, women's couture. HARD RULE: never positioned as their
+measurement system (they work to ±0.5cm with figuration judgment no v1
+scan matches; overclaiming here burns the brand permanently). Three real
+doors: (1) the between-fittings BODY DRIFT monitor — client scans
+quarterly at home, house sees girth deltas vs their fitting baseline
+before the next commission (naap history already is this; a shareable
+"body drift report" PDF is the bankable feature); (2) ultra-rich
+privacy — on-device-and-deleted is the entry requirement for principals
+and celebrities, and it is our founding law; (3) the v2 mesh (shoulder
+slope, posture, 3D twin) with these houses as design partners — the
+clienteling SaaS premium tier, men's and women's. Sequencing: only after
+calibration is proven and indie EU MTM adoption exists. Imran's shop →
+one-person Milan MTM → the houses.
+
 ## European MTM spec review (2026-09-03) — silhouettes & associate mode
 
 Audit against the detailed EU/MTM requirements confirmed the
