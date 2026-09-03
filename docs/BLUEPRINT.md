@@ -64,9 +64,19 @@ Target roster (founder's list):
    - v1.5: per-measurement **calibration regressors** trained on
      (estimate, tape-measured truth, user-edit) triples from early users.
      Small, cheap, on-device. Highest-ROI ML work.
-   - v2: SMPL-X body-model fitting on-device via existing pretrained research
+   - v2: parametric body-model fitting on-device via pretrained research
      models converted to TFLite/Core ML. Unlocks the 3D avatar, EU size
      translation, and pattern deltas. Never train a vision foundation model.
+     **Body model choice (2026-09-03, founder research):** Meta MHR
+     (github.com/facebookresearch/MHR) — Apache 2.0, 45 shape parameters,
+     PyTorch — replaces SMPL-X as the default (SMPL-X commercial licensing
+     via Meshcapade costs thousands/yr; keep it only if a required
+     pretrained image-fitting model is SMPL-locked). Naver Anny (also
+     Apache 2.0) is the fallback for body-shape diversity. First use is
+     OFFLINE: a synthetic calibration harness — sample MHR shape params →
+     mesh → slice true circumferences → render front/side silhouettes →
+     run the deterministic engine → tune shape factors/depth caps against
+     thousands of known bodies. No license cost, no cloud, no ML training.
 3. **No LLM in the numeric path.** Ease, fabric-stretch adjustments, and size
    translation are deterministic tables/code (see `lib/core/ease.dart`),
    authored and reviewed with a master tailor. LLMs may *propose* table
