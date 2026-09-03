@@ -77,6 +77,14 @@ Target roster (founder's list):
      mesh → slice true circumferences → render front/side silhouettes →
      run the deterministic engine → tune shape factors/depth caps against
      thousands of known bodies. No license cost, no cloud, no ML training.
+     Harness framework: NVIDIA SOMA-X (github.com/NVlabs/SOMA-X, Apache
+     2.0) — unifies MHR/Anny/native identity models, differentiable, has
+     first-class GarmentMeasurements support. LEGAL LINE (verified in its
+     README 2026-09-03): SOMA-X does NOT launder SMPL licensing —
+     "third-party models retain their own license terms", SMPL files are
+     "user-supplied licensed model files". Our pipeline therefore uses
+     zero SMPL assets; any future SMPL-trained on-device estimator still
+     needs its own commercial license regardless of output conversion.
 3. **No LLM in the numeric path.** Ease, fabric-stretch adjustments, and size
    translation are deterministic tables/code (see `lib/core/ease.dart`),
    authored and reviewed with a master tailor. LLMs may *propose* table
