@@ -1,11 +1,14 @@
 """Persistence — deliberately boring. Documents are stored as JSON columns.
 
-Two backends behind one four-method interface (execute/commit):
-- SQLite (default): zero-config dev/demo. EPHEMERAL in the container —
-  every redeploy starts empty (catalog self-seeds; orders do NOT survive).
-- Postgres: set NAAP_DATABASE_URL (e.g. a free Neon instance or Lightsail
-  managed DB) and orders/waitlist/reports become durable. Same SQL — the
-  wrapper only translates placeholders.
+Three backends behind one public surface:
+- SQLite (default): zero-config dev/demo/tests. EPHEMERAL in the
+  container — every redeploy starts empty (catalog self-seeds; orders do
+  NOT survive).
+- DynamoDB (set NAAP_DYNAMO_TABLE): durable at $0/month on the AWS
+  always-free tier — see db_dynamo.py, which this module re-exports
+  wholesale when the env var is present. The production choice.
+- Postgres (set NAAP_DATABASE_URL): same SQL as SQLite via a placeholder-
+  translating wrapper, if a relational store is ever preferred.
 """
 
 from __future__ import annotations
@@ -192,3 +195,12 @@ def list_reports(limit: int = 20) -> list[dict]:
         "ORDER BY created DESC LIMIT ?", (limit,)).fetchall()
     return [{"id": r[0], "kind": r[1], "created": r[2],
              "doc": json.loads(r[3])} for r in rows]
+
+
+# ---------------------------------------------------------------------------
+# DynamoDB takes over wholesale when configured — the $0/month production
+# backend (AWS always-free tier). Import at the end so its functions
+# rebind this module's public names.
+# ---------------------------------------------------------------------------
+if os.environ.get("NAAP_DYNAMO_TABLE"):
+    from .db_dynamo import *  # noqa: F401,F403,E402
