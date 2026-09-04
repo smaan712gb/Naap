@@ -507,6 +507,38 @@ def dual_layer_spec(req: SpecRequest) -> dict:
     }
 
 
+@app.get("/sizing/brands")
+def brand_size_translation(chest_cm: float, gender: str = "men") -> list[dict]:
+    """One body, every house's label — nearest size per brand from the
+    chart-verified fit library (nominative size references; each row
+    cites its published-chart evidence). House blocks stay the house's:
+    this only says what LABEL a measured body wears there."""
+    from .fit_library import SEED_ENTRIES
+    best: dict[str, tuple[float, object]] = {}
+    for e in SEED_ENTRIES:
+        chest = e.body_cm.get("chest") if e.body_cm else None
+        if chest is None:
+            continue
+        is_women = "women" in e.garment
+        if (gender == "women") != is_women:
+            continue
+        d = abs(chest - chest_cm)
+        if e.brand not in best or d < best[e.brand][0]:
+            best[e.brand] = (d, e)
+    out = []
+    for brand, (d, e) in sorted(best.items()):
+        if d > 6:  # body falls outside this brand's charted range
+            continue
+        out.append({
+            "brand": brand,
+            "size": e.size_label,
+            "fit": e.fit_philosophy,
+            "chart_chest_cm": e.body_cm["chest"],
+            "evidence": e.evidence,
+        })
+    return out
+
+
 @app.post("/sizing/su-misura/alteration.dxf")
 def su_misura_dxf(req: SuMisuraRequest) -> Response:
     s = su_misura(req)

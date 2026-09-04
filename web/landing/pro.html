@@ -46,6 +46,19 @@
   #out .grade{font-family:var(--display);font-size:1.9rem}
   #out pre{font-family:var(--mono);font-size:.78rem;background:var(--bone);border:1px solid var(--line);padding:16px;overflow-x:auto;margin-top:14px}
   #out .note{color:var(--stone);font-size:.82rem;margin-top:10px}
+  .ticket{border:1px solid var(--ink);margin-top:6px}
+  .t-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--ink);padding:14px 18px}
+  .t-label{font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--stone)}
+  .t-cols{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .t-cols>div{padding:18px}
+  .t-cols>div:first-child{border-right:1px solid var(--line)}
+  @media(max-width:640px){.t-cols{grid-template-columns:1fr}.t-cols>div:first-child{border-right:none;border-bottom:1px solid var(--line)}}
+  .t-row{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:7px 0;font-size:.92rem}
+  .t-row b{font-weight:500}
+  .t-row .plus{color:var(--accent)}
+  .brandrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+  .bchip{border:1px solid var(--ink);padding:9px 16px;font-size:.85rem}
+  .bchip small{display:block;color:var(--stone);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
   .privacy{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:56px 0}
   .privacy p{max-width:640px;font-size:1.04rem}
   .cta{padding-bottom:16vh}
@@ -108,11 +121,32 @@
     </div>
     <button onclick="runSpec()">Generate specification</button>
     <div id="out">
-      <div class="grade" id="o-size"></div>
-      <pre id="o-json"></pre>
-      <div class="note">Layer A is biometric truth; Layer B is the mapped
-      block with deltas a cutter applies to the nominal pattern. The
-      .DXF alteration export uses the same payload.</div>
+      <div class="ticket">
+        <div class="t-head">
+          <span class="t-label">Specification · naap-spec-v1</span>
+          <span class="grade" id="o-size"></span>
+        </div>
+        <div class="t-cols">
+          <div>
+            <div class="t-label">Layer A — Body truth (cm)</div>
+            <div id="o-body"></div>
+          </div>
+          <div>
+            <div class="t-label">Layer B — Block deltas from nominal</div>
+            <div id="o-deltas"></div>
+            <div class="note" id="o-note"></div>
+          </div>
+        </div>
+      </div>
+      <div class="t-label" style="margin-top:28px">As the houses label this body</div>
+      <div id="o-brands" class="brandrow"></div>
+      <div class="note">Per each house's published size chart — a
+      nominative reference. Every house's block, cut, and ease remain the
+      house's own.</div>
+      <details style="margin-top:20px">
+        <summary style="cursor:pointer;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--stone)">Raw payload (for your developers)</summary>
+        <pre id="o-json"></pre>
+      </details>
     </div>
   </div>
 </section>
@@ -146,27 +180,41 @@
 
 <script>
 const API = "https://naap-api.m9vte9fmk66k4.us-west-2.cs.amazonlightsail.com";
+const NAMES = {chest:"Chest", waist:"Waist", hip:"Seat", shoulder:"Shoulder",
+               sleeve:"Sleeve"};
 async function runSpec(){
   const v = id => parseFloat(document.getElementById(id).value);
   const m = {chest: v('d-chest'), waist: v('d-waist'), hip: v('d-hip'),
              shoulder: v('d-sh'), sleeve: v('d-sl')};
   try{
-    const r = await fetch(API + "/sizing/spec", {method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({measurements_cm: m, chest_cm: m.chest,
-        waist_cm: m.waist, hip_cm: m.hip, shoulder_cm: m.shoulder,
-        sleeve_cm: m.sleeve})});
+    const [r, rb] = await Promise.all([
+      fetch(API + "/sizing/spec", {method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({measurements_cm: m, chest_cm: m.chest,
+          waist_cm: m.waist, hip_cm: m.hip, shoulder_cm: m.shoulder,
+          sleeve_cm: m.sleeve})}),
+      fetch(API + `/sizing/brands?chest_cm=${m.chest}`),
+    ]);
     const d = await r.json();
+    const brands = rb.ok ? await rb.json() : [];
     const b = d.layer_b_garment_block;
     document.getElementById('o-size').textContent =
       `EU ${b.eu_size} · drop ${b.drop}`;
-    document.getElementById('o-json').textContent =
-      JSON.stringify(d, null, 2);
+    document.getElementById('o-body').innerHTML = Object.entries(m)
+      .map(([k,val]) => `<div class="t-row"><span>${NAMES[k]||k}</span><b>${val.toFixed(1)}</b></div>`).join("");
+    document.getElementById('o-deltas').innerHTML = Object.entries(b)
+      .filter(([k,val]) => k.endsWith('_delta_cm') && val !== null)
+      .map(([k,val]) => `<div class="t-row"><span>${NAMES[k.replace('_delta_cm','')]||k.replace('_delta_cm','')}</span><b class="plus">${val>=0?'+':''}${val.toFixed(1)} cm</b></div>`).join("");
+    document.getElementById('o-note').textContent = (b.notes||[]).join(' · ');
+    document.getElementById('o-brands').innerHTML = brands.length
+      ? brands.map(x =>
+          `<div class="bchip">${x.brand} <b>${x.size}</b><small>${x.fit || 'per published chart'}</small></div>`).join("")
+      : '<span class="note">Outside the charted range of the current library.</span>';
+    document.getElementById('o-json').textContent = JSON.stringify(d, null, 2);
     document.getElementById('out').style.display = 'block';
   }catch(e){
     document.getElementById('o-size').textContent = 'Engine unreachable — try again shortly.';
     document.getElementById('out').style.display = 'block';
-    document.getElementById('o-json').textContent = '';
   }
 }
 </script>
