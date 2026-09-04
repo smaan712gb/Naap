@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Naap Pro Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#14110F;--bone:#F4F2ED;--stone:#8C877D;--line:#DCD8D0;
+    --green:#0C1F19;--accent:#8C7A4B;
+    --display:'Bodoni Moda',Didot,Georgia,serif;
+    --sans:'Inter','Segoe UI',system-ui,sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--bone);color:var(--ink);line-height:1.6;font-size:15px}
+  header{background:var(--green);color:#fff;padding:20px 5vw;display:flex;justify-content:space-between;align-items:center}
+  .brand{font-family:var(--display);font-size:1.25rem}
+  main{max-width:900px;margin:0 auto;padding:40px 5vw 90px}
+  .kicker{font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);margin:34px 0 10px}
+  input,button{font-family:var(--sans);font-size:.95rem}
+  input{border:none;border-bottom:1px solid var(--ink);background:none;padding:8px 0;width:100%}
+  input:focus{outline:none;border-bottom-color:var(--accent)}
+  button{border:none;background:var(--green);color:#fff;letter-spacing:.14em;text-transform:uppercase;font-size:.7rem;padding:13px 26px;cursor:pointer}
+  button:hover{background:#123128}
+  .card{background:#fff;border:1px solid var(--line);padding:20px;margin-top:14px}
+  .code{font-family:var(--display);font-size:1.7rem;letter-spacing:.14em}
+  .spec-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:10px}
+  .m{border:1px solid var(--line);padding:8px 10px}
+  .m small{display:block;color:var(--stone);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase}
+  .m b{font-weight:600;font-size:1.05rem}
+  .muted{color:var(--stone);font-size:.85rem}
+  .row2{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap}
+  .row2>div{flex:1;min-width:200px}
+</style>
+</head>
+<body>
+<header>
+  <span class="brand">Naap · Pro Portal</span>
+  <input type="password" id="tok" placeholder="Portal token" style="max-width:220px;border-bottom-color:rgba(255,255,255,.5);color:#fff">
+</header>
+<main>
+  <div class="kicker">New measure request</div>
+  <div class="card">
+    <div class="row2">
+      <div><label class="muted">Atelier / house name</label>
+        <input id="r-atelier" placeholder="Sartoria Example"></div>
+      <div><label class="muted">Note (optional)</label>
+        <input id="r-note" placeholder="Navy 2-piece, trunk show follow-up"></div>
+      <button onclick="createReq()">Create request</button>
+    </div>
+    <div id="r-out" class="muted" style="margin-top:14px"></div>
+  </div>
+
+  <div class="kicker">Inbox — requests &amp; received specifications</div>
+  <button onclick="loadInbox()">Refresh inbox</button>
+  <div id="inbox"></div>
+</main>
+<script>
+const API = "https://naap-api.m9vte9fmk66k4.us-west-2.cs.amazonlightsail.com";
+const hdrs = () => ({"Authorization": "Bearer " + document.getElementById('tok').value.trim()});
+
+async function createReq(){
+  const r = await fetch(API + "/pro/requests", {method:"POST",
+    headers: {...hdrs(), "Content-Type":"application/json"},
+    body: JSON.stringify({atelier: document.getElementById('r-atelier').value,
+                          note: document.getElementById('r-note').value || null})});
+  if(!r.ok){ document.getElementById('r-out').textContent = "Error " + r.status; return; }
+  const d = await r.json();
+  document.getElementById('r-out').innerHTML =
+    `Give your client this code: <span class="code">${d.code}</span><br>
+     They open the Naap app → results → "Send to atelier" → enter the code.
+     The specification appears in the inbox below.`;
+}
+
+async function loadInbox(){
+  const r = await fetch(API + "/pro/inbox", {headers: hdrs()});
+  const el = document.getElementById('inbox');
+  if(!r.ok){ el.innerHTML = '<div class="card muted">Error ' + r.status + '</div>'; return; }
+  const rows = await r.json();
+  const reqs = rows.filter(x=>x.kind==='prorequest');
+  const specs = rows.filter(x=>x.kind==='prospec');
+  el.innerHTML = reqs.map(q => {
+    const got = specs.filter(s=>s.code===q.code);
+    return `<div class="card">
+      <b>${q.atelier}</b> · code <span class="code" style="font-size:1.05rem">${q.code}</span>
+      ${q.note?` · <span class="muted">${q.note}</span>`:""}
+      ${got.length? got.map(s=>`
+        <div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
+          <b>${s.client_label}</b>
+          <span class="muted">${new Date(s.created).toLocaleString()}
+          ${s.height_cm?` · stature ${s.height_cm} cm`:""}${s.gender?` · ${s.gender}`:""}</span>
+          <div class="spec-grid">
+            ${Object.entries(s.measurements_cm).map(([k,v])=>
+              `<div class="m"><small>${k}</small><b>${v.toFixed(1)}</b> <span class="muted">cm</span></div>`).join("")}
+          </div>
+          ${s.posture?`<div class="muted" style="margin-top:8px">Posture: ${s.posture}</div>`:""}
+        </div>`).join("")
+      : '<div class="muted" style="margin-top:8px">Awaiting client scan.</div>'}
+    </div>`;
+  }).join("") || '<div class="card muted">No requests yet.</div>';
+}
+</script>
+</body>
+</html>

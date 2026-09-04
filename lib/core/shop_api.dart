@@ -242,6 +242,49 @@ class ShopApi {
         .timeout(const Duration(seconds: 12));
   }
 
+  /// Measure-request loop: who is asking (shown before consent).
+  static Future<({String atelier, String? note})> fetchMeasureRequest(
+      String code) async {
+    final base = await baseUrl();
+    final r = await http
+        .get(Uri.parse('$base/pro/requests/${code.trim().toUpperCase()}'))
+        .timeout(const Duration(seconds: 12));
+    if (r.statusCode != 200) {
+      throw Exception('Unknown code');
+    }
+    final j = jsonDecode(r.body) as Map<String, dynamic>;
+    return (atelier: j['atelier'] as String, note: j['note'] as String?);
+  }
+
+  /// Sends measurement NUMBERS to the atelier behind [code] — never a
+  /// photo, never an address. Called only after the consent dialog.
+  static Future<void> submitSpecToAtelier({
+    required String code,
+    required String clientLabel,
+    required Map<String, double> measurementsCm,
+    double? heightCm,
+    String? gender,
+    String? posture,
+  }) async {
+    final base = await baseUrl();
+    final r = await http
+        .post(
+            Uri.parse(
+                '$base/pro/requests/${code.trim().toUpperCase()}/spec'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'client_label': clientLabel,
+              'measurements_cm': measurementsCm,
+              if (heightCm != null) 'height_cm': heightCm,
+              if (gender != null) 'gender': gender,
+              if (posture != null) 'posture': posture,
+            }))
+        .timeout(const Duration(seconds: 12));
+    if (r.statusCode != 200) {
+      throw Exception('Send failed (${r.statusCode})');
+    }
+  }
+
   static Future<String> baseUrl() async {
     final sp = await SharedPreferences.getInstance();
     return sp.getString(_kBaseUrl) ?? defaultBaseUrl;

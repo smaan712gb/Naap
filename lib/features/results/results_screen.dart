@@ -314,6 +314,12 @@ class _ResultsScreenState extends State<ResultsScreen> {
               label: const Text('Atelier Specification (EN, for MTM houses)'),
             ),
           ],
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () => _sendToAtelier(s),
+            icon: const Icon(Icons.send_outlined),
+            label: const Text('Send to atelier (request code)'),
+          ),
           const SizedBox(height: 16),
           Text(
             'Estimates from on-device analysis. Values marked ~ are lower-confidence — '
@@ -429,6 +435,85 @@ class _ResultsScreenState extends State<ResultsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('${pairs.length} tape values saved — naap '
               'updated, shukriya!')));
+    }
+  }
+
+  /// Measure-request loop: the client types the atelier's 6-character
+  /// code, sees WHO is asking, and consents before any number leaves the
+  /// phone. Numbers only — no photos, no address (product law).
+  Future<void> _sendToAtelier(AppState s) async {
+    final ctrl = TextEditingController();
+    final code = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Send to atelier'),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          textCapitalization: TextCapitalization.characters,
+          decoration: const InputDecoration(
+              labelText: 'Request code from your atelier',
+              hintText: 'e.g. 4F09A1',
+              border: OutlineInputBorder()),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+              child: const Text('Look up')),
+        ],
+      ),
+    );
+    if (code == null || code.isEmpty || !mounted) return;
+
+    try {
+      final req = await ShopApi.fetchMeasureRequest(code);
+      if (!mounted) return;
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text('Send to ${req.atelier}?'),
+          content: Text(
+              '${req.note != null ? '"${req.note}"\n\n' : ''}'
+              'Your measurement NUMBERS (never photos, never your address) '
+              'will be sent to ${req.atelier} for this request. Continue?'),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancel')),
+            FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Send numbers')),
+          ],
+        ),
+      );
+      if (ok != true) return;
+
+      final measurements = <String, double>{
+        for (final k in MeasurementKey.values)
+          if (s.naap[k] != null) k.name: s.naap[k]!.cm,
+      };
+      await ShopApi.submitSpecToAtelier(
+        code: code,
+        clientLabel: s.profile.name.isEmpty
+            ? 'Client'
+            : s.profile.name.split(' ').first,
+        measurementsCm: measurements,
+        heightCm: s.profile.heightCm,
+        gender: s.profile.bodyType.name,
+        posture: s.active.posture?.tailorSummary,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content:
+                Text('Measurements sent to ${req.atelier} — done!')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Could not send: $e')));
+      }
     }
   }
 

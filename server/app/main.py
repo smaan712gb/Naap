@@ -30,6 +30,7 @@ from .models import (CheckoutMode, Fabric, Order, OrderCreate, OrderStatus,
                      ORDER_TRANSITIONS, utcnow)
 from .dxf_export import alteration_dxf
 from .fit_library import FitReport as FitReportModel
+from .fit_library import GarmentEntry as GarmentEntryModel
 from .taxonomy import full_taxonomy
 from .sizing import SuMisura, map_su_misura
 
@@ -154,9 +155,85 @@ def waitlist_export() -> list[dict]:
 
 @app.get("/fit-library", dependencies=[Depends(admin_only)])
 def fit_library() -> list[dict]:
-    """Measured-garment entries (Phase 2 data moat; see PHASE2-PLAN.md)."""
+    """Measured-garment entries (Phase 2 data moat; see PHASE2-PLAN.md):
+    code-seeded rows plus admin-submitted ones (kind=fitlib reports)."""
     from .fit_library import SEED_ENTRIES
-    return [e.model_dump() for e in SEED_ENTRIES]
+    stored = [r["doc"] for r in db.list_reports(limit=1000)
+              if r.get("kind") == "fitlib"]
+    return [e.model_dump() for e in SEED_ENTRIES] + stored
+
+
+@app.post("/fit-library", dependencies=[Depends(admin_only)])
+def add_fit_library_entry(entry: "GarmentEntryModel") -> dict:
+    """Self-serve library growth: a garment measured on a table (see
+    docs/partners/GARMENT-MEASUREMENT-PROTOCOL.md) enters without a code
+    commit. Admin-gated; evidence field is mandatory by schema."""
+    rid = db.add_report("fitlib", entry.model_dump())
+    return {"ok": True, "id": rid}
+
+
+# ------------------------------------------------- measure-request loop
+
+class MeasureRequestCreate(BaseModel):
+    atelier: str = Field(min_length=1, max_length=80)
+    note: str | None = Field(default=None, max_length=200)
+
+
+class SpecSubmission(BaseModel):
+    """What a client's app sends to an atelier: measurement NUMBERS only,
+    plus optional stature/gender/posture context. Never a photo, never an
+    address — the atelier already knows its client."""
+    client_label: str = Field(min_length=1, max_length=60)  # e.g. first name
+    measurements_cm: dict[str, float] = Field(min_length=1)
+    height_cm: float | None = Field(default=None, ge=90, le=230)
+    gender: str | None = Field(default=None, max_length=10)
+    posture: str | None = Field(default=None, max_length=200)
+
+
+@app.post("/pro/requests", dependencies=[Depends(admin_only)])
+def create_measure_request(req: MeasureRequestCreate) -> dict:
+    import secrets
+    code = secrets.token_hex(3).upper()  # 6 hex chars, easy to read aloud
+    db.add_report("prorequest", {"code": code, "atelier": req.atelier,
+                                 "note": req.note})
+    return {"code": code, "atelier": req.atelier}
+
+
+def _find_request(code: str) -> Optional[dict]:
+    for r in db.list_reports(limit=1000):
+        if r.get("kind") == "prorequest" and \
+                r["doc"].get("code") == code.upper():
+            return r["doc"]
+    return None
+
+
+@app.get("/pro/requests/{code}")
+def measure_request_info(code: str) -> dict:
+    """Public: the client's app shows who is asking before consent."""
+    req = _find_request(code)
+    if not req:
+        raise HTTPException(404, "unknown request code")
+    return {"atelier": req["atelier"], "note": req.get("note")}
+
+
+@app.post("/pro/requests/{code}/spec")
+def submit_spec(code: str, sub: SpecSubmission) -> dict:
+    req = _find_request(code)
+    if not req:
+        raise HTTPException(404, "unknown request code")
+    rid = db.add_report("prospec", {"code": code.upper(),
+                                    "atelier": req["atelier"],
+                                    **sub.model_dump()})
+    return {"ok": True, "id": rid, "atelier": req["atelier"]}
+
+
+@app.get("/pro/inbox", dependencies=[Depends(admin_only)])
+def pro_inbox() -> list[dict]:
+    """The atelier portal's feed: requests and their received specs."""
+    rows = db.list_reports(limit=1000)
+    return [{"id": r["id"], "kind": r["kind"], "created": r["created"],
+             **r["doc"]}
+            for r in rows if r.get("kind") in ("prorequest", "prospec")]
 
 
 @app.post("/fit-reports")

@@ -49,6 +49,23 @@
 </section>
 
 <section>
+  <h2>Add measured garment to fit library</h2>
+  <p style="color:#66736D;font-size:.85rem">Per docs/partners/GARMENT-MEASUREMENT-PROTOCOL.md — garment on a table, label photo as evidence.</p>
+  <input id="fl-brand" placeholder="Brand (e.g. BOSS)">
+  <input id="fl-line" placeholder="Line (optional, e.g. BOSS main)">
+  <input id="fl-garment" placeholder="Garment (jacket / trouser / kurta)">
+  <input id="fl-size" placeholder="Size label (40R / EU 50 / M)">
+  <input id="fl-fit" placeholder="Fit philosophy (slim / classic)">
+  <input id="fl-evidence" placeholder="Evidence (measured on table 2026-09-04 by SM, label photo)">
+  <select id="fl-kind"><option value="garment_cm">garment (flat) measurements</option>
+    <option value="body_cm">body-chart measurements</option></select>
+  <textarea id="fl-meas" placeholder="one per line, e.g.&#10;chest_flat: 55.0&#10;shoulder: 45.5&#10;sleeve: 64.0"></textarea>
+  <label><input type="checkbox" id="fl-verified"> verified (double-checked against label photo)</label><br>
+  <button onclick="addFitEntry()">Add to library</button>
+  <span id="fl-out" style="color:#1B4D3E"></span>
+</section>
+
+<section>
   <h2>Orders</h2>
   <button onclick="loadOrders()">Load orders</button>
   <div id="orders"></div>
@@ -178,6 +195,25 @@ const NEXT = {placed:["fabric_sourced","cancelled"],
   fabric_sourced:["stitching","shipped","cancelled"],
   stitching:["qa","cancelled"], qa:["shipped","stitching"],
   shipped:["delivered"]};
+async function addFitEntry(){
+  const g = id => document.getElementById(id);
+  const meas = {};
+  for(const line of g('fl-meas').value.split('\n')){
+    const m = line.match(/^\s*([A-Za-z_]+)\s*[:=]\s*([\d.]+)/);
+    if(m) meas[m[1]] = parseFloat(m[2]);
+  }
+  if(!Object.keys(meas).length){ g('fl-out').textContent = "no measurements parsed"; return; }
+  const entry = {brand: g('fl-brand').value, line: g('fl-line').value || null,
+    garment: g('fl-garment').value, size_label: g('fl-size').value,
+    fit_philosophy: g('fl-fit').value || null, evidence: g('fl-evidence').value,
+    verified: g('fl-verified').checked};
+  entry[g('fl-kind').value] = meas;
+  const r = await fetch(API + "/fit-library", {method:"POST",
+    headers: {...hdrs(), "Content-Type":"application/json"},
+    body: JSON.stringify(entry)});
+  g('fl-out').textContent = r.ok ? "added ✔" : "error " + r.status + " — brand/garment/size/evidence are required";
+}
+
 async function loadOrders(){
   const r = await fetch(API + "/orders", {headers: hdrs()});
   if(!r.ok){ document.getElementById('orders').textContent = "Error " + r.status; return; }
