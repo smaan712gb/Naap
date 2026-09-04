@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/app_state.dart';
 import '../../core/measure/engine.dart';
+import '../../core/models/profile.dart';
 import '../results/results_screen.dart';
 import 'live_coach.dart';
 import 'pose_overlay.dart';
@@ -267,9 +268,61 @@ class _CaptureScreenState extends State<CaptureScreen>
       (Icons.record_voice_over, 'The app watches the camera, coaches you into place, and takes the photo itself when you are set.'),
       (Icons.lock, 'Photos are analyzed on your phone and deleted. They are never uploaded.'),
     ];
+    // Who is being measured — scans under the wrong profile calibrate to
+    // the wrong height and gender formulas and fail silently-plausibly
+    // (field lesson 2026-09-04: a 5'6" woman scanned under a 5'10" male
+    // profile reads ~6% large with a male neck). Make identity loud.
+    final s = context.watch<AppState>();
+    final p = s.profile;
+    final totalIn = (p.heightCm / 2.54).round();
+    final height = p.unit == PreferredUnit.inches
+        ? "${totalIn ~/ 12}'${totalIn % 12}\""
+        : '${p.heightCm.round()} cm';
+    final who = p.name.isEmpty ? 'Unnamed client' : p.name;
+    final gender =
+        p.bodyType == BodyType.female ? 'Female خاتون' : 'Male حضرت';
+
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
+        Container(
+          margin: const EdgeInsets.only(bottom: 22),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1B4D3E),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(children: [
+            const Icon(Icons.person_pin, color: Colors.white, size: 30),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Measuring: $who',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600)),
+                  Text('$gender · $height',
+                      style: const TextStyle(
+                          color: Colors.white70, fontSize: 13)),
+                ],
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('Switch or add a client from the people '
+                        'icon on the Home screen, then start the scan '
+                        'again.')));
+              },
+              child: const Text('Not them?',
+                  style: TextStyle(color: Color(0xFFEADFBE))),
+            ),
+          ]),
+        ),
         for (final (icon, text) in steps)
           Padding(
             padding: const EdgeInsets.only(bottom: 18),
