@@ -1,5 +1,12 @@
-"""SQLite persistence — deliberately boring. Documents are stored as JSON
-columns; swap for Postgres by reimplementing this module only."""
+"""Persistence — deliberately boring. Documents are stored as JSON columns.
+
+Two backends behind one four-method interface (execute/commit):
+- SQLite (default): zero-config dev/demo. EPHEMERAL in the container —
+  every redeploy starts empty (catalog self-seeds; orders do NOT survive).
+- Postgres: set NAAP_DATABASE_URL (e.g. a free Neon instance or Lightsail
+  managed DB) and orders/waitlist/reports become durable. Same SQL — the
+  wrapper only translates placeholders.
+"""
 
 from __future__ import annotations
 
@@ -13,14 +20,37 @@ from typing import Optional
 from .models import Fabric, Order, OrderCreate, OrderStatus, utcnow
 
 _lock = threading.Lock()
-_conn: sqlite3.Connection | None = None
+_conn = None
 
 
-def _db() -> sqlite3.Connection:
+class _Postgres:
+    """Minimal adapter exposing the sqlite3-ish surface db.py uses."""
+
+    def __init__(self, url: str):
+        import psycopg
+        self._c = psycopg.connect(url, autocommit=False)
+
+    def execute(self, sql: str, params: tuple = ()):  # noqa: ANN001
+        cur = self._c.cursor()
+        cur.execute(sql.replace("?", "%s"), params)
+        return cur
+
+    def commit(self) -> None:
+        self._c.commit()
+
+    def close(self) -> None:
+        self._c.close()
+
+
+def _db():
     global _conn
     if _conn is None:
-        path = os.environ.get("NAAP_DB_PATH", "naap.db")
-        _conn = sqlite3.connect(path, check_same_thread=False)
+        url = os.environ.get("NAAP_DATABASE_URL")
+        if url:
+            _conn = _Postgres(url)
+        else:
+            path = os.environ.get("NAAP_DB_PATH", "naap.db")
+            _conn = sqlite3.connect(path, check_same_thread=False)
         _conn.execute(
             "CREATE TABLE IF NOT EXISTS fabrics (id TEXT PRIMARY KEY, doc TEXT)")
         _conn.execute(

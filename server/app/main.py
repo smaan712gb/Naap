@@ -9,13 +9,17 @@ only for orders that need them (stitch & ship).
 
 from __future__ import annotations
 
+import hashlib
+import hmac
+import json as _json
 import logging
 import os
 from typing import Optional
 
 import httpx
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, Header, HTTPException, Response
+from fastapi import (Depends, FastAPI, Header, HTTPException, Request,
+                     Response)
 from pydantic import BaseModel, Field
 
 from . import db
@@ -372,6 +376,43 @@ def place_order(detail: OrderCreate) -> OrderResponse:
                     order.id)
     return OrderResponse(order=order, payment_url=payment_url,
                          tailor_note=note)
+
+
+@app.get("/orders", dependencies=[Depends(admin_only)])
+def orders_export() -> list[Order]:
+    """Ops view: every order, newest first (admin console)."""
+    return db.list_orders()
+
+
+@app.post("/stripe/webhook")
+async def stripe_webhook(request: Request) -> dict:
+    """Marks orders paid when Stripe confirms checkout. Signature is
+    verified with STRIPE_WEBHOOK_SECRET (constant-time HMAC); without the
+    secret configured the endpoint refuses — never trust an unsigned
+    payment claim."""
+    payload = await request.body()
+    secret = os.environ.get("STRIPE_WEBHOOK_SECRET")
+    if not secret:
+        raise HTTPException(503, "webhook secret not configured")
+    sig = request.headers.get("stripe-signature", "")
+    parts = dict(p.split("=", 1) for p in sig.split(",") if "=" in p)
+    signed = f"{parts.get('t', '')}.".encode() + payload
+    expected = hmac.new(secret.encode(), signed, hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(expected, parts.get("v1", "")):
+        raise HTTPException(400, "bad signature")
+
+    event = _json.loads(payload)
+    if event.get("type") == "checkout.session.completed":
+        session = event["data"]["object"]
+        oid = (session.get("metadata") or {}).get("order_id")
+        order = db.get_order(oid) if oid else None
+        if order and not order.paid:
+            order.paid = True
+            order.payment_ref = session.get("id")
+            order.history.append(f"{utcnow().isoformat()} paid via Stripe")
+            db.save_order(order)
+            log.info("order %s marked paid", oid)
+    return {"ok": True}
 
 
 @app.get("/orders/{order_id}")

@@ -49,6 +49,12 @@
 </section>
 
 <section>
+  <h2>Orders</h2>
+  <button onclick="loadOrders()">Load orders</button>
+  <div id="orders"></div>
+</section>
+
+<section>
   <h2>Waitlist</h2>
   <div class="row"><button onclick="loadWaitlist()">Show signups</button></div>
   <div id="waitlist"></div>
@@ -164,6 +170,40 @@ async function loadReports(){
       renderDoc(rep.kind, rep.doc);
     $('reports').appendChild(d);
   }
+}
+
+// Fulfillment ops: every order, payment flag, and the legal next steps
+// of the state machine as one-click buttons.
+const NEXT = {placed:["fabric_sourced","cancelled"],
+  fabric_sourced:["stitching","shipped","cancelled"],
+  stitching:["qa","cancelled"], qa:["shipped","stitching"],
+  shipped:["delivered"]};
+async function loadOrders(){
+  const r = await fetch(API + "/orders", {headers: hdrs()});
+  if(!r.ok){ document.getElementById('orders').textContent = "Error " + r.status; return; }
+  const orders = await r.json();
+  const el = document.getElementById('orders');
+  if(!orders.length){ el.textContent = "No orders yet."; return; }
+  el.innerHTML = orders.map(o => `
+    <div class="card">
+      <b>${o.id}</b> · ${new Date(o.created_at).toLocaleString()} ·
+      $${o.total_usd.toFixed(2)} ·
+      ${o.paid ? "✔ PAID" : "UNPAID"} · <b>${o.status}</b><br>
+      ${o.detail.mode} · ${o.detail.fabric_id || "no fabric"} ·
+      ${o.detail.customer_email || ""}<br>
+      ${(NEXT[o.status]||[]).map(n =>
+        `<button onclick="advance('${o.id}','${n}',this)">→ ${n}</button>`
+      ).join(" ")}
+    </div>`).join("");
+}
+async function advance(id, status, btn){
+  btn.disabled = true;
+  const r = await fetch(`${API}/orders/${id}/advance`,
+      {method:"POST",
+       headers: {...hdrs(), "Content-Type": "application/json"},
+       body: JSON.stringify({to: status})});
+  btn.textContent = r.ok ? "done" : "err " + r.status;
+  if(r.ok) loadOrders();
 }
 
 async function loadWaitlist(){

@@ -179,6 +179,10 @@ class Order(BaseModel):
     detail: OrderCreate
     history: list[str] = []
     total_usd: float = 0.0
+    # Payment is a FLAG, not a status — fulfillment states stay a pure
+    # state machine; the Stripe webhook flips this.
+    paid: bool = False
+    payment_ref: Optional[str] = None
 
 
 def utcnow() -> datetime:
