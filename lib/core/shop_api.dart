@@ -269,6 +269,7 @@ class ShopApi {
     double? heightCm,
     String? gender,
     String? posture,
+    String? style,
   }) async {
     final base = await baseUrl();
     final r = await http
@@ -282,6 +283,7 @@ class ShopApi {
               if (heightCm != null) 'height_cm': heightCm,
               if (gender != null) 'gender': gender,
               if (posture != null) 'posture': posture,
+              if (style != null) 'style': style,
             }))
         .timeout(const Duration(seconds: 12));
     if (r.statusCode != 200) {

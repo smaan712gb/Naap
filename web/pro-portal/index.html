@@ -93,6 +93,7 @@ async function loadInbox(){
             ${Object.entries(s.measurements_cm).map(([k,v])=>
               `<div class="m"><small>${k}</small><b>${v.toFixed(1)}</b> <span class="muted">cm</span></div>`).join("")}
           </div>
+          ${s.style?`<div style="margin-top:8px"><b>Cut as ordered:</b> ${s.style}</div>`:""}
           ${s.posture?`<div class="muted" style="margin-top:8px">Posture: ${s.posture}</div>`:""}
         </div>`).join("")
       : '<div class="muted" style="margin-top:8px">Awaiting client scan.</div>'}

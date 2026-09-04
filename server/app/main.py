@@ -180,6 +180,7 @@ class SpecSubmission(BaseModel):
     height_cm: float | None = Field(default=None, ge=90, le=230)
     gender: str | None = Field(default=None, max_length=10)
     posture: str | None = Field(default=None, max_length=200)
+    style: str | None = Field(default=None, max_length=300)  # cut choices
 
 
 @app.post("/pro/requests", dependencies=[Depends(admin_only)])

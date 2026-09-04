@@ -111,3 +111,90 @@ class KameezStyle {
     return lines;
   }
 }
+
+// ---------------------------------------------------------------------------
+// European suit style — the order vocabulary for the 60% of overseas
+// tailoring that is suits, not shalwar kameez (Imran's split, 2026-09-04).
+// Same declarative shape as KameezStyle: bilingual labels, parchi lines,
+// tailor-reviewable. Aesthetic words only — never house names.
+// ---------------------------------------------------------------------------
+
+enum LapelStyle { notch, peak, shawl }
+
+enum VentStyle { none, single, double_ }
+
+enum PleatStyle { flat, single, double_ }
+
+class SuitStyle {
+  LapelStyle lapel;
+  bool doubleBreasted;
+  int buttons; // 1, 2, 3 (single-breasted); 4/6 handled by doubleBreasted
+  VentStyle vents;
+  PleatStyle trouserPleats;
+  bool trouserCuffs;
+
+  SuitStyle({
+    this.lapel = LapelStyle.notch,
+    this.doubleBreasted = false,
+    this.buttons = 2,
+    this.vents = VentStyle.double_,
+    this.trouserPleats = PleatStyle.flat,
+    this.trouserCuffs = false,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'lapel': lapel.name,
+        'doubleBreasted': doubleBreasted,
+        'buttons': buttons,
+        'vents': vents.name,
+        'trouserPleats': trouserPleats.name,
+        'trouserCuffs': trouserCuffs,
+      };
+
+  factory SuitStyle.fromJson(Map<String, dynamic> j) => SuitStyle(
+        lapel: LapelStyle.values
+            .firstWhere((e) => e.name == j['lapel'], orElse: () => LapelStyle.notch),
+        doubleBreasted: j['doubleBreasted'] as bool? ?? false,
+        buttons: j['buttons'] as int? ?? 2,
+        vents: VentStyle.values
+            .firstWhere((e) => e.name == j['vents'], orElse: () => VentStyle.double_),
+        trouserPleats: PleatStyle.values.firstWhere(
+            (e) => e.name == j['trouserPleats'],
+            orElse: () => PleatStyle.flat),
+        trouserCuffs: j['trouserCuffs'] as bool? ?? false,
+      );
+
+  static const lapelEn = {
+    LapelStyle.notch: 'Notch lapel',
+    LapelStyle.peak: 'Peak lapel',
+    LapelStyle.shawl: 'Shawl collar',
+  };
+  static const ventEn = {
+    VentStyle.none: 'No vent',
+    VentStyle.single: 'Single vent',
+    VentStyle.double_: 'Double vents',
+  };
+  static const pleatEn = {
+    PleatStyle.flat: 'Flat front',
+    PleatStyle.single: 'Single pleat',
+    PleatStyle.double_: 'Double pleats',
+  };
+
+  /// One-line summary for specs and measure-request submissions.
+  String get summary =>
+      '${doubleBreasted ? 'Double-breasted' : 'Single-breasted'}, '
+      '$buttons-button, ${lapelEn[lapel]!.toLowerCase()}, '
+      '${ventEn[vents]!.toLowerCase()}; trousers '
+      '${pleatEn[trouserPleats]!.toLowerCase()}'
+      '${trouserCuffs ? ', cuffed' : ''}';
+
+  List<(String, String)> parchiLines() => [
+        ('Jacket',
+            '${doubleBreasted ? 'Double' : 'Single'}-breasted · '
+                '$buttons button${buttons > 1 ? 's' : ''}'),
+        ('Lapel', lapelEn[lapel]!),
+        ('Vents', ventEn[vents]!),
+        ('Trouser',
+            '${pleatEn[trouserPleats]!}${trouserCuffs ? ' · cuffed hem' : ''}'),
+      ];
+}

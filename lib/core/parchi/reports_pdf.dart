@@ -312,6 +312,7 @@ extension AtelierSpec on ReportsPdf {
     required Naap naap,
     String? house, // white-label: the atelier's own name
     String? postureSummary,
+    List<(String, String)> styleLines = const [], // suit cut choices
   }) async {
     final doc = pw.Document();
     final female = profile.bodyType == BodyType.female;
@@ -466,6 +467,15 @@ extension AtelierSpec on ReportsPdf {
                 row(kMeasurementDefs[k]!.english, naap[k]!.cm),
             ])),
           ]),
+          if (styleLines.isNotEmpty) ...[
+            pw.SizedBox(height: 12),
+            pw.Text('STYLE — CUT AS ORDERED', style: label()),
+            pw.SizedBox(height: 4),
+            for (final (k, v) in styleLines)
+              pw.Text('$k: $v',
+                  style:
+                      pw.TextStyle(font: pw.Font.helvetica(), fontSize: 9)),
+          ],
           if (su != null && su.notes.isNotEmpty) ...[
             pw.SizedBox(height: 12),
             pw.Text('FIGURATION NOTES', style: label()),

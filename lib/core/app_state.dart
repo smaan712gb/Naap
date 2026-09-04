@@ -39,6 +39,7 @@ class ClientRecord {
   UserProfile profile;
   Naap naap;
   KameezStyle style;
+  SuitStyle suitStyle;
   PersonalCalibration calibration;
   final List<ScanRecord> history;
 
@@ -55,12 +56,14 @@ class ClientRecord {
     UserProfile? profile,
     Naap? naap,
     KameezStyle? style,
+    SuitStyle? suitStyle,
     PersonalCalibration? calibration,
     List<ScanRecord>? history,
     List<String>? referencePaths,
   })  : profile = profile ?? UserProfile(),
         naap = naap ?? Naap.empty(),
         style = style ?? KameezStyle(),
+        suitStyle = suitStyle ?? SuitStyle(),
         calibration = calibration ?? PersonalCalibration(),
         history = history ?? [],
         referencePaths = referencePaths ?? [];
@@ -70,6 +73,7 @@ class ClientRecord {
         'profile': profile.toJson(),
         'naap': naap.toJson(),
         'style': style.toJson(),
+        'suitStyle': suitStyle.toJson(),
         'calibration': calibration.toJsonString(),
         'history': [for (final h in history) h.toJson()],
         'referencePaths': referencePaths,
@@ -86,6 +90,9 @@ class ClientRecord {
             : null,
         style: j['style'] != null
             ? KameezStyle.fromJson(j['style'] as Map<String, dynamic>)
+            : null,
+        suitStyle: j['suitStyle'] != null
+            ? SuitStyle.fromJson(j['suitStyle'] as Map<String, dynamic>)
             : null,
         calibration: j['calibration'] != null
             ? PersonalCalibration.fromJsonString(j['calibration'] as String)
@@ -295,6 +302,14 @@ class AppState extends ChangeNotifier {
 
   Future<void> setStyle(KameezStyle s) async {
     active.style = s;
+    await _persist();
+    notifyListeners();
+  }
+
+  SuitStyle get suitStyle => active.suitStyle;
+
+  Future<void> setSuitStyle(SuitStyle s) async {
+    active.suitStyle = s;
     await _persist();
     notifyListeners();
   }

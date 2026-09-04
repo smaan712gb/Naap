@@ -229,6 +229,9 @@ class _ResultsScreenState extends State<ResultsScreen> {
           if (s.garment == GarmentType.shalwarKameez ||
               s.garment == GarmentType.kurtaPajama)
             _styleSection(context, s),
+          if (s.garment == GarmentType.suitTwoPiece ||
+              s.garment == GarmentType.trousersShirt)
+            _suitStyleSection(context, s),
           const SizedBox(height: 16),
           Text('Tap any value to correct it — your edits are remembered.',
               style: Theme.of(context).textTheme.bodySmall),
@@ -503,6 +506,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
         heightCm: s.profile.heightCm,
         gender: s.profile.bodyType.name,
         posture: s.active.posture?.tailorSummary,
+        style: s.garment == GarmentType.suitTwoPiece ||
+                s.garment == GarmentType.trousersShirt
+            ? s.suitStyle.summary
+            : null,
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -531,6 +538,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
         naap: s.naap,
         house: s.shopName,
         postureSummary: s.active.posture?.tailorSummary,
+        styleLines: s.garment == GarmentType.suitTwoPiece ||
+                s.garment == GarmentType.trousersShirt
+            ? s.suitStyle.parchiLines()
+            : const [],
       );
       await Share.shareXFiles([XFile(file.path)],
           text: 'Measurement Specification (naap-spec-v1).',
@@ -878,6 +889,65 @@ class _ResultsScreenState extends State<ResultsScreen> {
             ]),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Suit order vocabulary — what a tailor needs beyond numbers to cut a
+  /// European jacket: lapel, breast, buttons, vents, trouser finish.
+  /// Aesthetic terms only, never house names.
+  Widget _suitStyleSection(BuildContext context, AppState s) {
+    final st = s.suitStyle;
+    Widget dd<T>(String label, T value, Map<T, String> options,
+        void Function(T) apply) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: DropdownButtonFormField<T>(
+          initialValue: value,
+          decoration: InputDecoration(
+              labelText: label,
+              isDense: true,
+              border: const OutlineInputBorder()),
+          items: [
+            for (final e in options.entries)
+              DropdownMenuItem(value: e.key, child: Text(e.value)),
+          ],
+          onChanged: (v) async {
+            if (v == null) return;
+            apply(v);
+            await s.setSuitStyle(st);
+          },
+        ),
+      );
+    }
+
+    return Card(
+      margin: const EdgeInsets.only(top: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Suit style — the cut your tailor will make',
+                style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 12),
+            dd('Jacket', st.doubleBreasted,
+                {false: 'Single-breasted', true: 'Double-breasted'},
+                (v) => st.doubleBreasted = v),
+            dd('Buttons', st.buttons,
+                {1: '1 button', 2: '2 buttons', 3: '3 buttons'},
+                (v) => st.buttons = v),
+            dd('Lapel', st.lapel, SuitStyle.lapelEn, (v) => st.lapel = v),
+            dd('Vents', st.vents, SuitStyle.ventEn, (v) => st.vents = v),
+            dd('Trouser front', st.trouserPleats, SuitStyle.pleatEn,
+                (v) => st.trouserPleats = v),
+            dd('Trouser hem', st.trouserCuffs,
+                {false: 'Plain hem', true: 'Cuffed (turn-up)'},
+                (v) => st.trouserCuffs = v),
+            Text(st.summary,
+                style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ),
       ),
     );
   }

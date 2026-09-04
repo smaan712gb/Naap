@@ -101,7 +101,7 @@ const Map<GarmentType, GarmentDef> kGarments = {
   ),
   GarmentType.suitTwoPiece: GarmentDef(
     type: GarmentType.suitTwoPiece,
-    english: '2-Piece Suit',
+    english: 'European Suit (2-piece)',
     urdu: 'ٹو پیس سوٹ',
     keys: [
       MeasurementKey.chest,
