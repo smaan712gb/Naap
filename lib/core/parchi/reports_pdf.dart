@@ -64,7 +64,7 @@ class ReportsPdf {
       );
 
   static pw.Widget _footer() => pw.Text(
-      'Generated on-device by Naap. No photos were uploaded — measurements '
+      'Generated on-device by Naap. No photos were uploaded - measurements '
       'only. getnaap.com',
       style: _en(7.5).copyWith(color: PdfColors.grey600));
 
@@ -177,7 +177,7 @@ class ReportsPdf {
                 borderRadius: pw.BorderRadius.circular(6)),
             child: pw.Text(
                 'Shop online without the returns lottery: these sizes are '
-                'measured, not guessed. Standard conventions — individual '
+                'measured, not guessed. Standard conventions - individual '
                 'brands vary.',
                 style: _en(8)),
           ),
@@ -226,7 +226,7 @@ class ReportsPdf {
           pw.Text(
               'For the tailoring house: girth changes since the baseline '
               'scan. Relative change between identically-taken scans is '
-              'more reliable than any absolute number — use it to adjust '
+              'more reliable than any absolute number - use it to adjust '
               'the block before the next commission, not as a cutting '
               'spec.',
               style: _en(9.5).copyWith(color: PdfColors.grey800)),
@@ -284,7 +284,7 @@ class ReportsPdf {
 
   static String _delta(double fromCm, double toCm, PreferredUnit unit) {
     final d = toCm - fromCm;
-    if (d.abs() < 0.05) return '—';
+    if (d.abs() < 0.05) return '-';
     final v = unit == PreferredUnit.inches ? d / 2.54 : d;
     return '${d > 0 ? '+' : '−'}${v.abs().toStringAsFixed(1)}'
         '${unit == PreferredUnit.inches ? '"' : ' cm'}';

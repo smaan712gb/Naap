@@ -117,7 +117,7 @@ class ParchiPdf {
                 pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text('NAAP — Digital Parchi',
+                    pw.Text('NAAP · Digital Parchi',
                         style: en(18, bold: true)
                             .copyWith(color: PdfColors.white)),
                     pw.SizedBox(height: 4),
@@ -256,7 +256,7 @@ class ParchiPdf {
                 child: pw.Column(children: [
                   pw.SvgImage(svg: _mannequinSvg, height: 150),
                   pw.SizedBox(height: 4),
-                  pw.Text('Generic avatar — not a photo',
+                  pw.Text('Generic avatar · not a photo',
                       style: en(7).copyWith(color: PdfColors.grey600),
                       textAlign: pw.TextAlign.center),
                   pw.SizedBox(height: 10),
@@ -293,7 +293,7 @@ class ParchiPdf {
                   pw.Row(
                       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                       children: [
-                        pw.Text('Style — کٹائی',
+                        pw.Text('Style · Cut',
                             style: en(10, bold: true)
                                 .copyWith(color: brandGreen)),
                       ]),
@@ -343,7 +343,7 @@ class ParchiPdf {
                 ],
                 pw.Text(
                     'Customer selected the »${fit.name.toUpperCase()}« column '
-                    '(highlighted) — cut to it. All three columns already '
+                    '(highlighted) - cut to it. All three columns already '
                     'include ease (asan)'
                     '${fdef != null ? ' for ${fdef.english}' : ''}; fitted/'
                     'regular/loose are shown so you can advise. Style numbers '
@@ -365,7 +365,7 @@ class ParchiPdf {
           pw.SizedBox(height: 8),
           pw.Text(
               '${measuredBy != null && measuredBy.isNotEmpty ? 'Measured at $measuredBy · ' : ''}'
-              'Generated on-device by Naap (ناپ). No photos were uploaded — measurements only. getnaap.com',
+              'Generated on-device by Naap. No photos were uploaded - measurements only. getnaap.com',
               style: en(7.5).copyWith(color: PdfColors.grey600)),
         ],
       ),
