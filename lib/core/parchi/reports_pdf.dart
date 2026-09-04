@@ -290,3 +290,147 @@ class ReportsPdf {
         '${unit == PreferredUnit.inches ? '"' : ' cm'}';
   }
 }
+
+/// Atelier Specification — the third document, for Western MTM houses
+/// and their associates. Cutting-ticket idiom: EU size and drop as the
+/// headline, body truth + block deltas in centimetres, posture
+/// figuration, optionally white-labeled with the house's own name.
+/// No bazaar vocabulary, no QR marketing — a working atelier paper.
+extension AtelierSpec on ReportsPdf {
+  static const _specKeys = [
+    MeasurementKey.chest, MeasurementKey.waist, MeasurementKey.hip,
+    MeasurementKey.shoulder, MeasurementKey.sleeveLength, MeasurementKey.neck,
+    MeasurementKey.overArm, MeasurementKey.frontChest,
+    MeasurementKey.backWidth, MeasurementKey.jacketLength,
+    MeasurementKey.bicep, MeasurementKey.wrist,
+    MeasurementKey.trouserWaist, MeasurementKey.thigh,
+    MeasurementKey.knee, MeasurementKey.calf,
+  ];
+
+  static Future<File> buildAtelierSpec({
+    required UserProfile profile,
+    required Naap naap,
+    String? house, // white-label: the atelier's own name
+    String? postureSummary,
+  }) async {
+    final doc = pw.Document();
+    final su = mapSuMisura(naap);
+    final ink = const PdfColor.fromInt(0xFF14110F);
+    final stone = const PdfColor.fromInt(0xFF8C877D);
+    pw.TextStyle label() => pw.TextStyle(
+        font: pw.Font.helvetica(), fontSize: 7, color: stone,
+        letterSpacing: 1.6);
+    pw.Widget row(String name, String value) => pw.Container(
+          padding: const pw.EdgeInsets.symmetric(vertical: 3.5),
+          decoration: const pw.BoxDecoration(
+              border: pw.Border(
+                  bottom: pw.BorderSide(
+                      color: PdfColor.fromInt(0xFFDCD8D0), width: .5))),
+          child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Text(name,
+                    style: pw.TextStyle(
+                        font: pw.Font.helvetica(), fontSize: 9.5)),
+                pw.Text(value,
+                    style: pw.TextStyle(
+                        font: pw.Font.helveticaBold(), fontSize: 9.5)),
+              ]),
+        );
+
+    final present = <MeasurementKey>[
+      for (final k in _specKeys)
+        if (naap[k] != null) k
+    ];
+    final half = (present.length + 1) ~/ 2;
+
+    doc.addPage(pw.Page(
+      pageFormat: PdfPageFormat.a4,
+      margin: const pw.EdgeInsets.all(42),
+      build: (ctx) => pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text((house?.isNotEmpty == true ? house! : 'NAAP').toUpperCase(),
+              style: label()),
+          pw.SizedBox(height: 6),
+          pw.Text('Measurement Specification',
+              style: pw.TextStyle(
+                  font: pw.Font.timesItalic(), fontSize: 26, color: ink)),
+          pw.SizedBox(height: 2),
+          pw.Text(
+              '${profile.name.isEmpty ? 'Client' : profile.name} · '
+              '${DateFormat('d MMMM yyyy').format(DateTime.now())} · '
+              'stature ${(profile.heightCm).toStringAsFixed(0)} cm',
+              style: pw.TextStyle(
+                  font: pw.Font.helvetica(), fontSize: 9, color: stone)),
+          pw.SizedBox(height: 18),
+          if (su != null)
+            pw.Container(
+              padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 12),
+              decoration: pw.BoxDecoration(border: pw.Border.all(color: ink)),
+              child: pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text('EU ${su.euSize} · DROP ${su.drop}',
+                        style: pw.TextStyle(
+                            font: pw.Font.timesBold(), fontSize: 20)),
+                    pw.Text(
+                        'vs nominal block: chest '
+                        '${su.chestDeltaCm >= 0 ? '+' : ''}${su.chestDeltaCm} · '
+                        'waist ${su.waistDeltaCm >= 0 ? '+' : ''}${su.waistDeltaCm} · '
+                        'seat ${su.hipDeltaCm >= 0 ? '+' : ''}${su.hipDeltaCm} cm',
+                        style: pw.TextStyle(
+                            font: pw.Font.helvetica(),
+                            fontSize: 8.5, color: stone)),
+                  ]),
+            ),
+          pw.SizedBox(height: 16),
+          pw.Text('BODY MEASUREMENTS — CENTIMETRES', style: label()),
+          pw.SizedBox(height: 6),
+          pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+            pw.Expanded(
+                child: pw.Column(children: [
+              for (final k in present.take(half))
+                row(kMeasurementDefs[k]!.english,
+                    naap[k]!.cm.toStringAsFixed(1)),
+            ])),
+            pw.SizedBox(width: 28),
+            pw.Expanded(
+                child: pw.Column(children: [
+              for (final k in present.skip(half))
+                row(kMeasurementDefs[k]!.english,
+                    naap[k]!.cm.toStringAsFixed(1)),
+            ])),
+          ]),
+          if (su != null && su.notes.isNotEmpty) ...[
+            pw.SizedBox(height: 12),
+            pw.Text('FIGURATION NOTES', style: label()),
+            pw.SizedBox(height: 4),
+            for (final n in su.notes)
+              pw.Text('- $n',
+                  style: pw.TextStyle(
+                      font: pw.Font.helvetica(), fontSize: 9)),
+          ],
+          if (postureSummary != null && postureSummary.isNotEmpty) ...[
+            pw.SizedBox(height: 8),
+            pw.Text('- Posture: $postureSummary',
+                style:
+                    pw.TextStyle(font: pw.Font.helvetica(), fontSize: 9)),
+          ],
+          pw.Spacer(),
+          pw.Text(
+              'Measured on-device with the client\'s consent. No photograph '
+              'ever left the client\'s phone. Format naap-spec-v1.',
+              style: pw.TextStyle(
+                  font: pw.Font.helvetica(), fontSize: 7.5, color: stone)),
+        ],
+      ),
+    ));
+    final dir = await getTemporaryDirectory();
+    final file = File(
+        '${dir.path}/atelier_spec_${DateFormat('yyyyMMdd_HHmm').format(DateTime.now())}.pdf');
+    await file.writeAsBytes(await doc.save());
+    return file;
+  }
+}

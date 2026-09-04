@@ -304,6 +304,15 @@ class _ResultsScreenState extends State<ResultsScreen> {
             icon: const Icon(Icons.badge_outlined),
             label: const Text('Share my Size Passport (PDF)'),
           ),
+          if (s.garment == GarmentType.suitTwoPiece ||
+              s.garment == GarmentType.trousersShirt) ...[
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () => _shareAtelierSpec(s),
+              icon: const Icon(Icons.description_outlined),
+              label: const Text('Atelier Specification (EN, for MTM houses)'),
+            ),
+          ],
           const SizedBox(height: 16),
           Text(
             'Estimates from on-device analysis. Values marked ~ are lower-confidence — '
@@ -419,6 +428,32 @@ class _ResultsScreenState extends State<ResultsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('${pairs.length} tape values saved — naap '
               'updated, shukriya!')));
+    }
+  }
+
+  /// The Western-atelier document: cutting-ticket idiom, EU size/drop
+  /// headline, cm body truth + block deltas, white-labeled with the
+  /// device's shop name when set. No bazaar vocabulary, no QR.
+  Future<void> _shareAtelierSpec(AppState s) async {
+    final box = context.findRenderObject() as RenderBox?;
+    final origin = box != null
+        ? box.localToGlobal(Offset.zero) & box.size
+        : const Rect.fromLTWH(0, 0, 1, 1);
+    try {
+      final file = await AtelierSpec.buildAtelierSpec(
+        profile: s.profile,
+        naap: s.naap,
+        house: s.shopName,
+        postureSummary: s.active.posture?.tailorSummary,
+      );
+      await Share.shareXFiles([XFile(file.path)],
+          text: 'Measurement Specification (naap-spec-v1).',
+          sharePositionOrigin: origin);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Could not share: $e')));
+      }
     }
   }
 
