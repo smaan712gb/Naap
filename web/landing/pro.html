@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Naap Pro — the fitting, without the fitting</title>
+<meta name="description" content="At-home measurement for made-to-measure houses: your client scans on their phone, you receive a cutting-ready specification. Photos never leave the device.">
+<link rel="canonical" href="https://getnaap.com/pro.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14110F; --bone:#F4F2ED; --stone:#8C877D; --line:#DCD8D0;
+    --green:#0C1F19; --accent:#8C7A4B;
+    --display:'Bodoni Moda',Didot,Georgia,serif;
+    --sans:'Inter','Segoe UI',system-ui,sans-serif;
+    --mono:ui-monospace,'Cascadia Code',Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bone);line-height:1.7;font-size:15px}
+  a{color:inherit}
+  header{background:var(--green);display:flex;justify-content:space-between;align-items:center;padding:22px 5vw;color:#fff}
+  .brand{font-family:var(--display);font-size:1.3rem;font-weight:500;text-decoration:none}
+  header a.back{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;opacity:.85}
+  .hero{background:var(--green);color:#fff;padding:12vh 5vw 13vh}
+  .hero h1{font-family:var(--display);font-weight:400;font-size:clamp(2.2rem,4.6vw,3.8rem);line-height:1.1;max-width:800px}
+  .hero p{color:rgba(255,255,255,.75);max-width:560px;margin-top:22px;font-size:1.05rem}
+  section{padding:11vh 5vw;max-width:1080px;margin:0 auto}
+  .kicker{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-bottom:18px}
+  h2{font-family:var(--display);font-weight:400;font-size:clamp(1.6rem,2.8vw,2.2rem);line-height:1.2;margin-bottom:14px}
+  .lede{color:var(--stone);max-width:600px}
+  .lede strong{color:var(--ink);font-weight:500}
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0;margin-top:48px;border-top:1px solid var(--line)}
+  .col{padding:30px 26px 0 0}
+  .col h3{font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;margin-bottom:10px}
+  .col p{color:var(--stone);font-size:.92rem}
+  .demo{background:#fff;border:1px solid var(--line);padding:34px;margin-top:40px}
+  .demo .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px;margin-bottom:20px}
+  .demo label{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--stone);display:block;margin-bottom:5px}
+  .demo input{width:100%;border:none;border-bottom:1px solid var(--ink);background:none;font-size:1rem;padding:6px 0;font-family:var(--sans)}
+  .demo input:focus{outline:none;border-bottom-color:var(--accent)}
+  .demo button{border:none;background:var(--green);color:#fff;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;padding:15px 32px;cursor:pointer}
+  .demo button:hover{background:#123128}
+  #out{margin-top:26px;display:none}
+  #out .grade{font-family:var(--display);font-size:1.9rem}
+  #out pre{font-family:var(--mono);font-size:.78rem;background:var(--bone);border:1px solid var(--line);padding:16px;overflow-x:auto;margin-top:14px}
+  #out .note{color:var(--stone);font-size:.82rem;margin-top:10px}
+  .privacy{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:56px 0}
+  .privacy p{max-width:640px;font-size:1.04rem}
+  .cta{padding-bottom:16vh}
+  .cta a.mail{display:inline-block;margin-top:24px;background:var(--green);color:#fff;text-decoration:none;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;padding:16px 34px}
+  footer{border-top:1px solid var(--line);padding:40px 5vw;color:var(--stone);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="/">Naap</a>
+  <a class="back" href="/">Home</a>
+</header>
+
+<div class="hero">
+  <h1>The fitting,<br>without the fitting.</h1>
+  <p>Your client stands in front of their phone for two minutes, anywhere
+  in the world. Your atelier receives a cutting-ready measurement
+  specification — body truth and garment block, both layers. No visit, no
+  guesswork, no returned garment.</p>
+</div>
+
+<section>
+  <div class="kicker">For made-to-measure houses &amp; clienteling teams</div>
+  <h2>Your blocks stay yours. We carry the body.</h2>
+  <p class="lede">Naap is not a sizing opinion. It delivers the
+  <strong>measured body</strong> — chest, waist, seat, shoulder, posture
+  profile, drop — as structured data your own patterns and conventions
+  consume. Nothing about your house's cut, ease philosophy, or client
+  book ever enters our system.</p>
+  <div class="cols">
+    <div class="col"><h3>Dual-layer spec</h3>
+      <p>Layer A: raw biometric truth in centimetres. Layer B: a mapped
+      garment block with per-field deltas from the nominal size — the
+      format a cutter or CAD operator actually uses.</p></div>
+    <div class="col"><h3>CAD-ready</h3>
+      <p>Alteration deltas export as .DXF for Gerber/Lectra workflows.
+      Posture profile (shoulder slope class, balance) rides along for
+      the pattern room.</p></div>
+    <div class="col"><h3>Remote clients, retained</h3>
+      <p>A Body Drift Report shows precisely how a client changed since
+      their last fitting — the trunk-show follow-up without the flight.</p></div>
+    <div class="col"><h3>White-label</h3>
+      <p>The capture experience can carry your house's name. Your client
+      never needs to know ours.</p></div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="kicker">Live demonstration — real API, no signup</div>
+  <h2>Try the spec engine now.</h2>
+  <p class="lede">Enter any body measurements (cm). This calls the same
+  production endpoint an atelier integration would use.</p>
+  <div class="demo">
+    <div class="row">
+      <div><label>Chest</label><input id="d-chest" value="102" inputmode="decimal"></div>
+      <div><label>Waist</label><input id="d-waist" value="88" inputmode="decimal"></div>
+      <div><label>Seat / Hip</label><input id="d-hip" value="104" inputmode="decimal"></div>
+      <div><label>Shoulder</label><input id="d-sh" value="46" inputmode="decimal"></div>
+      <div><label>Sleeve</label><input id="d-sl" value="64" inputmode="decimal"></div>
+    </div>
+    <button onclick="runSpec()">Generate specification</button>
+    <div id="out">
+      <div class="grade" id="o-size"></div>
+      <pre id="o-json"></pre>
+      <div class="note">Layer A is biometric truth; Layer B is the mapped
+      block with deltas a cutter applies to the nominal pattern. The
+      .DXF alteration export uses the same payload.</div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="privacy">
+    <div class="kicker">The privacy posture your clients expect</div>
+    <p>Capture photographs are analysed on the client's own device and
+    deleted immediately — <strong>no image ever reaches a server, ours or
+    anyone's</strong>. What travels is numbers, with the client's explicit
+    consent, per order. For a clientele that values discretion above all,
+    this is the only acceptable architecture — and it is the only one we
+    ship.</p>
+  </div>
+</section>
+
+<section class="cta" style="padding-top:8vh">
+  <div class="kicker">Pilot</div>
+  <h2>Five clients. One trunk season. Judge the tape yourself.</h2>
+  <p class="lede">We propose a quiet pilot: five of your remote clients
+  measure at home; your master compares against their records or a
+  fitting. If the numbers don't hold to your standard, we part as
+  friends.</p>
+  <a class="mail" href="mailto:smaan@ignite9.com?subject=Naap%20Pro%20pilot">Start the conversation</a>
+</section>
+
+<footer>
+  <span>Naap Pro · getnaap.com/pro</span>
+  <span>Photos never leave the device</span>
+</footer>
+
+<script>
+const API = "https://naap-api.m9vte9fmk66k4.us-west-2.cs.amazonlightsail.com";
+async function runSpec(){
+  const v = id => parseFloat(document.getElementById(id).value);
+  const m = {chest: v('d-chest'), waist: v('d-waist'), hip: v('d-hip'),
+             shoulder: v('d-sh'), sleeve: v('d-sl')};
+  try{
+    const r = await fetch(API + "/sizing/spec", {method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({measurements_cm: m, chest_cm: m.chest,
+        waist_cm: m.waist, hip_cm: m.hip, shoulder_cm: m.shoulder,
+        sleeve_cm: m.sleeve})});
+    const d = await r.json();
+    const b = d.layer_b_garment_block;
+    document.getElementById('o-size').textContent =
+      `EU ${b.eu_size} · drop ${b.drop}`;
+    document.getElementById('o-json').textContent =
+      JSON.stringify(d, null, 2);
+    document.getElementById('out').style.display = 'block';
+  }catch(e){
+    document.getElementById('o-size').textContent = 'Engine unreachable — try again shortly.';
+    document.getElementById('out').style.display = 'block';
+    document.getElementById('o-json').textContent = '';
+  }
+}
+</script>
+</body>
+</html>
