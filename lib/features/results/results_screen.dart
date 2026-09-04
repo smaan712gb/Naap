@@ -305,7 +305,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
             label: const Text('Share my Size Passport (PDF)'),
           ),
           if (s.garment == GarmentType.suitTwoPiece ||
-              s.garment == GarmentType.trousersShirt) ...[
+              s.garment == GarmentType.trousersShirt ||
+              s.garment == GarmentType.ladiesSuit) ...[
             const SizedBox(height: 8),
             OutlinedButton.icon(
               onPressed: () => _shareAtelierSpec(s),

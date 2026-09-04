@@ -314,28 +314,74 @@ extension AtelierSpec on ReportsPdf {
     String? postureSummary,
   }) async {
     final doc = pw.Document();
-    final su = mapSuMisura(naap);
+    final female = profile.bodyType == BodyType.female;
+    final su = female ? null : mapSuMisura(naap);
+    final ladies = female ? mapLadiesSizes(naap) : null;
+
+    // One body, every convention — side by side, no filtering needed on
+    // paper. Men: EU/IT share the scale, UK/US = EU-10 (R length).
+    final sizeCells = <(String, String)>[
+      if (su != null) ...[
+        ('EU', '${su.euSize}'),
+        ('IT', '${su.euSize}'),
+        ('UK', '${su.euSize - 10}'),
+        ('US', '${su.euSize - 10}R'),
+        ('DROP', '${su.drop}'),
+      ],
+      if (ladies != null) ...[
+        ('EU', '${ladies.eu}'),
+        ('IT', '${ladies.it}'),
+        ('FR', '${ladies.fr}'),
+        ('UK', '${ladies.uk}'),
+        ('US', '${ladies.us}'),
+      ],
+    ];
     final ink = const PdfColor.fromInt(0xFF14110F);
     final stone = const PdfColor.fromInt(0xFF8C877D);
     pw.TextStyle label() => pw.TextStyle(
         font: pw.Font.helvetica(), fontSize: 7, color: stone,
         letterSpacing: 1.6);
-    pw.Widget row(String name, String value) => pw.Container(
+    // cm and inches side by side — Milan and New York read the same row.
+    pw.Widget row(String name, double cm) => pw.Container(
           padding: const pw.EdgeInsets.symmetric(vertical: 3.5),
           decoration: const pw.BoxDecoration(
               border: pw.Border(
                   bottom: pw.BorderSide(
                       color: PdfColor.fromInt(0xFFDCD8D0), width: .5))),
-          child: pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              children: [
-                pw.Text(name,
+          child: pw.Row(children: [
+            pw.Expanded(
+                child: pw.Text(name,
                     style: pw.TextStyle(
-                        font: pw.Font.helvetica(), fontSize: 9.5)),
-                pw.Text(value,
+                        font: pw.Font.helvetica(), fontSize: 9.5))),
+            pw.SizedBox(
+                width: 44,
+                child: pw.Text(cm.toStringAsFixed(1),
+                    textAlign: pw.TextAlign.right,
                     style: pw.TextStyle(
-                        font: pw.Font.helveticaBold(), fontSize: 9.5)),
-              ]),
+                        font: pw.Font.helveticaBold(), fontSize: 9.5))),
+            pw.SizedBox(
+                width: 40,
+                child: pw.Text((cm / 2.54).toStringAsFixed(1),
+                    textAlign: pw.TextAlign.right,
+                    style: pw.TextStyle(
+                        font: pw.Font.helvetica(),
+                        fontSize: 9, color: stone))),
+          ]),
+        );
+
+    pw.Widget colHead() => pw.Padding(
+          padding: const pw.EdgeInsets.only(bottom: 2),
+          child: pw.Row(children: [
+            pw.Expanded(child: pw.SizedBox()),
+            pw.SizedBox(
+                width: 44,
+                child: pw.Text('CM',
+                    textAlign: pw.TextAlign.right, style: label())),
+            pw.SizedBox(
+                width: 40,
+                child: pw.Text('IN',
+                    textAlign: pw.TextAlign.right, style: label())),
+          ]),
         );
 
     final present = <MeasurementKey>[
@@ -364,43 +410,60 @@ extension AtelierSpec on ReportsPdf {
               style: pw.TextStyle(
                   font: pw.Font.helvetica(), fontSize: 9, color: stone)),
           pw.SizedBox(height: 18),
-          if (su != null)
+          if (sizeCells.isNotEmpty)
             pw.Container(
-              padding: const pw.EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 12),
               decoration: pw.BoxDecoration(border: pw.Border.all(color: ink)),
               child: pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Text('EU ${su.euSize} · DROP ${su.drop}',
-                        style: pw.TextStyle(
-                            font: pw.Font.timesBold(), fontSize: 20)),
-                    pw.Text(
-                        'vs nominal block: chest '
-                        '${su.chestDeltaCm >= 0 ? '+' : ''}${su.chestDeltaCm} · '
-                        'waist ${su.waistDeltaCm >= 0 ? '+' : ''}${su.waistDeltaCm} · '
-                        'seat ${su.hipDeltaCm >= 0 ? '+' : ''}${su.hipDeltaCm} cm',
-                        style: pw.TextStyle(
-                            font: pw.Font.helvetica(),
-                            fontSize: 8.5, color: stone)),
-                  ]),
+                for (var i = 0; i < sizeCells.length; i++)
+                  pw.Expanded(
+                    child: pw.Container(
+                      padding:
+                          const pw.EdgeInsets.symmetric(vertical: 10),
+                      decoration: i == 0
+                          ? null
+                          : const pw.BoxDecoration(
+                              border: pw.Border(
+                                  left: pw.BorderSide(
+                                      color: PdfColor.fromInt(0xFFDCD8D0),
+                                      width: .5))),
+                      child: pw.Column(children: [
+                        pw.Text(sizeCells[i].$1, style: label()),
+                        pw.SizedBox(height: 3),
+                        pw.Text(sizeCells[i].$2,
+                            style: pw.TextStyle(
+                                font: pw.Font.timesBold(), fontSize: 19)),
+                      ]),
+                    ),
+                  ),
+              ]),
             ),
+          if (su != null) ...[
+            pw.SizedBox(height: 6),
+            pw.Text(
+                'vs nominal EU block: chest '
+                '${su.chestDeltaCm >= 0 ? '+' : ''}${su.chestDeltaCm} · '
+                'waist ${su.waistDeltaCm >= 0 ? '+' : ''}${su.waistDeltaCm} · '
+                'seat ${su.hipDeltaCm >= 0 ? '+' : ''}${su.hipDeltaCm} cm',
+                style: pw.TextStyle(
+                    font: pw.Font.helvetica(), fontSize: 8.5, color: stone)),
+          ],
           pw.SizedBox(height: 16),
-          pw.Text('BODY MEASUREMENTS — CENTIMETRES', style: label()),
+          pw.Text('BODY MEASUREMENTS', style: label()),
           pw.SizedBox(height: 6),
           pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
             pw.Expanded(
                 child: pw.Column(children: [
+              colHead(),
               for (final k in present.take(half))
-                row(kMeasurementDefs[k]!.english,
-                    naap[k]!.cm.toStringAsFixed(1)),
+                row(kMeasurementDefs[k]!.english, naap[k]!.cm),
             ])),
             pw.SizedBox(width: 28),
             pw.Expanded(
                 child: pw.Column(children: [
+              colHead(),
               for (final k in present.skip(half))
-                row(kMeasurementDefs[k]!.english,
-                    naap[k]!.cm.toStringAsFixed(1)),
+                row(kMeasurementDefs[k]!.english, naap[k]!.cm),
             ])),
           ]),
           if (su != null && su.notes.isNotEmpty) ...[
