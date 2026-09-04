@@ -47,19 +47,37 @@ def alteration_dxf(s: SuMisura, order_id: str) -> bytes:
         *([("BACK WIDTH", s.back_width_delta_cm)]
           if s.back_width_delta_cm is not None else []),
     ]
-    y = 74.0
+    # Drawn delta bars (audit 2026-09-04: text-only sheets open "empty" in
+    # a CAD viewport — operators expect geometry). Each delta renders as a
+    # horizontal bar from a zero axis, scaled 10 units/cm, with its label:
+    # readable at a glance in any viewer, still plain data on layers.
+    doc.layers.add("NAAP_DIAGRAM", color=5)
+    y = 70.0
+    x0 = 90.0  # zero axis
+    scale = 10.0
+    msp.add_line((x0, y + 6), (x0, y - len(deltas) * 12), dxfattribs={
+        "layer": "NAAP_DIAGRAM"})
     for name, cm in deltas:
         sign = "+" if cm >= 0 else ""
         msp.add_text(
             f"{name}: {sign}{cm:.1f} CM",
             dxfattribs={"layer": "NAAP_DELTAS", "height": 5},
         ).set_placement((0, y))
-        y -= 10
+        if abs(cm) > 0.05:
+            x1 = x0 + cm * scale
+            msp.add_lwpolyline(
+                [(x0, y + 1), (x1, y + 1), (x1, y + 4), (x0, y + 4),
+                 (x0, y + 1)],
+                dxfattribs={"layer": "NAAP_DIAGRAM"})
+        y -= 12
+    msp.add_text("SCALE: 10 UNITS = 1 CM DELTA",
+                 dxfattribs={"layer": "NAAP_DIAGRAM", "height": 3}
+                 ).set_placement((x0, y + 4))
     for i, note in enumerate(s.notes):
         msp.add_text(
             f"NOTE: {note.upper()}",
             dxfattribs={"layer": "NAAP_META", "height": 4},
-        ).set_placement((0, y - i * 8))
+        ).set_placement((0, y - 8 - i * 8))
 
     buf = io.StringIO()
     doc.write(buf)
