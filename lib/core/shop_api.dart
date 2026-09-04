@@ -181,12 +181,16 @@ class ShopApi {
 
   /// Price breakdown before ordering — no surprises at checkout.
   static Future<Map<String, dynamic>> quote(
-      {required String mode, String? fabricId}) async {
+      {required String mode, String? fabricId, String? garment}) async {
     final base = await baseUrl();
     final resp = await http
         .post(Uri.parse('$base/orders/quote'),
             headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({'mode': mode, 'fabric_id': fabricId}))
+            body: jsonEncode({
+              'mode': mode,
+              'fabric_id': fabricId,
+              if (garment != null) 'garment': garment,
+            }))
         .timeout(const Duration(seconds: 12));
     if (resp.statusCode != 200) {
       throw Exception('Quote failed (HTTP ${resp.statusCode})');

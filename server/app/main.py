@@ -94,16 +94,8 @@ def seed_if_empty() -> None:
         n += 1
     log.info("seeded %d fabrics from bundled seed file", n)
 
-STITCHING_FEE_USD = {  # margin-bearing service fees per checkout mode
-    CheckoutMode.stitch_and_ship: 35.0,
-    CheckoutMode.diy_fabric: 0.0,
-    CheckoutMode.measurement_only: 1.99,  # parchi export micro-fee
-}
-SHIPPING_USD = {
-    CheckoutMode.stitch_and_ship: 25.0,
-    CheckoutMode.diy_fabric: 20.0,
-    CheckoutMode.measurement_only: 0.0,
-}
+# All commercial numbers live in pricing.py — one reviewable file.
+from . import pricing  # noqa: E402
 
 
 def admin_only(authorization: Optional[str] = Header(None)) -> None:
@@ -392,6 +384,8 @@ def _stripe_checkout(order: Order) -> Optional[str]:
 class QuoteRequest(BaseModel):
     mode: CheckoutMode
     fabric_id: Optional[str] = None
+    garment: str = "shalwarKameez"
+    country: Optional[str] = None  # 2-letter hint for shipping zone
 
 
 @app.post("/orders/quote")
@@ -407,20 +401,20 @@ def quote_order(req: QuoteRequest) -> dict:
             raise HTTPException(404, "fabric not available")
         fabric_usd = fabric.price_usd
         fabric_name = fabric.name
-    fee = STITCHING_FEE_USD[req.mode]
-    shipping = SHIPPING_USD[req.mode]
-    return {
-        "fabric_name": fabric_name,
-        "fabric_usd": fabric_usd,
-        "service_usd": fee,
-        "shipping_usd": shipping,
-        "total_usd": round(fabric_usd + fee + shipping, 2),
-    }
+    fabric_obj = db.get_fabric(req.fabric_id) if req.fabric_id else None
+    breakdown = pricing.quote(
+        req.mode,
+        fabric_usd=fabric_usd,
+        fabric_meters=fabric_obj.meters if fabric_obj else 0.0,
+        fabric_gsm=fabric_obj.gsm if fabric_obj else None,
+        garment=req.garment,
+        country_hint=req.country,
+    )
+    return {"fabric_name": fabric_name, **breakdown}
 
 
 @app.post("/orders")
 def place_order(detail: OrderCreate) -> OrderResponse:
-    total = STITCHING_FEE_USD[detail.mode] + SHIPPING_USD[detail.mode]
     fabric = None
     if detail.mode != CheckoutMode.measurement_only:
         if not detail.fabric_id:
@@ -428,7 +422,15 @@ def place_order(detail: OrderCreate) -> OrderResponse:
         fabric = db.get_fabric(detail.fabric_id)
         if not fabric or not fabric.verified:
             raise HTTPException(404, "fabric not available")
-        total += fabric.price_usd
+    total = pricing.quote(
+        detail.mode,
+        fabric_usd=fabric.price_usd if fabric else 0.0,
+        fabric_meters=fabric.meters if fabric else 0.0,
+        fabric_gsm=fabric.gsm if fabric else None,
+        garment=detail.garment,
+        country_hint=None,  # free-text address; zone default until a
+                            # structured country field ships in the app
+    )["total_usd"]
     if detail.mode == CheckoutMode.stitch_and_ship and not detail.parchi:
         raise HTTPException(422, "stitch & ship needs the measurement parchi "
                                  "(sent only with in-app consent)")

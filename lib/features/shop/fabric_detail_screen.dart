@@ -119,7 +119,10 @@ class _FabricDetailScreenState extends State<FabricDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               FutureBuilder<Map<String, dynamic>>(
-                future: ShopApi.quote(mode: mode, fabricId: widget.fabric.id),
+                future: ShopApi.quote(
+                    mode: mode,
+                    fabricId: widget.fabric.id,
+                    garment: context.read<AppState>().garment.name),
                 builder: (ctx, snap) {
                   if (snap.connectionState != ConnectionState.done) {
                     return const Padding(
@@ -167,6 +170,10 @@ class _FabricDetailScreenState extends State<FabricDetailScreen> {
                         row('Stitching & service', q['service_usd'] as num),
                       if ((q['shipping_usd'] as num) > 0)
                         row('Worldwide shipping', q['shipping_usd'] as num),
+                      if ((q['duties_usd'] as num? ?? 0) > 0)
+                        row('Import duties (est.)', q['duties_usd'] as num),
+                      if ((q['processing_usd'] as num? ?? 0) > 0)
+                        row('Card processing', q['processing_usd'] as num),
                       const Divider(height: 12),
                       row('Total', q['total_usd'] as num, bold: true),
                     ]),
